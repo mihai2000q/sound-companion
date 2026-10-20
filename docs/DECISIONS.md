@@ -1,0 +1,62 @@
+# Decision log
+
+Each entry: decision, reason, and what would change it. Entries 1 to 5 record how the project changed. Earlier logs: [archive/metal/DECISIONS.md](archive/metal/DECISIONS.md) and [archive/typescript-stack/DECISIONS.md](archive/typescript-stack/DECISIONS.md).
+
+| # | Decision | Reason | Revisit if |
+|---|---|---|---|
+| 1 | Subject changed from metal artists to music theory and instruments | Research showed the metal corpus was patchy (six headline bands had no page in the `music-wiki` snapshot, no free metal dataset, no permission found for Encyclopaedia Metallum). The new corpus was measured before design. | Never. |
+| 2 | Data was verified before design | The metal subject failed on data. Research agents checked licences, fetchability and tools first. | Never. |
+| 3 | Audio input (recording, analysis, YouTube links) is out of scope | Audio analysis is a separate signal-processing problem, accuracy on real songs is weak, and YouTube downloads breach its terms. | A later project. |
+| 4 | Stack changed from SvelteKit and TypeScript to React and Python (FastAPI) | The author knows React and not Svelte. A plain React app needs a separate backend anyway, so the one-language benefit of SvelteKit was gone. Python gives the most complete LangChain, course-aligned examples, upsert and richer filters in the vector store, and RAGAs in the same project. Two spikes (TypeScript and Python) showed both stacks work with workarounds. | The Python spike's untested areas fail (real model behaviour, OpenRouter cost through `langchain-openai`). |
+| 5 | The Python stack costs the verified `tonal` tool layer | `tonal` is JavaScript only. The music tools are the weakest part in Python, see decision 24. | A Python library covers more of the tools. |
+| 6 | Scope: music theory and instruments together | A question like "what does a B-flat clarinet sound when it reads a written C" needs both the corpus and a tool. | Never. |
+| 7 | Audience: a learner, beginner to intermediate | Tightens the system prompt and the golden set. | Never. |
+| 8 | Corpus: about 150 Wikipedia articles plus Open Music Theory v1 | Both CC BY-SA 4.0, structured headings, enough size (about 2,000 to 5,000 chunks), and the two sources use different Conventions. | OMT 2e becomes fetchable, or a text gap appears. |
+| 9 | Not used: Wikibooks, LibreTexts books, Open Opus, Met Museum | Wikibooks is thin, LibreTexts licences are mixed (NC, GFDL) with a 5 s crawl delay, Open Opus has no SLA, the Met API has no prose. | A gap in the golden set that these would fill. |
+| 10 | Wikipedia pages fetched from the REST HTML endpoint | It keeps headings and tables, `explaintext` flattens or drops them, and the research verified headings in the response. | Table extraction fails for the transposition tables. |
+| 11 | Ingestion at about 1 request per second with a User-Agent, one-off script with caching | Wikipedia rate-limited a burst in the research. | Never. |
+| 12 | 5,000-character floor for Wikipedia pages | 28 of 190 Hornbostel-Sachs links were stubs under 2,000 characters. | The floor drops needed pages. |
+| 13 | Redirects resolved, old names stored as Aliases and prepended to chunk text | Makes "English horn" find "Cor anglais" in vector and keyword search. | Never. |
+| 14 | Store `revision_id` and `license` per document, show attribution links | CC BY-SA requires attribution, and pages change daily. | Never. |
+| 15 | pgvector in the app's Postgres, behind a `Retriever` interface | One database, SQL filters, hybrid in one query. SRP is satisfied by the interface, not by splitting databases. | Scale, or a reviewer expectation of Chroma. |
+| 16 | `langchain-postgres` `PGVectorStore` (v2) for core retrieval, with real metadata columns | Matches the course pattern, gives upsert by id, safe deletes and rich filters (`$or`, `$not`, `$like`). The JS store had no upsert and fewer filters. Pinned to an exact version because it is 0.0.x. | A bug blocks use. Fall back to our own SQL for retrieval. |
+| 17 | `topics` stored as a pipe-delimited text column and filtered with `$like` | The library cannot filter array columns. The workaround gives both any-of and all-of. | The library adds array filters. |
+| 18 | Deterministic chunk ids (uuid5), re-ingest by upsert then delete stale chunks | The batch insert is not transactional, so idempotency comes from the ids. | Never. |
+| 19 | Section-aware chunking from real headings (HTML sections, OMT `##` and `###`), about 800 characters, 100 overlap | Keeps topics separate and gives Citations a section. | Retrieval eval shows poor recall. |
+| 20 | HNSW index with a custom `QueryOptions` setting `hnsw.iterative_scan = relaxed_order` | A selective filter returned 0 rows with the index forced until the setting was applied. | Postgres keeps using sequential scans at our size, then the index is optional. |
+| 21 | `create_agent` with retrieval as a tool, no router | Matches the course, less code, decomposition comes free through the tool loop. | Agent loops cost too much. |
+| 22 | `AsyncPostgresSaver` on a connection pool for memory, `aget_state` for export | Verified with a fake model: memory across turns, isolated threads, full message list for export. | Real-model behaviour differs, or partial checkpoints after disconnects cause trouble. |
+| 23 | Query translation: multi-query inside the retrieval tool, decomposition via the tool loop, structured args. No HyDE or step-back. | Fits the use cases and the budget. | Eval shows recall problems HyDE might fix. |
+| 24 | Music libraries: `pychord` (chords), `music21` (scales, intervals, keys), hand-written `note_frequency` and instrument offset table | `pychord` matches `tonal` for chords including ambiguous detection. `music21` is the only credible library for scales and intervals, but is 230 MB and spells flats with `-`. `mingus` is GPLv3 and unmaintained, `musthe` is from 2018. | `music21` proves too heavy, then hand-write scales and intervals (about 100 lines). |
+| 25 | Six tools: knowledge base search plus `chord_info`, `scale_info`, `interval_between`, `transpose_for_instrument`, `note_frequency` | At least 3 required, all deterministic and testable. `harmonic_series` is a stretch. | Time pressure: drop `scale_info`. |
+| 26 | Libraries raise on invalid input, tools catch and return structured errors | `H4` and `Xyz` raise in both libraries. Structured errors are better for the model than silent empties. | Never. |
+| 27 | Transposition table of about 14 instruments, each with a Citation | No library has curated, citable instrument data. | Never. |
+| 28 | Tools use scientific pitch notation (C4 = middle C) and state it | Sources disagree on conventions. Stating the tool's Convention stops silent contradictions. | Never. |
+| 29 | Convention conflicts are shown side by side with a Citation each, no winner | Matches how sources actually differ, easier to verify, clear faithfulness test. | Never. |
+| 30 | Ambiguous analyses return all Candidates | `pychord` gives `[Dm7, F6/D]` for D, F, A, C. | Never. |
+| 31 | Answer only from retrieved context and tool results | Keeps RAGAs faithfulness meaningful. | Eval shows too many "I don't know" answers for covered topics. |
+| 32 | Hybrid search by our own SQL (RRF), library `HybridSearchConfig` only as a comparison mode | 0.0.19 reuses the first query's keywords unless a fresh config is passed per call. Our SQL is predictable and easy to explain. | The library bug is fixed and the comparison favours it. |
+| 33 | Hand-rolled SSE with typed events from `stream_mode=["messages","updates","custom"]` | The event stream is the shared contract for UI, logging and the RAG-process view. Verified with a fake model. | Never. |
+| 34 | `fetch` plus a stream reader on the client, Vite dev proxy for `/api` | `EventSource` cannot POST a body, and the proxy removes the need for CORS in development. | A fetch-event-source library saves code. |
+| 35 | Chat plus inspector panel UI with Tailwind 4 and DaisyUI 5 | Shows context, sources and tool results, gives the RAG-process view cheaply. DaisyUI works in React. | Never. |
+| 36 | OpenRouter for chat and embeddings: `openai/text-embedding-3-small` (1536 dimensions), `openai/gpt-4o-mini` first for answers and rewriting | The JS research tested them end to end. Cheaper models are compared with the tool-calling eval. | A cheaper model passes the eval, a guardrail blocks a model, or `langchain-openai` mishandles cost. |
+| 37 | Budget in OpenRouter credits (soft 1, hard 4), treated as USD | `usage.cost` is returned in credits, no price table needed. | The account page shows another relation. |
+| 38 | Persistence: Postgres only, plain SQL migrations plus the library's table helper, no ORM | Few tables, SQL is the point (hybrid query, usage sums). | Schema grows. |
+| 39 | Optional tasks: injection protection, cost display, logging (medium), RAGAs, hybrid (hard), citations, history and export (easy), RAG-process view (stretch) | Exceeds the minimum of 2 medium and 1 hard. | Time pressure: drop the stretch, then logging. |
+| 40 | Evaluation in three layers, RAGAs in the same Python project | Two layers are free and run on every change. RAGAs is native Python, so no separate container is needed. | RAGAs dependencies conflict with the backend. Then a separate virtualenv or container. |
+| 41 | No auth, single local user, English only | Out of scope for the brief and the budget. | Never for this sprint. |
+| 42 | `CONTEXT.md` holds domain terms, `GLOSSARY.md` holds technical terms | One glossary for each kind of language. | Never. |
+| 43 | Work in stories, not days | The author wants feature-by-feature implementation. | Never. |
+
+## Open facts (verify in the story that needs them)
+
+- A real model through Python `langchain-openai` with OpenRouter: streaming, tool calling, `usage.cost` on streamed responses, cost across several calls in one turn, tool-call argument chunks (story 1, then story 11). Six specific checks are listed in [research/python-stack-spike.md](research/python-stack-spike.md) section C4.
+- Credits equal USD on this OpenRouter account, and workspace guardrails for the chosen models (stories 1 and 11).
+- Table extraction from the REST HTML for the "Transposing instrument" article and any tuning tables (story 2).
+- Wikipedia API rate-limit policy page was not read (story 2).
+- OMT v1 repo has no LICENSE file. The licence is declared in the page footer and about page (story 2).
+- Generated `content_tsv` column coexisting with the library's inserts, in Python (story 15). Confirmed in the TypeScript spike only.
+- Real embeddings, tables above 3,000 rows, concurrent writers and the iterative-scan setting under a connection pool (stories 3 and 4).
+- Behaviour after a client disconnect mid-stream (partial checkpoint) and true incremental streaming with a slow real model (story 6).
+- React, Vite and a Tailwind 4, DaisyUI 5 build were not run (story 1).
+- `music21` rendering of key signatures and intervals in `b` notation after normalisation, and its 230 MB weight in the Docker image (story 8).
