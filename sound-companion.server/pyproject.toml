@@ -3,10 +3,12 @@ name = "sound-companion-server"
 version = "0.1.0"
 requires-python = "==3.12.*"
 dependencies = [
+    "beautifulsoup4==4.15.0",
     "fastapi==0.150.0",
     "httpx==0.28.1",
     "langchain-postgres==0.0.19",
     "psycopg[binary]==3.3.6",
     "pydantic-settings==2.16.0",
+    "sqlalchemy==2.1.5",
     "uvicorn==0.54.0",
 ]
