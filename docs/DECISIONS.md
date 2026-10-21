@@ -50,13 +50,13 @@ Each entry: decision, reason, and what would change it. Entries 1 to 5 record ho
 | 44 | Docker Compose runs the database, the backend and the client dev server | One `docker compose up` starts the whole stack. Ports and Postgres settings come from the one root `.env`, and the client also runs on the host with `npm run dev`. | The container file watching or HMR is too slow on this machine. |
 | 45 | Server data goes through React Query with `queryOptions` and key factories in `src/queries/`, called inline with `useQuery`, not through one hook per query | `queryOptions` keeps key, function and settings together and is reusable for prefetch and invalidation without wrapper hooks. Defaults live in one `QueryClient` (staleTime 30 s, gcTime 5 min, retry 1, no refetch on focus), and a query overrides them where needed. | A feature needs shared logic around a query, then a hook is fine. |
 | 46 | Streamed cost comes from a small `ChatOpenAI` subclass that keeps OpenRouter's raw `usage` (with `cost`) on the streamed chunk | Live check: `langchain-openai` drops `usage.cost` on streamed responses, the generation lookup returned 404 and LangChain's chunk id is not OpenRouter's. The raw usage chunk does carry `cost`. The subclass is about 8 lines and puts the cost on the message the cost guard already reads. | The library keeps `cost` on streamed chunks, or the private method it overrides changes (pin `langchain-openai` and test that cost is present). |
+| 47 | The transposition table is built from "List of transposing instruments" (sounding pitch of a written C4), and the ingest flattener expands `rowspan` and `colspan` | "Transposing instrument" has no data table, only prose. The list page has one 116-row table, and a plain row-by-row flatten drops the family column. Offsets are derived (sounding minus written), not read. See [research/ingestion-sources-facts.md](research/ingestion-sources-facts.md). | Wikipedia restructures the list page, or the hand-built table is judged enough without it. |
 
 ## Open facts (verify in the story that needs them)
 
+Resolved in story 2 (issue 9): table extraction, the Wikipedia rate-limit policy and the OMT v1 licence statement, see [research/ingestion-sources-facts.md](research/ingestion-sources-facts.md).
+
 - Credits equal USD on this OpenRouter account, and workspace guardrails for the chosen models: the models work with the author's key, the account page and guardrail settings are still to be confirmed by the author (story 1, issue 5).
-- Table extraction from the REST HTML for the "Transposing instrument" article and any tuning tables (story 2).
-- Wikipedia API rate-limit policy page was not read (story 2).
-- OMT v1 repo has no LICENSE file. The licence is declared in the page footer and about page (story 2).
 - Generated `content_tsv` column coexisting with the library's inserts, in Python (story 15). Confirmed in the TypeScript spike only.
 - Real embeddings, tables above 3,000 rows, concurrent writers and the iterative-scan setting under a connection pool (stories 3 and 4).
 - Behaviour after a client disconnect mid-stream (partial checkpoint) and true incremental streaming with a slow real model (story 6).

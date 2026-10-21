@@ -73,6 +73,7 @@
   {"title": "Bore (wind instruments)", "source_type": "encyclopedia", "topics": ["acoustics", "instruments"], "aliases": ["Bore"]},
   {"title": "Standing wave", "source_type": "encyclopedia", "topics": ["acoustics"], "aliases": []},
   {"title": "Resonance", "source_type": "encyclopedia", "topics": ["acoustics"], "aliases": []},
+  {"title": "List of transposing instruments", "source_type": "encyclopedia", "topics": ["transposition", "instruments"], "aliases": []},
   {"title": "Transposing instrument", "source_type": "encyclopedia", "topics": ["transposition", "instruments"], "aliases": []},
 
   {"title": "Organology", "source_type": "encyclopedia", "topics": ["instruments", "classification"], "aliases": []},
