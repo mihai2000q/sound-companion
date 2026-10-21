@@ -117,9 +117,9 @@ Rules: both libraries raise exceptions on invalid input (`H4`, `Xyz`), so tools 
 A script, not the request path (`sound-companion.server/scripts/ingest.py`):
 
 1. Read `data/seed-list.json`.
-2. Wikipedia pages: `GET /api/rest_v1/page/html/<title>` (keeps headings and tables, unlike `explaintext`), with a descriptive User-Agent and about 1 request per second. Parse `<section>` and heading elements with BeautifulSoup, strip images, references and navigation boxes, flatten tables to text rows. Resolve redirects and record Aliases.
-3. Open Music Theory v1: `git clone --depth 1` the repo, read the Markdown files, strip front matter and image link definitions, split on `##` and `###`.
-4. Apply the 5,000-character floor to Wikipedia pages, store `revision_id`, `license`, `url` per document.
+2. Wikipedia pages: `GET /api/rest_v1/page/html/<title>` (keeps headings and tables, unlike `explaintext`), with a descriptive User-Agent and about 1 request per second. Pages are cached under `data/cache/wikipedia/` (HTML plus a small JSON file with the canonical title and `revision_id`, read from the response `etag`), keyed by the requested title, so a re-run makes no requests. Parse the headings with BeautifulSoup, strip images, references, navigation boxes and infoboxes, flatten `wikitable`s to text rows with `rowspan` and `colspan` expanded. Redirects are followed, the canonical title is the document title and the requested name becomes an Alias.
+3. Open Music Theory v1: `git clone --depth 1` the repo, read the Markdown files, strip front matter and link definitions, split on `#`, `##` and `###` into sections with a heading path. Site plumbing and stub pages are excluded and listed (`app/rag/omt.py`). The clone lives in `data/cache/omt/`.
+4. Apply the 5,000-character floor to Wikipedia pages (required pages below it are kept and flagged), print the report of included, dropped and flagged entries, and upsert every document, with its sections, `revision_id`, `license` and `url`, into `documents` through SQLAlchemy (stale rows are removed in the same transaction).
 5. Chunk, prepend the title and alias line, embed, and add to `PGVectorStore` with deterministic ids (a UUID derived from document, section and chunk index), so re-running upserts. After adding, delete that document's chunks whose ids are no longer produced. The library's batch insert is not one transaction (one INSERT and commit per row), so a failed run is fixed by re-running.
 
 ## Folder layout (proposed)
@@ -131,17 +131,17 @@ newDir/
   docs/
   docker-compose.yml
   .env.example
-  data/                      seed list, golden set, cached pages, OMT clone
+  data/                      seed list, golden set; cache/ (gitignored): fetched pages, OMT clone
   sound-companion.server/
     pyproject.toml           pinned versions (langchain-postgres exact)
     app/
       main.py                FastAPI app, lifespan, CORS
       api/                   chat (SSE), threads, health
       agent/                 create_agent setup, prompts, checkpointer, streaming adapter
-      rag/                   loaders, splitter, vector store, retriever, hybrid SQL
+      rag/                   Wikipedia fetch and cleaning, Open Music Theory parser, corpus build, document store, then splitter, vector store, retriever, hybrid SQL
       tools/                 one module per tool plus schemas, instruments.py
       security/              validation, delimiting, rate limit
-      db/                    engine config (two URL styles), migrations, usage and log writers
+      db/                    SQLAlchemy models, Alembic migrations and runner, engine config (two URL styles), usage and log writers
       config.py              settings from env
     scripts/                 ingest.py, run_eval.py
     eval/                    golden-set runners, RAGAs

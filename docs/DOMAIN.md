@@ -34,9 +34,9 @@ Rules:
 
 1. About 60 theory articles, spread across the topics in the scope, and about 90 instrument articles balanced across families (strings, woodwinds, brass, percussion, keyboards, electronic, folk and world). Seed instruments from the Hornbostel-Sachs page plus a hand-picked orchestral and popular list.
 2. Supporting pages are required: Transposing instrument, List of transposing instruments (the source of the transposition table), Concert pitch, Harmonic series (music), Musical tuning (not "Tuning", which is a disambiguation page), Scientific pitch notation, Musical note, Organology, Musical acoustics.
-3. Every Wikipedia article needs at least 5,000 characters. Entries below the floor are dropped, or flagged for the author to decide.
+3. Every Wikipedia article needs at least 5,000 characters. Entries below the floor are dropped, except the required pages, which are kept and flagged. The ingestion report lists every dropped and flagged title for the author to decide.
 4. Redirects are resolved to the canonical title, and the pre-redirect names are stored as Aliases (English horn to Cor anglais, Bb clarinet to Soprano clarinet, Pianoforte to Piano).
-5. All Open Music Theory v1 content pages are included. Non-content files (404, README, stubs) are excluded.
+5. All Open Music Theory v1 content pages are included: 114 of the 129 Markdown files. The 15 excluded are site plumbing (404, README, index, contents, about) and stubs (mostly videos); the list is in `app/rag/omt.py` and printed by the ingestion report. Textbook documents have no topics yet.
 6. Include enough pages where Conventions differ: Musical note, Scientific pitch notation, Chord notation, Cadence, Time signature (quarter note vs crotchet).
 
 The list is drafted in story 2 and reviewed by the author before ingestion.

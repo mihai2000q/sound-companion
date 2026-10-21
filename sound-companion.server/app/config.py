@@ -37,12 +37,12 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        """Plain psycopg style, for the migration runner and scripts."""
+        """Plain psycopg style, for the health check and the checkpointer pool."""
         return self._database_url("postgresql")
 
     @property
     def database_url_async(self) -> str:
-        """SQLAlchemy psycopg style, for the vector store (PGEngine)."""
+        """SQLAlchemy psycopg style, for our ORM models, Alembic and the vector store (PGEngine)."""
         return self._database_url("postgresql+psycopg")
 
 

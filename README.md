@@ -14,7 +14,7 @@ Example questions:
 
 ## Status
 
-Documentation phase. Implementation proceeds story by story, see [docs/IMPLEMENTATION-PLAN.md](docs/IMPLEMENTATION-PLAN.md).
+Story 1 (scaffold) is done, story 2 (Seed list and ingestion) is in progress. Implementation proceeds story by story, see [docs/IMPLEMENTATION-PLAN.md](docs/IMPLEMENTATION-PLAN.md).
 
 History: the project first targeted metal artists ([docs/archive/metal/](docs/archive/metal/)), then music theory and instruments on a SvelteKit and TypeScript stack ([docs/archive/typescript-stack/](docs/archive/typescript-stack/)). Both were changed after research, see decisions 1 to 5 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
@@ -26,7 +26,7 @@ History: the project first targeted metal artists ([docs/archive/metal/](docs/ar
 | Backend | Python 3.12, FastAPI, LangChain (`create_agent`), `langchain-postgres` `PGVectorStore`, LangGraph Postgres checkpointer |
 | Music computation | `pychord` (chords), `music21` (scales, intervals, keys), small hand-written functions |
 | LLM and embeddings | OpenRouter (OpenAI-compatible) |
-| Database | PostgreSQL with pgvector, in Docker |
+| Database | PostgreSQL with pgvector, in Docker. SQLAlchemy models and Alembic migrations |
 | Evaluation | Deterministic metrics, RAGAs (same Python project) |
 
 ## Running locally
@@ -42,6 +42,17 @@ History: the project first targeted metal artists ([docs/archive/metal/](docs/ar
 | Postgres | `localhost:7001` |
 
 Ports come from `.env`. To run the migrations by hand, see [Migrations](docs/DATABASE-SCHEMA.md#migrations).
+
+### Building the Corpus
+
+With the database up (and migrated), from `sound-companion.server`:
+
+```
+uv run python -m scripts.ingest              # fetch, clean, report and store
+uv run python -m scripts.ingest --dry-run    # the same, but store nothing
+```
+
+The script reads `data/seed-list.json`, fetches the Wikipedia pages at about 1 request per second and clones Open Music Theory v1 into `data/cache/` (not committed). Re-running uses the cache and makes no requests. It prints which entries were included, dropped below the 5,000-character floor or flagged, and which Open Music Theory files were excluded.
 
 ## Documents
 

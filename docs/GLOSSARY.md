@@ -63,6 +63,17 @@ Technical terms. Domain terms (Note, Pitch class, Written pitch, Sounding pitch,
 | Tool selection accuracy | Whether the agent called the right tool. |
 | Parameter accuracy | Whether it passed the right arguments. |
 
+## Database and data
+
+| Term | Meaning |
+|---|---|
+| ORM | Object-relational mapper. Tables are Python classes and rows are objects, so ordinary reads and writes need no hand-written SQL. Here: SQLAlchemy. |
+| SQLAlchemy | The Python database toolkit used for our own tables (`app/db/models.py`). `langchain-postgres` uses it too. |
+| Migration | A versioned change to the database schema, applied in order and never edited afterwards. |
+| Alembic | SQLAlchemy's migration tool. Revisions are Python files in `app/db/migrations/versions/`, the applied one is stored in the `alembic_version` table. |
+| Upsert | Insert a row, or update it if it already exists (here keyed by `url`), so a re-run does not duplicate. |
+| ETag | A response header that identifies a version of a page. Wikipedia's starts with the revision id, which is how we read `revision_id`. |
+
 ## Licensing
 
 | Term | Meaning |

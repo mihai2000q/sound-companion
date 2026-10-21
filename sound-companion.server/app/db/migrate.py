@@ -1,36 +1,49 @@
 from pathlib import Path
 
-import psycopg
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import create_engine, inspect, text
 
 from app.config import settings
 
-MIGRATIONS_DIR = Path(__file__).parent / "migrations"
+DB_DIR = Path(__file__).parent
 LOCK_ID = 7_001_001  # arbitrary, keeps concurrent runners (two backend replicas) from interleaving
+# Versions recorded by the hand-written SQL runner this replaced, newest last.
+LEGACY_VERSIONS = {"0001_enable_pgvector": "0001", "0002_documents": "0002"}
 
 
-def run_migrations() -> list[str]:
-    """Apply unapplied migrations in filename order, return the versions applied now."""
-    applied_now: list[str] = []
-    with psycopg.connect(settings.database_url, autocommit=True) as conn:
-        conn.execute("SELECT pg_advisory_lock(%s)", (LOCK_ID,))
+def run_migrations() -> None:
+    """Upgrade the database to the latest revision."""
+    config = Config(str(DB_DIR.parent.parent / "alembic.ini"))
+    config.set_main_option("script_location", str(DB_DIR / "migrations"))
+    engine = create_engine(settings.database_url_async)
+    with engine.connect() as conn:
+        conn.execute(text("SELECT pg_advisory_lock(:id)"), {"id": LOCK_ID})
+        conn.commit()
         try:
-            conn.execute(
-                "CREATE TABLE IF NOT EXISTS schema_migrations ("
-                "version text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())"
-            )
-            done = {row[0] for row in conn.execute("SELECT version FROM schema_migrations")}
-            for path in sorted(MIGRATIONS_DIR.glob("*.sql")):
-                if path.stem in done:
-                    continue
-                with conn.transaction():
-                    conn.execute(path.read_text())
-                    conn.execute("INSERT INTO schema_migrations (version) VALUES (%s)", (path.stem,))
-                applied_now.append(path.stem)
+            config.attributes["connection"] = conn
+            _adopt_legacy_history(config, conn)
+            command.upgrade(config, "head")
         finally:
-            conn.execute("SELECT pg_advisory_unlock(%s)", (LOCK_ID,))
-    return applied_now
+            conn.execute(text("SELECT pg_advisory_unlock(:id)"), {"id": LOCK_ID})
+            conn.commit()
+    engine.dispose()
+
+
+def _adopt_legacy_history(config: Config, conn) -> None:
+    """A database migrated by the old SQL runner is stamped at its revision, not migrated again."""
+    tables = set(inspect(conn).get_table_names())
+    if "schema_migrations" not in tables or "alembic_version" in tables:
+        return
+    applied = [row[0] for row in conn.execute(text("SELECT version FROM schema_migrations"))]
+    known = [LEGACY_VERSIONS[v] for v in sorted(applied) if v in LEGACY_VERSIONS]
+    conn.commit()
+    if known:
+        command.stamp(config, known[-1])
+    conn.execute(text("DROP TABLE schema_migrations"))
+    conn.commit()
 
 
 if __name__ == "__main__":
-    applied = run_migrations()
-    print(f"applied: {', '.join(applied)}" if applied else "nothing to apply")
+    run_migrations()
+    print("database is at the latest revision")
