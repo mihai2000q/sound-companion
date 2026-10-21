@@ -152,6 +152,7 @@ newDir/
     src/
       components/            Chat, MessageBubble, ToolCard, Inspector, Composer
       hooks/                 useChatStream (fetch + stream reader)
+      queries/               React Query keys and queryOptions per feature, used inline with useQuery
       state/                 conversation store
       types/                 event types shared with the backend contract
 ```
