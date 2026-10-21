@@ -590,11 +590,11 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", specifier = ">=0.150.0" },
+    { name = "fastapi", specifier = "==0.150.0" },
     { name = "langchain-postgres", specifier = "==0.0.19" },
     { name = "psycopg", extras = ["binary"], specifier = "==3.3.6" },
-    { name = "pydantic-settings", specifier = ">=2.16.0" },
-    { name = "uvicorn", specifier = ">=0.54.0" },
+    { name = "pydantic-settings", specifier = "==2.16.0" },
+    { name = "uvicorn", specifier = "==0.54.0" },
 ]
 
 [[package]]
