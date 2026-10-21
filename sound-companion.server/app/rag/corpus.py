@@ -18,6 +18,13 @@ REQUIRED_TITLES = {
     "Organology", "Musical acoustics", "Chord notation", "Cadence", "Time signature",
 }
 
+# Short pages the author decided to keep (issue 15): core theory and the only page for an
+# instrument. They sit between 3,000 and 5,000 characters and are not flagged.
+KEEP_BELOW_FLOOR = {
+    "Minor scale", "Blues scale", "Relative key", "Dominant (music)", "Twelve-bar blues",
+    "A440 (pitch standard)", "Glockenspiel", "Tubular bells", "Electric piano",
+}
+
 
 @dataclass
 class ReportLine:
@@ -61,7 +68,7 @@ def build_wikipedia_documents(entries: list[dict], fetcher: WikipediaFetcher) ->
             aliases=_aliases(entry, page.canonical_title),
             fetched_at=datetime.fromisoformat(page.fetched_at),
         )
-        if doc.char_count >= MIN_CHARS:
+        if doc.char_count >= MIN_CHARS or doc.title in KEEP_BELOW_FLOOR:
             result.included.append(doc)
         elif doc.title in REQUIRED_TITLES or entry["title"] in REQUIRED_TITLES:
             result.included.append(doc)
@@ -89,6 +96,7 @@ def omt_documents(parse: OmtParse) -> list[Document]:
             license=OMT_LICENSE,
             revision_id=doc.commit,
             sections=doc.sections,
+            topics=doc.topics,
         )
         for doc in parse.documents
     ]

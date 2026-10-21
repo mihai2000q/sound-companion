@@ -44,7 +44,7 @@ Notes:
 - **Real columns** keep types, filter with typed comparisons, and index with plain btree. Do not store metadata only in the JSON column.
 - **`topics` is a pipe-delimited TEXT** (`|woodwinds|instruments|`), because the library cannot filter array columns. Filter with `$like`: contains one topic `{"topics": {"$like": "%|woodwinds|%"}}`, any of with `$or`, all of with `$and`. `aliases` is only stored for display, as a delimited string, because only the title line needs searching.
 - **Filters** support `$and`, `$or`, `$not`, `$in`, `$nin`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$between`, `$like` and `$exists`. Values are bound parameters, an unknown operator raises a clear `ValueError`, and an empty `$in` returns nothing. Filter values must match the column type (an int against a text column raises an error).
-- **Upsert:** `add_documents(docs, ids=...)` upserts on `langchain_id` (`ON CONFLICT DO UPDATE`). Use deterministic UUIDs (uuid5 over document id, section and chunk index) so re-ingestion is idempotent.
+- **Upsert:** `add_documents(docs, ids=...)` upserts on `langchain_id` (`ON CONFLICT DO UPDATE`). Use deterministic UUIDs (uuid5 over the document URL, section index and chunk index) so re-ingestion is idempotent.
 - **Delete:** `delete(ids=...)` and `delete(filter=...)` work. An empty filter deletes nothing (the library checks), unlike the JavaScript store.
 - **Scores** are cosine distance, lower is better. Convert with `1 - distance` for display.
 - **Dimensions:** 1536 for `openai/text-embedding-3-small`. HNSW supports at most 2000 dimensions on the `vector` type, so do not use a 3072-dimension model without requesting reduced dimensions.
@@ -56,7 +56,7 @@ Notes:
 store.apply_vector_index(HNSWIndex(m=16, ef_construction=64))   # 3.0 s on 3,000 rows in the spike
 ```
 
-With the index forced, a selective filter returned 0 of 10 rows (a filter matching 10 of 3,000 chunks). Setting `hnsw.iterative_scan = relaxed_order` fixed it. The library's `HNSWQueryOptions` only sets `ef_search`, so we pass a small `QueryOptions` subclass through `index_query_options` whose `to_parameter()` returns `hnsw.ef_search`, `hnsw.iterative_scan = relaxed_order` and `hnsw.max_scan_tuples` settings. At 3,000 rows Postgres uses a sequential scan anyway, so re-test with the real corpus before relying on the index. Not verified: that `SET LOCAL` always lands on the query's connection in every pool configuration.
+With the index forced, a selective filter returned 0 of 10 rows (a filter matching 10 of 3,000 chunks). Setting `hnsw.iterative_scan = relaxed_order` fixed it. The library's `HNSWQueryOptions` only sets `ef_search`, so we pass a small `QueryOptions` subclass through `index_query_options` whose `to_parameter()` returns `hnsw.ef_search`, `hnsw.iterative_scan = relaxed_order` and `hnsw.max_scan_tuples` settings. At 7,329 chunks Postgres still uses a sequential scan, so the index and the option were checked with index scans forced, and the setting reached the query's connection through a pool of one ([research/hnsw-iterative-scan.md](research/hnsw-iterative-scan.md)).
 
 ## Hybrid search (story 15)
 

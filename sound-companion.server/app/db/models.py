@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, Integer, Text, func
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, Integer, Text, func
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -17,7 +17,7 @@ class DocumentRecord(Base):
         CheckConstraint("source_type IN ('encyclopedia', 'textbook')", name="documents_source_type_check"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     title: Mapped[str] = mapped_column(Text)
     source_type: Mapped[str] = mapped_column(Text)
     topics: Mapped[str] = mapped_column(Text, server_default="")  # pipe-delimited, '|a|b|'
