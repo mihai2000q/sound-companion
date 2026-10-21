@@ -13,12 +13,17 @@ class Settings(BaseSettings):
 
     backend_host: str = "127.0.0.1"
     backend_port: int
+    client_port: int
 
     postgres_user: str
     postgres_password: str
     postgres_db: str
     postgres_host: str
     postgres_port: int
+
+    @property
+    def client_origins(self) -> list[str]:
+        return [f"http://localhost:{self.client_port}", f"http://127.0.0.1:{self.client_port}"]
 
     @property
     def database_url(self) -> str:
