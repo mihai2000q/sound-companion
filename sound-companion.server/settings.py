@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     # Read from the machine's environment, not from .env.
     openrouter_api_key: str
+    openrouter_base_url: str
 
     backend_host: str = "127.0.0.1"
     backend_port: int
