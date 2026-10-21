@@ -42,7 +42,6 @@ History: the project first targeted metal artists ([docs/archive/metal/](docs/ar
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Decision log with reasons |
 | [docs/EVALUATION.md](docs/EVALUATION.md) | Golden set, metrics, RAGAs setup |
 | [docs/SECURITY.md](docs/SECURITY.md) | Threat model and defences |
-| [docs/REACT-PRIMER.md](docs/REACT-PRIMER.md) | The React and SSE patterns this project uses |
 | [docs/research/](docs/research/) | Verified facts about data sources, libraries and APIs |
 
 ## Budget
