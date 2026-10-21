@@ -10,7 +10,11 @@ export default defineConfig(({ mode }) => {
   return {
     // Only VITE_-prefixed variables reach browser code.
     envDir: '..',
-    server: { port: Number(env.CLIENT_PORT), strictPort: true },
+    server: {
+      port: Number(env.CLIENT_PORT),
+      strictPort: true,
+      proxy: { '/api': `http://${env.BACKEND_HOST}:${env.BACKEND_PORT}` },
+    },
     plugins: [
       react(),
       tailwindcss(),
