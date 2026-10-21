@@ -67,7 +67,7 @@ The backend returns `text/event-stream` from a FastAPI `StreamingResponse`. The 
 | `error` | `{ code, message }` | Inline error with retry | Backend |
 | `done` | `{}` | End of stream | Backend |
 
-This mapping was verified with a fake model in the spike ([research/python-stack-spike.md](research/python-stack-spike.md)). Not verified: real model streaming, and whether OpenRouter's `usage.cost` survives `langchain-openai`'s chunk conversion. If it is dropped, read it from the raw response, a small `ChatOpenAI` subclass, or `GET /api/v1/generation?id=<id>` (story 1 and 11 check this with a real key).
+This mapping was verified with a fake model in the spike ([research/python-stack-spike.md](research/python-stack-spike.md)). Real streaming and tool calling were then verified against OpenRouter (section C4 of the spike). `langchain-openai` drops `usage.cost` on streamed chunks, so the backend uses a small `ChatOpenAI` subclass that keeps the raw `usage` on the chunk (decision 46).
 
 The same events feed logging, so the UI and the monitoring data cannot disagree.
 
@@ -89,7 +89,7 @@ Chat on the left, collapsible inspector panel on the right.
 
 ## Cost guard
 
-`usage_log` stores one row per model call (model, tokens, cost in credits). Before each request the backend sums cost. At 1 credit the UI shows a warning, at 4 credits the backend refuses new requests with a clear error. OpenRouter returns `usage.cost` on every response (verified at HTTP level in the JavaScript research), so no per-model price table is needed, subject to the `langchain-openai` check above. Credits are treated as USD (verify on the account page).
+`usage_log` stores one row per model call (model, tokens, cost in credits). Before each request the backend sums cost. At 1 credit the UI shows a warning, at 4 credits the backend refuses new requests with a clear error. OpenRouter returns `usage.cost` on every response (verified at HTTP level in the JavaScript research), so no per-model price table is needed, read through the `ChatOpenAI` subclass above. Credits are treated as USD (verify on the account page).
 
 ## Models
 

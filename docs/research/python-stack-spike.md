@@ -20,7 +20,7 @@ Date: 2026-10-19. Python 3.12.3 (macOS, venv), throwaway `pgvector/pgvector:pg16
 | C1 | `create_agent` + Postgres checkpointer | PASS | Sync `PostgresSaver` and `AsyncPostgresSaver` both work. Memory across turns confirmed. |
 | C2 | Streaming (messages, updates, custom) | PASS | Tokens, tool calls, tool results, custom events all map cleanly to typed SSE events. |
 | C3 | FastAPI SSE with `curl -N` | PASS | Works. CORS configured and verified. Proxy buffering through Vite/nginx not tested. |
-| C4 | OpenRouter `usage.cost` on streamed responses | NOT TESTED | Needs a real key. What to check is listed in C4. |
+| C4 | OpenRouter `usage.cost` on streamed responses | PARTLY | Live run on 2026-10-21: five checks pass, `usage.cost` is DROPPED on streamed responses by `langchain-openai`. A small `ChatOpenAI` subclass restores it (decision 46). See C4. |
 
 ## Part A: langchain-postgres `PGVectorStore` (v2 API)
 
@@ -447,15 +447,42 @@ Proxy buffering gotchas (documented behaviour, NOT tested through a real proxy):
 - Client disconnect: Starlette cancels the generator (`asyncio.CancelledError`), which cancels the agent run; the checkpoint may then hold a partial turn (a tool call without a result). Not tested here; a real test is worthwhile.
 - The fake model emits tokens instantly, so true incremental delivery (first byte timing) was not measured with `curl`. The `Transfer-Encoding: chunked` response and per-event writes indicate it will stream, but a real slow model is the real test.
 
-### C4. Not testable without a real API key
+### C4. Live run against OpenRouter (2026-10-21)
 
-Could NOT be tested: OpenRouter `usage.cost` on streamed responses through `langchain-openai` (`ChatOpenAI(base_url="https://openrouter.ai/api/v1", ...)`). What to check later with a real key:
-1. With `stream_usage=True` (or `stream_options={"include_usage": True}`), does the last stream chunk carry `usage_metadata` (token counts), as with the fake?
-2. Does OpenRouter's `usage.cost` (and `cost_details`) survive `langchain-openai`'s chunk conversion? The standard `usage_metadata` only has token fields; the raw `usage` object, including `cost`, may land in `response_metadata["token_usage"]` or be dropped. If dropped, read it from the raw chunk via a callback, a custom `ChatOpenAI` subclass that overrides `_convert_chunk_to_generation_chunk`, or a direct `httpx` call, or fetch cost afterwards from OpenRouter's `GET /api/v1/generation?id=<id>`.
-3. Whether the final usage chunk arrives after `finish_reason` (an empty `choices` list) and is not swallowed by `create_agent` streaming (`stream_mode="messages"` showed the fake's usage chunk, so structurally it works).
-4. Cost across several model calls in one agent turn (the app sums per call).
-5. Tool calls with real streaming: argument fragments in `tool_call_chunks` arriving over several chunks, and the `updates` event still giving the complete call.
-6. Non-streamed `usage` for the same request, to compare with the streamed totals.
+Run with the author's real key, `langchain-openai 1.7.2`, `langchain 1.4.6`, `langchain-core 1.6.12`, `langgraph 1.2.16`, `openai 3.35.1`, models `openai/gpt-4o-mini` and `openai/text-embedding-3-small`, base URL `https://openrouter.ai/api/v1`. Throwaway scripts (not in the repo); total spend a small fraction of a cent.
+
+| Check | Result |
+|---|---|
+| Real chat call and real embedding call | PASS. Chat returned `pong`, embedding has 1536 dimensions. Both models were allowed by the key's workspace. |
+| 1. Streamed token counts (`stream_usage=True`) | PASS. `usage_metadata` arrives on the second-to-last chunk (the one carrying `finish_reason`), followed by one empty chunk. Take usage from the aggregated message, not from the last chunk. |
+| 2. `usage.cost` survives `langchain-openai` | **Non-streamed: PASS**, it is in `response_metadata["token_usage"]["cost"]` (plus `cost_details`, `is_byok`). **Streamed: FAIL**, it is dropped. The raw SSE usage chunk does carry `cost`; the converted chunk only gets token fields. |
+| 3. Usage chunk survives `create_agent` streaming | PASS. `stream_mode="messages"` shows `usage_metadata` for every model call in a turn, and the final `AIMessage` in `updates` has it too. |
+| 4. Cost across several model calls in one turn | PASS with the subclass below. A turn with a tool call and an answer was two model calls, 2.22e-05 each (72/19 and 100/12 tokens, matching $0.15 and $0.60 per million), summed to 4.44e-05. |
+| 5. Tool-call fragments with real streaming | PASS. The arguments arrived as 13 `tool_call_chunks` fragments; the `updates` event still held the complete call (`add {'a': 1234, 'b': 4321}`). |
+| 6. Streamed vs non-streamed totals | PASS. Same tokens (15 and 5) and same cost (5.25e-06) for the same prompt. |
+
+**Chunk ids.** The streamed chunks carry LangChain's own id (`lc_run--...`), not OpenRouter's `gen-...` id, and `response_metadata` has no `id`.
+
+**Generation lookup.** `GET /api/v1/generation?id=<gen id>` returned 404 on four tries over about 8 seconds, even with the id taken from the raw stream. It is not usable as the primary cost source.
+
+**Metadata merge gotcha.** When chunks are added, string values in `response_metadata` are concatenated (observed: `finish_reason` became `stopstop`, `model_name` was doubled). Put a new key on one chunk only.
+
+**Fix that works** (subclass, overrides the private `_convert_chunk_to_generation_chunk`, so pin `langchain-openai`):
+
+```python
+class CostChatOpenAI(ChatOpenAI):
+    def _convert_chunk_to_generation_chunk(self, chunk, default_chunk_class, base_generation_info):
+        gen = super()._convert_chunk_to_generation_chunk(chunk, default_chunk_class, base_generation_info)
+        usage = chunk.get("usage")
+        if gen is not None and usage and "cost" in usage:
+            gen.message.response_metadata["token_usage"] = usage
+            gen.message.response_metadata["generation_id"] = chunk.get("id")
+        return gen
+```
+
+With it the aggregated stream and the agent's per-call `AIMessage` both carry `response_metadata["token_usage"]["cost"]`, so story 11 reads the cost from the same place for streamed and non-streamed calls.
+
+Not checked by this run (the author's to confirm on the account): credits equal USD on the account page, and that the workspace guardrails are meant to allow the two models.
 
 ## Recommendation
 

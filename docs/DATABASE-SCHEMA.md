@@ -137,7 +137,7 @@ CREATE TABLE threads (
 
 Total spend for the budget guard: `SELECT COALESCE(SUM(cost_credits),0) FROM usage_log;`
 
-OpenRouter returns `usage.cost` in credits on every response (verified at HTTP level in the JavaScript research). Whether it survives `langchain-openai` in Python is not yet verified (see [ARCHITECTURE.md](ARCHITECTURE.md#streaming-events-sse)). Credits are treated as USD for the caps.
+OpenRouter returns `usage.cost` in credits on every response (verified at HTTP level in the JavaScript research). Through `langchain-openai` it survives on non-streamed calls but is dropped on streamed ones, so the backend uses a small `ChatOpenAI` subclass (decision 46, [research](research/python-stack-spike.md), section C4). Credits are treated as USD for the caps.
 
 ## Conversation memory
 
