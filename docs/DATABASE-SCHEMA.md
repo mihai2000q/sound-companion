@@ -44,7 +44,7 @@ Notes:
 - **Real columns** keep types, filter with typed comparisons, and index with plain btree. Do not store metadata only in the JSON column.
 - **`topics` is a pipe-delimited TEXT** (`|woodwinds|instruments|`), because the library cannot filter array columns. Filter with `$like`: contains one topic `{"topics": {"$like": "%|woodwinds|%"}}`, any of with `$or`, all of with `$and`. `aliases` is only stored for display, as a delimited string, because only the title line needs searching.
 - **Filters** support `$and`, `$or`, `$not`, `$in`, `$nin`, `$ne`, `$gt`, `$gte`, `$lt`, `$lte`, `$between`, `$like` and `$exists`. Values are bound parameters, an unknown operator raises a clear `ValueError`, and an empty `$in` returns nothing. Filter values must match the column type (an int against a text column raises an error).
-- **Upsert:** `add_documents(docs, ids=...)` upserts on `langchain_id` (`ON CONFLICT DO UPDATE`). Use deterministic UUIDs (uuid5 over document id, section and chunk index) so re-ingestion is idempotent.
+- **Upsert:** `add_documents(docs, ids=...)` upserts on `langchain_id` (`ON CONFLICT DO UPDATE`). Use deterministic UUIDs (uuid5 over the document URL, section index and chunk index) so re-ingestion is idempotent.
 - **Delete:** `delete(ids=...)` and `delete(filter=...)` work. An empty filter deletes nothing (the library checks), unlike the JavaScript store.
 - **Scores** are cosine distance, lower is better. Convert with `1 - distance` for display.
 - **Dimensions:** 1536 for `openai/text-embedding-3-small`. HNSW supports at most 2000 dimensions on the `vector` type, so do not use a 3072-dimension model without requesting reduced dimensions.
