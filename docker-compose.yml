@@ -15,7 +15,7 @@ services:
       timeout: 5s
       retries: 10
 
-  backend:
+  server:
     build: ./sound-companion.server
     env_file: .env
     environment:
@@ -40,6 +40,9 @@ services:
     build: ./sound-companion.client
     environment:
       CLIENT_PORT: ${CLIENT_PORT}
+      # Inside compose the client reaches the backend by service name.
+      BACKEND_HOST: server
+      BACKEND_PORT: ${BACKEND_PORT}
     ports:
       - "${CLIENT_PORT}:${CLIENT_PORT}"
     volumes:
@@ -47,7 +50,7 @@ services:
       - ./sound-companion.client:/app
       - /app/node_modules
     depends_on:
-      backend:
+      server:
         condition: service_healthy
 
 volumes:
