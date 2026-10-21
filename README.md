@@ -29,6 +29,20 @@ History: the project first targeted metal artists ([docs/archive/metal/](docs/ar
 | Database | PostgreSQL with pgvector, in Docker |
 | Evaluation | Deterministic metrics, RAGAs (same Python project) |
 
+## Running locally
+
+1. Copy `.env.example` to `.env` and change the placeholder password if you like.
+2. Put your OpenRouter key in your shell environment (it is not read from `.env`): `export OPENROUTER_API_KEY=...`
+3. `docker compose up --build` starts Postgres (pgvector, named volume `pgdata`), the server and the client dev server. The server applies the database migrations on startup.
+
+| Service | URL |
+|---|---|
+| Client | http://localhost:7003 (`/` home, `/health` server and database status) |
+| Server | http://localhost:7002 (`GET /api/health`) |
+| Postgres | `localhost:7001` |
+
+Ports come from `.env`. To run the migrations by hand, see [Migrations](docs/DATABASE-SCHEMA.md#migrations).
+
 ## Documents
 
 | File | Purpose |
@@ -42,7 +56,6 @@ History: the project first targeted metal artists ([docs/archive/metal/](docs/ar
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Decision log with reasons |
 | [docs/EVALUATION.md](docs/EVALUATION.md) | Golden set, metrics, RAGAs setup |
 | [docs/SECURITY.md](docs/SECURITY.md) | Threat model and defences |
-| [docs/REACT-PRIMER.md](docs/REACT-PRIMER.md) | The React and SSE patterns this project uses |
 | [docs/research/](docs/research/) | Verified facts about data sources, libraries and APIs |
 
 ## Budget

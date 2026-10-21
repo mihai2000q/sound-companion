@@ -47,11 +47,13 @@ Each entry: decision, reason, and what would change it. Entries 1 to 5 record ho
 | 41 | No auth, single local user, English only | Out of scope for the brief and the budget. | Never for this sprint. |
 | 42 | `CONTEXT.md` holds domain terms, `GLOSSARY.md` holds technical terms | One glossary for each kind of language. | Never. |
 | 43 | Work in stories, not days | The author wants feature-by-feature implementation. | Never. |
+| 44 | Docker Compose runs the database, the backend and the client dev server | One `docker compose up` starts the whole stack. Ports and Postgres settings come from the one root `.env`, and the client also runs on the host with `npm run dev`. | The container file watching or HMR is too slow on this machine. |
+| 45 | Server data goes through React Query with `queryOptions` and key factories in `src/queries/`, called inline with `useQuery`, not through one hook per query | `queryOptions` keeps key, function and settings together and is reusable for prefetch and invalidation without wrapper hooks. Defaults live in one `QueryClient` (staleTime 30 s, gcTime 5 min, retry 1, no refetch on focus), and a query overrides them where needed. | A feature needs shared logic around a query, then a hook is fine. |
+| 46 | Streamed cost comes from a small `ChatOpenAI` subclass that keeps OpenRouter's raw `usage` (with `cost`) on the streamed chunk | Live check: `langchain-openai` drops `usage.cost` on streamed responses, the generation lookup returned 404 and LangChain's chunk id is not OpenRouter's. The raw usage chunk does carry `cost`. The subclass is about 8 lines and puts the cost on the message the cost guard already reads. | The library keeps `cost` on streamed chunks, or the private method it overrides changes (pin `langchain-openai` and test that cost is present). |
 
 ## Open facts (verify in the story that needs them)
 
-- A real model through Python `langchain-openai` with OpenRouter: streaming, tool calling, `usage.cost` on streamed responses, cost across several calls in one turn, tool-call argument chunks (story 1, then story 11). Six specific checks are listed in [research/python-stack-spike.md](research/python-stack-spike.md) section C4.
-- Credits equal USD on this OpenRouter account, and workspace guardrails for the chosen models (stories 1 and 11).
+- Credits equal USD on this OpenRouter account, and workspace guardrails for the chosen models: the models work with the author's key, the account page and guardrail settings are still to be confirmed by the author (story 1, issue 5).
 - Table extraction from the REST HTML for the "Transposing instrument" article and any tuning tables (story 2).
 - Wikipedia API rate-limit policy page was not read (story 2).
 - OMT v1 repo has no LICENSE file. The licence is declared in the page footer and about page (story 2).

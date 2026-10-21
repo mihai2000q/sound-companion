@@ -1,0 +1,57 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build: ./sound-companion.server
+    env_file: .env
+    environment:
+      # Inside compose the database is reached by service name on its container port.
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      BACKEND_HOST: 0.0.0.0
+      # Passed through from the machine's environment; compose refuses to start without it.
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY in your shell environment}
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import os,urllib.request as u; u.urlopen('http://localhost:' + os.environ['BACKEND_PORT'] + '/api/health')\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      db:
+        condition: service_healthy
+
+  client:
+    build: ./sound-companion.client
+    environment:
+      CLIENT_PORT: ${CLIENT_PORT}
+      # Inside compose the client reaches the backend by service name.
+      BACKEND_HOST: server
+      BACKEND_PORT: ${BACKEND_PORT}
+    ports:
+      - "${CLIENT_PORT}:${CLIENT_PORT}"
+    volumes:
+      # Live edits from the host reach the Vite dev server (HMR); the image's node_modules stay.
+      - ./sound-companion.client:/app
+      - /app/node_modules
+    depends_on:
+      server:
+        condition: service_healthy
+
+volumes:
+  pgdata:

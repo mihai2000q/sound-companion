@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Sound Companion is a RAG chatbot that teaches music theory and instruments from a curated, cited corpus plus local calculation tools. The repo is in the **documentation phase**: there is no code, build, lint or test tooling yet. Work proceeds story by story from `docs/IMPLEMENTATION-PLAN.md` (each story lists acceptance criteria and facts to verify first). Commands will be added here once story 1 (scaffold) lands.
 
-Planned stack: React + Vite + TypeScript + Tailwind/DaisyUI (`frontend/`), Python 3.12 + FastAPI + LangChain `create_agent` (`backend/`), PostgreSQL + pgvector in Docker, OpenRouter for the LLM and embeddings. Secrets (OpenRouter key) live in `.env`, never committed.
+Planned stack: React + Vite + TypeScript + Tailwind/DaisyUI (`sound-companion.client/`), Python 3.12 + FastAPI + LangChain `create_agent` (`sound-companion.server/`), PostgreSQL + pgvector in Docker, OpenRouter for the LLM and embeddings. Secrets (OpenRouter key) live in `.env`, never committed.
 
 ## Where to look
 

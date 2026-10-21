@@ -100,7 +100,7 @@ The query vector is passed as a pgvector value. `websearch_to_tsquery` accepts n
 
 ## Instrument data
 
-The transposition table is a code constant in `backend/app/tools/instruments.py` (about 14 rows, each with a Wikipedia URL as its Citation), not a database table. It is small, reviewed by hand, and unit-tested.
+The transposition table is a code constant in `sound-companion.server/app/tools/instruments.py` (about 14 rows, each with a Wikipedia URL as its Citation), not a database table. It is small, reviewed by hand, and unit-tested.
 
 ## Usage, logs, threads
 
@@ -137,7 +137,7 @@ CREATE TABLE threads (
 
 Total spend for the budget guard: `SELECT COALESCE(SUM(cost_credits),0) FROM usage_log;`
 
-OpenRouter returns `usage.cost` in credits on every response (verified at HTTP level in the JavaScript research). Whether it survives `langchain-openai` in Python is not yet verified (see [ARCHITECTURE.md](ARCHITECTURE.md#streaming-events-sse)). Credits are treated as USD for the caps.
+OpenRouter returns `usage.cost` in credits on every response (verified at HTTP level in the JavaScript research). Through `langchain-openai` it survives on non-streamed calls but is dropped on streamed ones, so the backend uses a small `ChatOpenAI` subclass (decision 46, [research](research/python-stack-spike.md), section C4). Credits are treated as USD for the caps.
 
 ## Conversation memory
 
@@ -149,4 +149,15 @@ Golden set and exported runs are files, not tables: `data/golden-set.json` and `
 
 ## Migrations
 
-Plain numbered SQL files in `backend/app/db/migrations/`, applied by a small script on startup. The chunk table itself is created by the library helper from a setup script, and our migrations add the keyword column and indexes. No ORM.
+Plain numbered SQL files in `sound-companion.server/app/db/migrations/`, applied by a small script on startup. The chunk table itself is created by the library helper from a setup script, and our migrations add the keyword column and indexes. No ORM.
+
+**How they run.** The runner is `sound-companion.server/app/db/migrate.py`. It applies the `.sql` files in filename order, each in its own transaction, and records each applied version in a `schema_migrations` table. A version that is already recorded is skipped, so running it again changes nothing. An advisory lock keeps two runners from interleaving.
+
+- **Automatically:** the server runs it on startup, so `docker compose up` is enough. A failing migration stops the server from starting.
+- **By hand, with the stack running:** `docker compose exec server python -m app.db.migrate`
+- **By hand, without the server:** `docker compose run --rm --no-deps server python -m app.db.migrate` (the database must be up).
+- **On the host:** `cd sound-companion.server && uv run python -m app.db.migrate`, with the database up on `localhost:7001` (`POSTGRES_HOST` and `POSTGRES_PORT` from `.env`).
+
+The runner prints `applied: <versions>` or `nothing to apply`.
+
+**Adding one.** Create `NNNN_short_name.sql` in `app/db/migrations/` with the next number, for example `0002_documents.sql`. Never edit a migration that has been applied, add a new one. `0001_enable_pgvector.sql` enables the `vector` extension.

@@ -2,10 +2,10 @@
 
 ## Overview
 
-Two projects in one repository. A React single-page app (`frontend/`) talks to a FastAPI backend (`backend/`) over one streaming endpoint. The backend owns all LangChain logic, the music tools, ingestion and evaluation. Postgres (with pgvector) holds the knowledge base, conversation memory, usage and logs.
+Two projects in one repository. A React single-page app (`sound-companion.client/`) talks to a FastAPI backend (`sound-companion.server/`) over one streaming endpoint. The backend owns all LangChain logic, the music tools, ingestion and evaluation. Postgres (with pgvector) holds the knowledge base, conversation memory, usage and logs.
 
 ```
-Browser (React + Tailwind/DaisyUI, Vite dev server)
+Browser (React + Tailwind/DaisyUI, Vite dev server; runs in compose, or on the host with `npm run dev`)
    |  POST /api/chat  (fetch, body: thread_id + message)      /api/* proxied by Vite to :8000
    |  <- SSE stream of typed events
 FastAPI backend
@@ -45,7 +45,7 @@ Eval scripts (pytest-style CLI, RAGAs) in the same Python project
 
 ## Retrieval
 
-Behind a small `Retriever` interface in `backend/app/rag/`:
+Behind a small `Retriever` interface in `sound-companion.server/app/rag/`:
 
 - **Baseline (core):** `langchain-postgres` `PGVectorStore` (v2 API, `PGEngine`) with real metadata columns, used through `add_documents` and `as_retriever(search_kwargs={"k": ..., "filter": ...})`, the pattern from the course.
 - **Hybrid (story 15, hard task):** our own SQL (vector similarity plus `ts_rank`, fused with reciprocal rank fusion) run through psycopg, see [DATABASE-SCHEMA.md](DATABASE-SCHEMA.md#hybrid-search-story-15). The library's `HybridSearchConfig` is a second mode for comparison only, because in `langchain-postgres` 0.0.19 it mutates the shared config and reuses the first query's keywords unless a fresh config copy is passed on every call (confirmed in the spike).
@@ -67,7 +67,7 @@ The backend returns `text/event-stream` from a FastAPI `StreamingResponse`. The 
 | `error` | `{ code, message }` | Inline error with retry | Backend |
 | `done` | `{}` | End of stream | Backend |
 
-This mapping was verified with a fake model in the spike ([research/python-stack-spike.md](research/python-stack-spike.md)). Not verified: real model streaming, and whether OpenRouter's `usage.cost` survives `langchain-openai`'s chunk conversion. If it is dropped, read it from the raw response, a small `ChatOpenAI` subclass, or `GET /api/v1/generation?id=<id>` (story 1 and 11 check this with a real key).
+This mapping was verified with a fake model in the spike ([research/python-stack-spike.md](research/python-stack-spike.md)). Real streaming and tool calling were then verified against OpenRouter (section C4 of the spike). `langchain-openai` drops `usage.cost` on streamed chunks, so the backend uses a small `ChatOpenAI` subclass that keeps the raw `usage` on the chunk (decision 46).
 
 The same events feed logging, so the UI and the monitoring data cannot disagree.
 
@@ -89,7 +89,7 @@ Chat on the left, collapsible inspector panel on the right.
 
 ## Cost guard
 
-`usage_log` stores one row per model call (model, tokens, cost in credits). Before each request the backend sums cost. At 1 credit the UI shows a warning, at 4 credits the backend refuses new requests with a clear error. OpenRouter returns `usage.cost` on every response (verified at HTTP level in the JavaScript research), so no per-model price table is needed, subject to the `langchain-openai` check above. Credits are treated as USD (verify on the account page).
+`usage_log` stores one row per model call (model, tokens, cost in credits). Before each request the backend sums cost. At 1 credit the UI shows a warning, at 4 credits the backend refuses new requests with a clear error. OpenRouter returns `usage.cost` on every response (verified at HTTP level in the JavaScript research), so no per-model price table is needed, read through the `ChatOpenAI` subclass above. Credits are treated as USD (verify on the account page).
 
 ## Models
 
@@ -114,7 +114,7 @@ Rules: both libraries raise exceptions on invalid input (`H4`, `Xyz`), so tools 
 
 ## Ingestion
 
-A script, not the request path (`backend/scripts/ingest.py`):
+A script, not the request path (`sound-companion.server/scripts/ingest.py`):
 
 1. Read `data/seed-list.json`.
 2. Wikipedia pages: `GET /api/rest_v1/page/html/<title>` (keeps headings and tables, unlike `explaintext`), with a descriptive User-Agent and about 1 request per second. Parse `<section>` and heading elements with BeautifulSoup, strip images, references and navigation boxes, flatten tables to text rows. Resolve redirects and record Aliases.
@@ -132,7 +132,7 @@ newDir/
   docker-compose.yml
   .env.example
   data/                      seed list, golden set, cached pages, OMT clone
-  backend/
+  sound-companion.server/
     pyproject.toml           pinned versions (langchain-postgres exact)
     app/
       main.py                FastAPI app, lifespan, CORS
@@ -146,17 +146,20 @@ newDir/
     scripts/                 ingest.py, run_eval.py
     eval/                    golden-set runners, RAGAs
     tests/
-  frontend/
+  sound-companion.client/
     package.json
     vite.config.ts           dev proxy for /api
     src/
+      App.tsx, providers.tsx, router.tsx   app shell, context providers, route table
+      pages/                 one component per route (HomePage at /, HealthPage at /health)
       components/            Chat, MessageBubble, ToolCard, Inspector, Composer
       hooks/                 useChatStream (fetch + stream reader)
+      queries/               React Query keys and queryOptions per feature, used inline with useQuery
       state/                 conversation store
       types/                 event types shared with the backend contract
 ```
 
-Rule: `backend/app/rag`, `tools`, `agent` and `security` never import FastAPI, so they run from scripts and tests. Only `api/` knows about HTTP.
+Rule: `sound-companion.server/app/rag`, `tools`, `agent` and `security` never import FastAPI, so they run from scripts and tests. Only `api/` knows about HTTP.
 
 ## Tooling versions (from the research)
 
