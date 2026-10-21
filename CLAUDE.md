@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state
 
-Sound Companion is a RAG chatbot that teaches music theory and instruments from a curated, cited corpus plus local calculation tools. Story 1 (scaffold) is done and story 2 (Seed list and ingestion) is in progress. Work proceeds story by story from `docs/IMPLEMENTATION-PLAN.md` (each story lists acceptance criteria and facts to verify first). There is no lint tooling yet, and tests are written only for the AI parts of the bot.
+Sound Companion is a RAG chatbot that teaches music theory and instruments from a curated, cited corpus plus local calculation tools. Stories 1 (scaffold), 2 (Seed list and ingestion) and 3 (chunking, embeddings, indexing) are done, and story 4 (baseline retrieval, golden set, retrieval metrics) is next. Work proceeds story by story from `docs/IMPLEMENTATION-PLAN.md` (each story lists acceptance criteria and facts to verify first). There is no lint tooling yet, and tests are written only for the AI parts of the bot.
 
 ## Commands
 
@@ -34,7 +34,7 @@ One streaming endpoint, `POST /api/chat` (body: `thread_id` + `message`), return
 
 The backend runs a LangChain `create_agent` with no router. Retrieval is a tool (`search_knowledge_base`) that does multi-query rewrite with a cheap model, then retrieves, merges and wraps chunks as data (prompt-injection defence). Decomposition happens through the agent's tool loop. Music tools: `chord_info` (pychord), `scale_info` and `interval_between` (music21), `transpose_for_instrument` (hand-written offset table + music21 spelling), `note_frequency` (hand-written). Memory is per `thread_id` via `AsyncPostgresSaver`.
 
-Retrieval sits behind a small `Retriever` interface: baseline is `langchain-postgres` `PGVectorStore` (v2); hybrid search (vector + `ts_rank`, fused with RRF) is our own SQL via psycopg. Ingestion is an idempotent script, not part of the request path: stage one (done) caches pages and stores cleaned `documents`, Story 3 chunks them with deterministic uuid5 chunk ids (upsert, then delete stale chunks). Our own tables are SQLAlchemy models migrated with Alembic (`app/db/models.py`, `app/db/migrations/`); the hybrid query stays hand-written SQL.
+Retrieval sits behind a small `Retriever` interface: baseline is `langchain-postgres` `PGVectorStore` (v2); hybrid search (vector + `ts_rank`, fused with RRF) is our own SQL via psycopg. Ingestion is an idempotent script, not part of the request path: `scripts.ingest` caches pages and stores cleaned `documents`, `scripts.index` chunks them with deterministic uuid5 chunk ids (upsert, then delete stale chunks) and embeds them into the `chunks` table (made by the library helper, not Alembic). Our own tables are SQLAlchemy models migrated with Alembic (`app/db/models.py`, `app/db/migrations/`); the hybrid query stays hand-written SQL.
 
 ## Constraints that are easy to miss
 

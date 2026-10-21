@@ -69,7 +69,7 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 **Verify first:** real embeddings at full corpus size, and that the iterative-scan setting works through the connection pool with the real corpus.
 
 **Done when:**
-- One command builds the index from the cached pages.
+- One command builds the index from the stored documents.
 - Re-running does not duplicate rows (upsert) and removes chunks that no longer exist.
 - Total embedding cost is logged and within a few cents.
 - A sample query returns plausible chunks in a REPL script, and a query for "English horn" finds Cor anglais chunks.
