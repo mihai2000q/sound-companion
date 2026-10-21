@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import quote
 
+from app.rag.documents import Section
+
 REPO_URL = "https://github.com/openmusictheory/openmusictheory.github.io.git"
 SITE_URL = "https://openmusictheory.github.io"
 LICENSE = "CC BY-SA 4.0"  # page footer and about page, the repo has no LICENSE file
@@ -35,12 +37,6 @@ _LINK_DEFINITION = re.compile(r"^\[[^\]\n]+\]:[ \t]*\S.*\n?", re.MULTILINE)
 # `{{ page.title }}` followed by its `====` underline, a leftover of the Jekyll template
 _TEMPLATE_TITLE = re.compile(r"^\{\{ page\.title \}\}[ \t]*\n[=\-]{3,}[ \t]*\n?", re.MULTILINE)
 _HEADING = re.compile(r"^(#{1,3})[ \t]+(.*?)[ \t]*#*[ \t]*$")
-
-
-@dataclass
-class Section:
-    heading_path: list[str]
-    text: str
 
 
 @dataclass

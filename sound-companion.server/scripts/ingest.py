@@ -1,14 +1,16 @@
 """Ingestion, stage one. Run from the server folder: `uv run python -m scripts.ingest`.
 
-Fetches every Wikipedia entry of the Seed list into `data/cache/wikipedia/`, and clones Open Music
-Theory v1 into `data/cache/omt/` and parses it. A re-run reads the caches and makes no requests.
-The 5,000-character floor and storage come in a later issue.
+Fetches every Wikipedia entry of the Seed list into `data/cache/wikipedia/`, clones Open Music
+Theory v1 into `data/cache/omt/`, cleans both into documents, applies the 5,000-character floor to
+Wikipedia articles, prints a report and stores the documents. A re-run reads the caches and makes
+no requests. Chunking and embedding come in Story 3.
 """
 
 import argparse
 import json
 from pathlib import Path
 
+from app.rag.corpus import MIN_CHARS, build_wikipedia_documents, omt_documents
 from app.rag.omt import clone_omt, parse_omt
 from app.rag.wikipedia import WikipediaCache, WikipediaFetcher
 
@@ -18,39 +20,45 @@ WIKIPEDIA_CACHE = REPO_ROOT / "data" / "cache" / "wikipedia"
 OMT_CLONE = REPO_ROOT / "data" / "cache" / "omt"
 
 
-def fetch_wikipedia(limit: int | None) -> None:
+def main(limit: int | None, dry_run: bool) -> None:
     entries = [e for e in json.loads(SEED_LIST.read_text()) if e["source_type"] == "encyclopedia"]
     if limit is not None:
         entries = entries[:limit]
     fetcher = WikipediaFetcher(WikipediaCache(WIKIPEDIA_CACHE))
-    for entry in entries:
-        page = fetcher.fetch(entry["title"])
-        if page.status == "missing":
-            print(f"MISSING   {page.requested_title}")
-        elif page.redirect_alias:
-            print(f"redirect  {page.requested_title} -> {page.canonical_title} (rev {page.revision_id})")
-        else:
-            print(f"ok        {page.canonical_title} (rev {page.revision_id})")
-    print(f"{len(entries)} entries, {fetcher.requests_made} requests made")
+    wikipedia = build_wikipedia_documents(entries, fetcher)
 
-
-def parse_open_music_theory() -> None:
     commit = clone_omt(OMT_CLONE)
-    result = parse_omt(OMT_CLONE, commit)
-    for doc in result.documents:
-        words = sum(len(s.text.split()) for s in doc.sections)
-        print(f"ok        {doc.slug} ({len(doc.sections)} sections, {words} words)")
-    for slug, reason in result.excluded.items():
-        print(f"EXCLUDED  {slug}: {reason}")
-    print(f"{len(result.documents)} documents, {len(result.excluded)} excluded, commit {commit[:7]}")
+    omt = parse_omt(OMT_CLONE, commit)
+    textbook = omt_documents(omt)
+
+    print(f"Wikipedia: {len(entries)} entries, {fetcher.requests_made} requests made")
+    print(f"\nINCLUDED  {len(wikipedia.included)} Wikipedia articles, {len(textbook)} OMT pages (commit {commit[:7]})")
+    for doc in wikipedia.included:
+        redirected = f" (also: {', '.join(doc.aliases)})" if doc.aliases else ""
+        print(f"  {doc.title}: {doc.char_count} chars, rev {doc.revision_id}{redirected}")
+    print(f"\nDROPPED   {len(wikipedia.dropped)} below the {MIN_CHARS}-character floor")
+    for line in wikipedia.dropped:
+        print(f"  {line.title}: {line.detail}")
+    print(f"\nFLAGGED   {len(wikipedia.flagged)} for the author to decide")
+    for line in wikipedia.flagged:
+        print(f"  {line.title}: {line.detail}")
+    print(f"\nOMT EXCLUDED  {len(omt.excluded)} files")
+    for slug, reason in omt.excluded.items():
+        print(f"  {slug}: {reason}")
+
+    if limit is not None or dry_run:
+        print("\nNothing stored (--limit or --dry-run).")
+        return
+    from app.config import settings  # only here, so a dry run needs no environment
+    from app.rag.store import store_documents
+
+    stored, removed = store_documents(settings.database_url_async, [*wikipedia.included, *textbook])
+    print(f"\nStored {stored} documents, removed {removed} stale.")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--source", choices=["wikipedia", "omt", "all"], default="all")
-    parser.add_argument("--limit", type=int, help="Wikipedia only: the first N entries of the Seed list")
+    parser.add_argument("--limit", type=int, help="first N Wikipedia entries only, stores nothing")
+    parser.add_argument("--dry-run", action="store_true", help="report only, do not store")
     args = parser.parse_args()
-    if args.source in ("wikipedia", "all"):
-        fetch_wikipedia(args.limit)
-    if args.source in ("omt", "all"):
-        parse_open_music_theory()
+    main(args.limit, args.dry_run)

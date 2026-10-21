@@ -18,7 +18,8 @@ CREATE TABLE documents (
   aliases       TEXT[] NOT NULL DEFAULT '{}',
   url           TEXT NOT NULL UNIQUE,
   license       TEXT NOT NULL,                   -- 'CC BY-SA 4.0'
-  revision_id   TEXT,                            -- Wikipedia revision id or git commit
+  revision_id   TEXT NOT NULL,                   -- Wikipedia revision id or git commit
+  sections      JSONB NOT NULL,                  -- cleaned text: [{"heading_path": [...], "text": "..."}]
   fetched_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   char_count    INTEGER NOT NULL
 );
