@@ -27,6 +27,11 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?set OPENROUTER_API_KEY in your shell environment}
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import os,urllib.request as u; u.urlopen('http://localhost:' + os.environ['BACKEND_PORT'] + '/api/health')\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     depends_on:
       db:
         condition: service_healthy
@@ -42,7 +47,8 @@ services:
       - ./sound-companion.client:/app
       - /app/node_modules
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   pgdata:
