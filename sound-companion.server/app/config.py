@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    # Root .env when run from the server folder; in compose the real environment wins.
+    # Root .env when run from the backend folder; in compose the real environment wins.
     model_config = SettingsConfigDict(env_file="../.env", extra="ignore")
 
     # Read from the machine's environment, not from .env.
