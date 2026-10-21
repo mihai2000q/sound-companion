@@ -100,7 +100,7 @@ The query vector is passed as a pgvector value. `websearch_to_tsquery` accepts n
 
 ## Instrument data
 
-The transposition table is a code constant in `backend/app/tools/instruments.py` (about 14 rows, each with a Wikipedia URL as its Citation), not a database table. It is small, reviewed by hand, and unit-tested.
+The transposition table is a code constant in `sound-companion.server/app/tools/instruments.py` (about 14 rows, each with a Wikipedia URL as its Citation), not a database table. It is small, reviewed by hand, and unit-tested.
 
 ## Usage, logs, threads
 
@@ -149,4 +149,4 @@ Golden set and exported runs are files, not tables: `data/golden-set.json` and `
 
 ## Migrations
 
-Plain numbered SQL files in `backend/app/db/migrations/`, applied by a small script on startup. The chunk table itself is created by the library helper from a setup script, and our migrations add the keyword column and indexes. No ORM.
+Plain numbered SQL files in `sound-companion.server/app/db/migrations/`, applied by a small script on startup. The chunk table itself is created by the library helper from a setup script, and our migrations add the keyword column and indexes. No ORM.

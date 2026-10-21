@@ -20,8 +20,8 @@ Single-context repo:
 ├── docs/
 │   ├── GLOSSARY.md                    ← technical terms
 │   └── DECISIONS.md                   ← numbered decision log
-├── backend/
-└── frontend/
+├── sound-companion.server/
+└── sound-companion.client/
 ```
 
 ## Use the glossary's vocabulary

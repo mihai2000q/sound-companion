@@ -78,7 +78,7 @@ Export format (`data/runs/<timestamp>.json`), one entry per question:
 }
 ```
 
-Runner: `backend/eval/run_ragas.py` reads the JSON and prints per-metric scores (RAGAs dependencies in an optional extras group so they do not bloat the app image). It uses the same OpenRouter key, so keep the golden set at about 31 questions to protect the budget. Run it on demand, never in the request path. Tool-only questions have no retrieved contexts, so score them with layers 1 and 2 and exclude them from the context metrics.
+Runner: `sound-companion.server/eval/run_ragas.py` reads the JSON and prints per-metric scores (RAGAs dependencies in an optional extras group so they do not bloat the app image). It uses the same OpenRouter key, so keep the golden set at about 31 questions to protect the budget. Run it on demand, never in the request path. Tool-only questions have no retrieved contexts, so score them with layers 1 and 2 and exclude them from the context metrics.
 
 Metrics: faithfulness, answer relevancy, context precision, context recall.
 

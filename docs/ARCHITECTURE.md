@@ -2,7 +2,7 @@
 
 ## Overview
 
-Two projects in one repository. A React single-page app (`frontend/`) talks to a FastAPI backend (`backend/`) over one streaming endpoint. The backend owns all LangChain logic, the music tools, ingestion and evaluation. Postgres (with pgvector) holds the knowledge base, conversation memory, usage and logs.
+Two projects in one repository. A React single-page app (`sound-companion.client/`) talks to a FastAPI backend (`sound-companion.server/`) over one streaming endpoint. The backend owns all LangChain logic, the music tools, ingestion and evaluation. Postgres (with pgvector) holds the knowledge base, conversation memory, usage and logs.
 
 ```
 Browser (React + Tailwind/DaisyUI, Vite dev server; runs in compose, or on the host with `npm run dev`)
@@ -45,7 +45,7 @@ Eval scripts (pytest-style CLI, RAGAs) in the same Python project
 
 ## Retrieval
 
-Behind a small `Retriever` interface in `backend/app/rag/`:
+Behind a small `Retriever` interface in `sound-companion.server/app/rag/`:
 
 - **Baseline (core):** `langchain-postgres` `PGVectorStore` (v2 API, `PGEngine`) with real metadata columns, used through `add_documents` and `as_retriever(search_kwargs={"k": ..., "filter": ...})`, the pattern from the course.
 - **Hybrid (story 15, hard task):** our own SQL (vector similarity plus `ts_rank`, fused with reciprocal rank fusion) run through psycopg, see [DATABASE-SCHEMA.md](DATABASE-SCHEMA.md#hybrid-search-story-15). The library's `HybridSearchConfig` is a second mode for comparison only, because in `langchain-postgres` 0.0.19 it mutates the shared config and reuses the first query's keywords unless a fresh config copy is passed on every call (confirmed in the spike).
@@ -114,7 +114,7 @@ Rules: both libraries raise exceptions on invalid input (`H4`, `Xyz`), so tools 
 
 ## Ingestion
 
-A script, not the request path (`backend/scripts/ingest.py`):
+A script, not the request path (`sound-companion.server/scripts/ingest.py`):
 
 1. Read `data/seed-list.json`.
 2. Wikipedia pages: `GET /api/rest_v1/page/html/<title>` (keeps headings and tables, unlike `explaintext`), with a descriptive User-Agent and about 1 request per second. Parse `<section>` and heading elements with BeautifulSoup, strip images, references and navigation boxes, flatten tables to text rows. Resolve redirects and record Aliases.
@@ -132,7 +132,7 @@ newDir/
   docker-compose.yml
   .env.example
   data/                      seed list, golden set, cached pages, OMT clone
-  backend/
+  sound-companion.server/
     pyproject.toml           pinned versions (langchain-postgres exact)
     app/
       main.py                FastAPI app, lifespan, CORS
@@ -146,7 +146,7 @@ newDir/
     scripts/                 ingest.py, run_eval.py
     eval/                    golden-set runners, RAGAs
     tests/
-  frontend/
+  sound-companion.client/
     package.json
     vite.config.ts           dev proxy for /api
     src/
@@ -156,7 +156,7 @@ newDir/
       types/                 event types shared with the backend contract
 ```
 
-Rule: `backend/app/rag`, `tools`, `agent` and `security` never import FastAPI, so they run from scripts and tests. Only `api/` knows about HTTP.
+Rule: `sound-companion.server/app/rag`, `tools`, `agent` and `security` never import FastAPI, so they run from scripts and tests. Only `api/` knows about HTTP.
 
 ## Tooling versions (from the research)
 

@@ -2,7 +2,7 @@
 
 Work story by story. Each story is a vertical slice that can be demonstrated and tested before the next starts. No day estimates. Stories 1 to 9 deliver the core requirements, the rest add the optional tasks and reflection.
 
-Each story states: goal, what to build, acceptance criteria, and facts to verify first. Terms follow [CONTEXT.md](../CONTEXT.md). Backend code lives in `backend/`, frontend code in `frontend/` (see [ARCHITECTURE.md](ARCHITECTURE.md#folder-layout-proposed)).
+Each story states: goal, what to build, acceptance criteria, and facts to verify first. Terms follow [CONTEXT.md](../CONTEXT.md). Backend code lives in `sound-companion.server/`, frontend code in `sound-companion.client/` (see [ARCHITECTURE.md](ARCHITECTURE.md#folder-layout-proposed)).
 
 ## Core requirement coverage
 
@@ -34,8 +34,8 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 
 **Build:**
 - `docker-compose.yml` with Postgres (`pgvector` image) and a volume, plus the backend and the client dev server services.
-- `backend/`: `pyproject.toml` with pinned versions (`langchain-postgres` exact), FastAPI app with a health endpoint, settings from env (pydantic settings or similar) that fail fast, a migration runner.
-- `frontend/`: Vite + React + TypeScript, Tailwind 4 with DaisyUI 5 (`@plugin "daisyui"`), a Vite proxy for `/api`.
+- `sound-companion.server/`: `pyproject.toml` with pinned versions (`langchain-postgres` exact), FastAPI app with a health endpoint, settings from env (pydantic settings or similar) that fail fast, a migration runner.
+- `sound-companion.client/`: Vite + React + TypeScript, Tailwind 4 with DaisyUI 5 (`@plugin "daisyui"`), a Vite proxy for `/api`.
 - `.env.example`.
 
 **Verify first (needs your OpenRouter key, kept in `.env`, never committed):**
@@ -52,7 +52,7 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 
 ## Story 2: Seed list and ingestion
 
-**Build:** `data/seed-list.json` (about 60 theory articles, about 90 instrument articles, supporting pages, see [DOMAIN.md](DOMAIN.md)), reviewed by you. `backend/scripts/ingest.py` stage one: fetch Wikipedia pages from the REST HTML endpoint (about 1 request per second, User-Agent, caching under `data/cache/`), `git clone --depth 1` Open Music Theory v1, parse sections with BeautifulSoup, strip noise, apply the 5,000-character floor, resolve redirects into Aliases, record `revision_id`.
+**Build:** `data/seed-list.json` (about 60 theory articles, about 90 instrument articles, supporting pages, see [DOMAIN.md](DOMAIN.md)), reviewed by you. `sound-companion.server/scripts/ingest.py` stage one: fetch Wikipedia pages from the REST HTML endpoint (about 1 request per second, User-Agent, caching under `data/cache/`), `git clone --depth 1` Open Music Theory v1, parse sections with BeautifulSoup, strip noise, apply the 5,000-character floor, resolve redirects into Aliases, record `revision_id`.
 
 **Verify first:** table extraction for the "Transposing instrument" article and any tuning tables, the Wikipedia API rate-limit policy page, and the OMT licence statement (footer and about page, the repo has no LICENSE file).
 
@@ -100,7 +100,7 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 
 **Build:**
 - Backend `POST /api/chat` with request validation, `StreamingResponse` with typed SSE events as in [ARCHITECTURE.md](ARCHITECTURE.md), keepalive comments, `X-Accel-Buffering: no`.
-- Frontend: chat page with composer, message list, typing indicator, error display, and a `useChatStream` hook using `fetch` and a stream reader. See [REACT-PRIMER.md](REACT-PRIMER.md).
+- Frontend: chat page with composer, message list, typing indicator, error display, and a `useChatStream` hook using `fetch` and a stream reader.
 
 **Verify first:** real incremental streaming with a slow real model, and what the checkpoint holds after a client disconnects mid-stream.
 
@@ -203,7 +203,7 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 
 ## Story 16: RAGAs evaluation
 
-**Build:** run export script (question, answer, contexts, reference), a RAGAs runner in `backend/eval/`, golden set of about 31 questions, results section in EVALUATION.md.
+**Build:** run export script (question, answer, contexts, reference), a RAGAs runner in `sound-companion.server/eval/`, golden set of about 31 questions, results section in EVALUATION.md.
 
 **Done when:**
 - One command prints all four RAGAs metrics.
