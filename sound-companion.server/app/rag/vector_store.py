@@ -1,5 +1,8 @@
+from dataclasses import dataclass
+
 from langchain_core.embeddings import Embeddings
 from langchain_postgres import Column, PGEngine, PGVectorStore
+from langchain_postgres.v2.indexes import HNSWIndex, QueryOptions
 from sqlalchemy import create_engine, inspect, text
 
 from app.config import settings
@@ -7,6 +10,26 @@ from app.rag.chunking import METADATA_COLUMNS
 
 CHUNKS_TABLE = "chunks"
 EMBEDDING_DIMENSIONS = 1536  # openai/text-embedding-3-small
+
+
+@dataclass
+class HnswIterative(QueryOptions):
+    """`SET LOCAL` options for every dense query. Without `hnsw.iterative_scan`, a selective filter
+    on the HNSW index can return fewer rows than asked for, even none (docs/DATABASE-SCHEMA.md)."""
+
+    ef_search: int = 100
+    iterative_scan: str = "relaxed_order"
+    max_scan_tuples: int = 20_000
+
+    def to_parameter(self) -> list[str]:
+        return [
+            f"hnsw.ef_search = {self.ef_search}",
+            f"hnsw.iterative_scan = {self.iterative_scan}",
+            f"hnsw.max_scan_tuples = {self.max_scan_tuples}",
+        ]
+
+    def to_string(self) -> str:
+        return "; ".join(self.to_parameter())
 
 
 def create_chunk_table() -> bool:
@@ -27,11 +50,24 @@ def create_chunk_table() -> bool:
     return True
 
 
-def open_store(embeddings: Embeddings) -> PGVectorStore:
-    engine = PGEngine.from_connection_string(settings.database_url_async)
+def open_store(embeddings: Embeddings, **engine_options) -> PGVectorStore:
+    """`engine_options` go to SQLAlchemy's `create_async_engine` (pool size, connect args)."""
+    engine = PGEngine.from_connection_string(settings.database_url_async, **engine_options)
     return PGVectorStore.create_sync(
-        engine, embeddings, CHUNKS_TABLE, metadata_columns=METADATA_COLUMNS
+        engine,
+        embeddings,
+        CHUNKS_TABLE,
+        metadata_columns=METADATA_COLUMNS,
+        index_query_options=HnswIterative(),
     )
+
+
+def ensure_vector_index(store: PGVectorStore) -> bool:
+    """Create the HNSW index on the embedding column. Returns False when it already exists."""
+    if store.is_valid_index():
+        return False
+    store.apply_vector_index(HNSWIndex(m=16, ef_construction=64))
+    return True
 
 
 def delete_stale_chunks(keep_ids: list[str], document_ids: list[str] | None = None) -> int:
