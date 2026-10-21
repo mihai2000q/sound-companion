@@ -33,7 +33,7 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 ## Story 1: Infrastructure and scaffold
 
 **Build:**
-- `docker-compose.yml` with Postgres (`pgvector` image) and a volume, plus the backend service.
+- `docker-compose.yml` with Postgres (`pgvector` image) and a volume, plus the backend and the client dev server services.
 - `backend/`: `pyproject.toml` with pinned versions (`langchain-postgres` exact), FastAPI app with a health endpoint, settings from env (pydantic settings or similar) that fail fast, a migration runner.
 - `frontend/`: Vite + React + TypeScript, Tailwind 4 with DaisyUI 5 (`@plugin "daisyui"`), a Vite proxy for `/api`.
 - `.env.example`.

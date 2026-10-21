@@ -5,7 +5,7 @@
 Two projects in one repository. A React single-page app (`frontend/`) talks to a FastAPI backend (`backend/`) over one streaming endpoint. The backend owns all LangChain logic, the music tools, ingestion and evaluation. Postgres (with pgvector) holds the knowledge base, conversation memory, usage and logs.
 
 ```
-Browser (React + Tailwind/DaisyUI, Vite dev server)
+Browser (React + Tailwind/DaisyUI, Vite dev server; runs in compose, or on the host with `npm run dev`)
    |  POST /api/chat  (fetch, body: thread_id + message)      /api/* proxied by Vite to :8000
    |  <- SSE stream of typed events
 FastAPI backend

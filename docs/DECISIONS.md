@@ -47,6 +47,7 @@ Each entry: decision, reason, and what would change it. Entries 1 to 5 record ho
 | 41 | No auth, single local user, English only | Out of scope for the brief and the budget. | Never for this sprint. |
 | 42 | `CONTEXT.md` holds domain terms, `GLOSSARY.md` holds technical terms | One glossary for each kind of language. | Never. |
 | 43 | Work in stories, not days | The author wants feature-by-feature implementation. | Never. |
+| 44 | Docker Compose runs the database, the backend and the client dev server | One `docker compose up` starts the whole stack. Ports and Postgres settings come from the one root `.env`, and the client also runs on the host with `npm run dev`. | The container file watching or HMR is too slow on this machine. |
 
 ## Open facts (verify in the story that needs them)
 
