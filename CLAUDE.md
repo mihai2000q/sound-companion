@@ -14,6 +14,7 @@ Run from the repo root unless noted. Settings come from the root `.env` (copy `.
 - `cd sound-companion.server && uv run python -m app.db.migrate`: apply migrations by hand. `uv run alembic revision --autogenerate -m "name"` creates one from a change to `app/db/models.py`, `uv run alembic check` finds drift.
 - `cd sound-companion.server && uv run python -m scripts.ingest`: Wikipedia fetch (cached), Open Music Theory clone, clean, floor, report, store. `--dry-run` stores nothing, `--limit N` takes the first N Wikipedia entries and stores nothing. The first run makes about 160 requests at 1 per second, later runs make none.
 - `cd sound-companion.server && uv run python -m scripts.chunk`: split the stored documents into chunks and print the count, size spread and a sample (`--sample "Title"`), no model calls. `uv run pytest` runs the tests.
+- `cd sound-companion.server && uv run python -m scripts.setup_chunks`: create the `chunks` table (safe to repeat). `scripts.index --limit N --title "T"` chunks, embeds (costs credits) and upserts documents, `scripts.search "query"` runs a similarity search.
 
 Stack: React + Vite + TypeScript + Tailwind/DaisyUI (`sound-companion.client/`), Python 3.12 + FastAPI + LangChain `create_agent` (`sound-companion.server/`), PostgreSQL + pgvector in Docker, OpenRouter for the LLM and embeddings. Secrets (OpenRouter key) live in `.env`, never committed.
 
