@@ -30,6 +30,83 @@ EXCLUDED = {
 }
 MIN_PROSE_WORDS = 60  # any other page this short is a stub too
 
+# Topics per page, from the book's table of contents mapped to the project's topics (docs/DOMAIN.md).
+# Every page that is not excluded needs an entry; `parse_omt` raises on a missing one.
+_FUNDAMENTALS = {
+    "basicNotation": ["notation"],
+    "meter": ["rhythm-and-meter"],
+    "protonotation": ["notation", "rhythm-and-meter"],
+    "rhythmicValues": ["rhythm-and-meter", "notation"],
+    "beams": ["rhythm-and-meter", "notation"],
+    "pitches": ["notes-and-intervals", "notation"],
+    "scales": ["scales-and-modes"],
+    "keySignatures": ["scales-and-modes", "notation"],
+    "intervals": ["notes-and-intervals"],
+    "triads": ["chords-and-harmony"],
+    "motionTypes": ["counterpoint-and-voice-leading"],
+    "whiteKeyMethod": ["notes-and-intervals"],
+    "sightSinging": ["notes-and-intervals"],
+    "chromaticSolfege": ["notes-and-intervals", "scales-and-modes"],
+    "trinket": ["notation"],
+    "analyzingPoetry": ["rhythm-and-meter"],
+}
+_VOICE_LEADING = {
+    slug: ["counterpoint-and-voice-leading"]
+    for slug in (
+        "speciesIntro cantusFirmus firstSpecies secondSpecies thirdSpecies fourthSpecies "
+        "thoroughbassFigures bassoContinuo-history bassoContinuo tendency "
+        "tendencyTonesFunctionalDissonances melodicKeyboardStyle KBVLschemata unfiguredBass "
+        "embellishingTones melodicSequentials"
+    ).split()
+}
+_VOICE_LEADING["RNfromFB"] = ["counterpoint-and-voice-leading", "chords-and-harmony"]
+_HARMONY = {
+    slug: ["chords-and-harmony"]
+    for slug in (
+        "functions harmonicFunctions harmonicSyntax1 harmonicSyntax2 harmonicAnalysis cadenceTypes "
+        "alteredSubdominants appliedChords modalMixture"
+    ).split()
+}
+_HARMONY["Modulation"] = ["chords-and-harmony", "form"]
+_FORM = {
+    slug: ["form"]
+    for slug in (
+        "thematicStructureInTheClassicalStyle sentence period hybridThemes compoundPeriod "
+        "compoundSentence smallTernary smallBinary classicalThemes themeFunctions externalExpansions "
+        "internalExpansions SonataTheory-intro SonataTheory-exposition SonataTheory-modules "
+        "sonataStructuralPointsOfArrival sonataThematicModules sonataRecap sonataDevelopment "
+        "sonataFramingModules rondo thematicFunctionInRondo fivePartRondo sonataRondo minuet MinuetForm "
+        "schemataOpensAndCloses schemataContinuationPatterns schemataSummary schemata-improv "
+        "popRockForm popRockForm-terms popRockForm-containers popRockForm-functions popRockForm-notation"
+    ).split()
+}
+_POST_TONAL = {
+    slug: ["post-tonal"]
+    for slug in (
+        "pitch(Class) interval(Class) mod12 scales2 symmetryAndCentricity normalOrder transposition "
+        "inversion setClassAndPrimeForm1 setClassAndPrimeForm2 complements commonTonesUnderTransposition "
+        "twelveToneBasics twelveToneOperations twelveToneIntervallicStructure twelveToneMusicDerivation "
+        "twelveToneMusicInvariance postTonalAnalysis atonal twelveTone atonalGlossary"
+    ).split()
+}
+_POP_ROCK = {"syncopation": ["rhythm-and-meter"]}
+_POP_ROCK.update(
+    {
+        slug: ["chords-and-harmony"]
+        for slug in (
+            "popRockHarmony popRockHarmony-dooWop popRockHarmony-sscp popRockHarmony-puff "
+            "popRockHarmony-blues popRockHarmony-lament popRockHarmony-fifths popRockHarmony-plagal "
+            "popRockHarmony-pachelbel popRockHarmony-minor"
+        ).split()
+    }
+)
+_POP_ROCK.update(
+    {f"popRockHarmony-EverettSystem{n}": ["chords-and-harmony", "scales-and-modes"] for n in range(2, 6)}
+)
+TOPICS = {
+    **_FUNDAMENTALS, **_VOICE_LEADING, **_HARMONY, **_FORM, **_POST_TONAL, **_POP_ROCK,
+}
+
 _FRONT_MATTER = re.compile(r"\A---\n(.*?)\n---[ \t]*\n", re.DOTALL)
 _TITLE = re.compile(r"^title:\s*(.+?)\s*$", re.MULTILINE)
 # `[keyboard]: {{ site.url }}/Graphics/keyboard.png` (image targets) and plain `[VAT]: http://...`
@@ -47,6 +124,7 @@ class OmtDocument:
     license: str
     commit: str
     sections: list[Section]
+    topics: list[str]
 
 
 @dataclass
@@ -79,6 +157,8 @@ def parse_omt(clone_dir: Path, commit: str) -> OmtParse:
         if len(body.split()) < MIN_PROSE_WORDS:
             excluded[slug] = "stub: under %d words of text" % MIN_PROSE_WORDS
             continue
+        if slug not in TOPICS:
+            raise ValueError(f"no topics for the Open Music Theory page '{slug}', add it to TOPICS")
         documents.append(
             OmtDocument(
                 slug=slug,
@@ -87,6 +167,7 @@ def parse_omt(clone_dir: Path, commit: str) -> OmtParse:
                 license=LICENSE,
                 commit=commit,
                 sections=_split_sections(body),
+                topics=TOPICS[slug],
             )
         )
     return OmtParse(documents, excluded)
