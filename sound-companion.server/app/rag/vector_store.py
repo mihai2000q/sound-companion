@@ -1,6 +1,6 @@
 from langchain_core.embeddings import Embeddings
 from langchain_postgres import Column, PGEngine, PGVectorStore
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 
 from app.config import settings
 from app.rag.chunking import METADATA_COLUMNS
@@ -32,3 +32,20 @@ def open_store(embeddings: Embeddings) -> PGVectorStore:
     return PGVectorStore.create_sync(
         engine, embeddings, CHUNKS_TABLE, metadata_columns=METADATA_COLUMNS
     )
+
+
+def delete_stale_chunks(keep_ids: list[str], document_ids: list[str] | None = None) -> int:
+    """Delete chunks whose id is not in `keep_ids`: those of `document_ids`, or of the whole table
+    when it is None (a full run, which also removes chunks of documents that left the Corpus).
+    Run it after the upsert, so a failed run leaves the old chunks searchable."""
+    statement = f"DELETE FROM {CHUNKS_TABLE} WHERE langchain_id <> ALL(CAST(:keep AS uuid[]))"
+    params: dict = {"keep": keep_ids}
+    if document_ids is not None:
+        statement += " AND document_id = ANY(:documents)"
+        params["documents"] = document_ids
+    engine = create_engine(settings.database_url_async)
+    try:
+        with engine.begin() as connection:
+            return connection.execute(text(statement), params).rowcount
+    finally:
+        engine.dispose()

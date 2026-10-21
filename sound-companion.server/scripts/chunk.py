@@ -19,11 +19,11 @@ def main(sample_title: str, sample_count: int) -> None:
     engine = create_engine(settings.database_url_async)
     with Session(engine) as session:
         documents = session.scalars(select(DocumentRecord).order_by(DocumentRecord.id)).all()
-    chunks = {doc.title: chunk_document(doc) for doc in documents}
+    chunks = [(doc.title, chunk_document(doc)) for doc in documents]  # a title can repeat
     engine.dispose()
 
-    sizes = [len(c.content) for per_doc in chunks.values() for c in per_doc]
-    empty = [title for title, per_doc in chunks.items() if not per_doc]
+    sizes = [len(c.content) for _, per_doc in chunks for c in per_doc]
+    empty = [title for title, per_doc in chunks if not per_doc]
     print(f"{len(documents)} documents -> {len(sizes)} chunks")
     print(
         f"chars per chunk (title line included): min {min(sizes)}, median {statistics.median(sizes):.0f}, "
@@ -31,8 +31,8 @@ def main(sample_title: str, sample_count: int) -> None:
     )
     print(f"documents without chunks: {len(empty)}" + (f" ({', '.join(empty)})" if empty else ""))
 
-    shown = chunks.get(sample_title)
-    if shown is None:
+    shown = [c for title, per_doc in chunks if title == sample_title for c in per_doc]
+    if not shown:
         print(f"\nNo stored document titled '{sample_title}'.")
         return
     print(f"\n'{sample_title}': {len(shown)} chunks, first {min(sample_count, len(shown))}")
