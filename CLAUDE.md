@@ -4,9 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state
 
-Sound Companion is a RAG chatbot that teaches music theory and instruments from a curated, cited corpus plus local calculation tools. The repo is in the **documentation phase**: there is no code, build, lint or test tooling yet. Work proceeds story by story from `docs/IMPLEMENTATION-PLAN.md` (each story lists acceptance criteria and facts to verify first). Commands will be added here once story 1 (scaffold) lands.
+Sound Companion is a RAG chatbot that teaches music theory and instruments from a curated, cited corpus plus local calculation tools. Story 1 (scaffold) is done and story 2 (Seed list and ingestion) is in progress. Work proceeds story by story from `docs/IMPLEMENTATION-PLAN.md` (each story lists acceptance criteria and facts to verify first). There is no lint tooling yet, and tests are written only for the AI parts of the bot.
 
-Planned stack: React + Vite + TypeScript + Tailwind/DaisyUI (`sound-companion.client/`), Python 3.12 + FastAPI + LangChain `create_agent` (`sound-companion.server/`), PostgreSQL + pgvector in Docker, OpenRouter for the LLM and embeddings. Secrets (OpenRouter key) live in `.env`, never committed.
+## Commands
+
+Run from the repo root unless noted. Settings come from the root `.env` (copy `.env.example`).
+
+- `docker compose up --build`: Postgres, the server (applies migrations on startup) and the client dev server.
+- `cd sound-companion.server && uv run python -m app.db.migrate`: apply migrations by hand. `uv run alembic revision --autogenerate -m "name"` creates one from a change to `app/db/models.py`, `uv run alembic check` finds drift.
+- `cd sound-companion.server && uv run python -m scripts.ingest`: Wikipedia fetch (cached), Open Music Theory clone, clean, floor, report, store. `--dry-run` stores nothing, `--limit N` takes the first N Wikipedia entries and stores nothing. The first run makes about 160 requests at 1 per second, later runs make none.
+
+Stack: React + Vite + TypeScript + Tailwind/DaisyUI (`sound-companion.client/`), Python 3.12 + FastAPI + LangChain `create_agent` (`sound-companion.server/`), PostgreSQL + pgvector in Docker, OpenRouter for the LLM and embeddings. Secrets (OpenRouter key) live in `.env`, never committed.
 
 ## Where to look
 
@@ -24,7 +32,7 @@ One streaming endpoint, `POST /api/chat` (body: `thread_id` + `message`), return
 
 The backend runs a LangChain `create_agent` with no router. Retrieval is a tool (`search_knowledge_base`) that does multi-query rewrite with a cheap model, then retrieves, merges and wraps chunks as data (prompt-injection defence). Decomposition happens through the agent's tool loop. Music tools: `chord_info` (pychord), `scale_info` and `interval_between` (music21), `transpose_for_instrument` (hand-written offset table + music21 spelling), `note_frequency` (hand-written). Memory is per `thread_id` via `AsyncPostgresSaver`.
 
-Retrieval sits behind a small `Retriever` interface: baseline is `langchain-postgres` `PGVectorStore` (v2); hybrid search (vector + `ts_rank`, fused with RRF) is our own SQL via psycopg. Ingestion is an idempotent script (deterministic uuid5 chunk ids, upsert then delete stale chunks), not part of the request path.
+Retrieval sits behind a small `Retriever` interface: baseline is `langchain-postgres` `PGVectorStore` (v2); hybrid search (vector + `ts_rank`, fused with RRF) is our own SQL via psycopg. Ingestion is an idempotent script, not part of the request path: stage one (done) caches pages and stores cleaned `documents`, Story 3 chunks them with deterministic uuid5 chunk ids (upsert, then delete stale chunks). Our own tables are SQLAlchemy models migrated with Alembic (`app/db/models.py`, `app/db/migrations/`); the hybrid query stays hand-written SQL.
 
 ## Constraints that are easy to miss
 

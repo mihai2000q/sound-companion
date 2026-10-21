@@ -52,7 +52,7 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 
 ## Story 2: Seed list and ingestion
 
-**Build:** `data/seed-list.json` (about 60 theory articles, about 90 instrument articles, supporting pages, see [DOMAIN.md](DOMAIN.md)), reviewed by you. `sound-companion.server/scripts/ingest.py` stage one: fetch Wikipedia pages from the REST HTML endpoint (about 1 request per second, User-Agent, caching under `data/cache/`), `git clone --depth 1` Open Music Theory v1, parse sections with BeautifulSoup, strip noise, apply the 5,000-character floor, resolve redirects into Aliases, record `revision_id`.
+**Build:** `data/seed-list.json` (about 60 theory articles, about 90 instrument articles, supporting pages, see [DOMAIN.md](DOMAIN.md)), reviewed by you. `sound-companion.server/scripts/ingest.py` stage one (also stores the cleaned documents in a `documents` table, SQLAlchemy model plus Alembic migration): fetch Wikipedia pages from the REST HTML endpoint (about 1 request per second, User-Agent, caching under `data/cache/`), `git clone --depth 1` Open Music Theory v1, parse sections with BeautifulSoup, strip noise, apply the 5,000-character floor, resolve redirects into Aliases, record `revision_id`.
 
 **Verify first:** table extraction for the "Transposing instrument" article and any tuning tables, the Wikipedia API rate-limit policy page, and the OMT licence statement (footer and about page, the repo has no LICENSE file).
 

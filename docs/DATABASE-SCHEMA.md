@@ -18,7 +18,8 @@ CREATE TABLE documents (
   aliases       TEXT[] NOT NULL DEFAULT '{}',
   url           TEXT NOT NULL UNIQUE,
   license       TEXT NOT NULL,                   -- 'CC BY-SA 4.0'
-  revision_id   TEXT,                            -- Wikipedia revision id or git commit
+  revision_id   TEXT NOT NULL,                   -- Wikipedia revision id or git commit
+  sections      JSONB NOT NULL,                  -- cleaned text: [{"heading_path": [...], "text": "..."}]
   fetched_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   char_count    INTEGER NOT NULL
 );
@@ -149,15 +150,13 @@ Golden set and exported runs are files, not tables: `data/golden-set.json` and `
 
 ## Migrations
 
-Plain numbered SQL files in `sound-companion.server/app/db/migrations/`, applied by a small script on startup. The chunk table itself is created by the library helper from a setup script, and our migrations add the keyword column and indexes. No ORM.
+Alembic revisions in `sound-companion.server/app/db/migrations/versions/`, applied by a small runner on startup. The tables we own are SQLAlchemy models in `app/db/models.py`. The chunk and checkpoint tables belong to their libraries, so `env.py` ignores them (`include_object`) and autogenerate never touches them. Our migrations add the keyword column and indexes on the chunk table by hand.
 
-**How they run.** The runner is `sound-companion.server/app/db/migrate.py`. It applies the `.sql` files in filename order, each in its own transaction, and records each applied version in a `schema_migrations` table. A version that is already recorded is skipped, so running it again changes nothing. An advisory lock keeps two runners from interleaving.
+**How they run.** The runner is `sound-companion.server/app/db/migrate.py`. It takes an advisory lock (so two replicas do not interleave), then runs `alembic upgrade head`. Alembic records the current revision in the `alembic_version` table, so running it again changes nothing. A database migrated by the earlier SQL runner (a `schema_migrations` table) is stamped at its revision once and that table is dropped.
 
 - **Automatically:** the server runs it on startup, so `docker compose up` is enough. A failing migration stops the server from starting.
 - **By hand, with the stack running:** `docker compose exec server python -m app.db.migrate`
 - **By hand, without the server:** `docker compose run --rm --no-deps server python -m app.db.migrate` (the database must be up).
 - **On the host:** `cd sound-companion.server && uv run python -m app.db.migrate`, with the database up on `localhost:7001` (`POSTGRES_HOST` and `POSTGRES_PORT` from `.env`).
 
-The runner prints `applied: <versions>` or `nothing to apply`.
-
-**Adding one.** Create `NNNN_short_name.sql` in `app/db/migrations/` with the next number, for example `0002_documents.sql`. Never edit a migration that has been applied, add a new one. `0001_enable_pgvector.sql` enables the `vector` extension.
+**Adding one.** Change the model in `app/db/models.py`, then from `sound-companion.server` run `uv run alembic revision --autogenerate -m "short name"` and read the generated file in `versions/` before keeping it. Number the revision id and file with the next number (`0003`), as the existing ones. `uv run alembic check` fails when the models and the database differ, `uv run alembic downgrade -1` steps back one revision. Never edit a revision that has been applied, add a new one. `0001` enables the `vector` extension, `0002` creates `documents`.
