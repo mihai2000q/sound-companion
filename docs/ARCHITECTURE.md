@@ -150,6 +150,8 @@ newDir/
     package.json
     vite.config.ts           dev proxy for /api
     src/
+      App.tsx, providers.tsx, router.tsx   app shell, context providers, route table
+      pages/                 one component per route (HomePage at /, HealthPage at /health)
       components/            Chat, MessageBubble, ToolCard, Inspector, Composer
       hooks/                 useChatStream (fetch + stream reader)
       queries/               React Query keys and queryOptions per feature, used inline with useQuery
