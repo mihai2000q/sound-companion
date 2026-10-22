@@ -506,6 +506,24 @@ Not checked by this run (the author's to confirm on the account): credits equal 
 - **Surprise:** in a new thread, "and what are its registers?" with nothing before it was searched as "registers of the clarinet" and answered, instead of asking what "its" refers to. The model guessed a referent that was nowhere in the thread. Rule 5 (ask when unclear) in the prompt did not stop it. This is for the clarify checks (q15 to q17) and the Story 9 eval, not a memory bug.
 - **Tests:** an `InMemorySaver` is enough to test that a second turn sees the first and that threads are separate, no database needed.
 
+### C7. Clarify, decline and empty retrieval with a real model (Story 5, issue 32)
+
+`scripts.check_behaviour` runs each case on its own in-memory thread and prints tool calls and answers (a person judges them, Story 9 automates it). `openai/gpt-4o-mini`, `temperature=0`.
+
+| Case | First prompt (rules only) | Final prompt (rules plus 3 worked examples) |
+|---|---|---|
+| q15 "Tell me about the guitar." | Answered, listed two types | One question: "Which type of guitar do you mean: classical, steel-string acoustic, electric, or another kind?" The reply "electric" is answered from the Electric guitar page |
+| q16 range of a saxophone | Answered with the alto range | Asks soprano, alto, tenor or baritone |
+| q17 "Transpose it up a fifth." | Asked what to transpose, no tool call | Same (one version declined it as off-topic, and one copied the wording of an example) |
+| q02, q04, q05, q13 specific questions | Answered with cites | Answered with cites, no question |
+| "Tell me a joke", pancake recipe | Declined, no tool call | Same |
+| "How do I tune a theremin?" | States the knowledge base has nothing on it | Same, one line, no answer from memory |
+
+- **What changed the behaviour:** rewording rule 5 as a checklist ("after searching, before answering, if one case fits your whole reply is one question") made q16 work and q17 worse. What fixed q15 and q16 was three worked examples with other subjects (drum, clarinet range, "play it an octave lower") plus "ask even when the pages already describe the kinds, do not summarise them". Examples must say the reply is a question about the user's own request, or the model copies their wording.
+- **Surprise:** the Guitar page has a "Types" section, so for "guitar" the model treats the question as answered. A search for "guitar" returns only chunks of the Guitar page, never the Classical, Electric or Bass guitar pages, so the options come from section text and the model's wording, and the question did not name the bass guitar. Retrieval cannot yet list which pages exist on a subject (hybrid search or a title listing would help).
+- **Judging by eye:** the empty-retrieval case needs a topic the Corpus truly lacks, "tune a theremin" works. "Range of a sousaphone" is covered by the Sousaphone page, so the answer there is grounded.
+- **Cost:** about a cent for the whole run of ten cases.
+
 ## Recommendation
 
 The Python stack is good enough for this project, with a few small workarounds. On the evidence of this spike it is better than the TypeScript store on ingest and filters, and roughly equal on hybrid search (library hybrid exists but has a bug to wrap).
