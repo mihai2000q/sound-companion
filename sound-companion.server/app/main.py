@@ -17,7 +17,7 @@ from app.rag.retriever import VectorRetriever
 async def lifespan(app: FastAPI):
     await asyncio.to_thread(run_migrations)
     async with open_checkpointer() as saver:
-        app.state.agent = build_agent(make_chat_model(), VectorRetriever.from_settings(), saver)
+        app.state.agent = build_agent(make_chat_model(), VectorRetriever.from_settings(), saver, make_chat_model(settings.openrouter_rewrite_model))
         yield
 
 

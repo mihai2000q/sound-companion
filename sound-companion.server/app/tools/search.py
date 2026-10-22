@@ -6,6 +6,7 @@ from langgraph.config import get_stream_writer
 from pydantic import BaseModel, Field, ValidationError
 
 from app.rag.retriever import Filters, RetrievedChunk, Retriever
+from app.rag.rewrite import Rewriter, merge_results
 
 NOT_FOUND = (
     "Nothing relevant found in the knowledge base for this query. "
@@ -72,20 +73,23 @@ def search_knowledge_base(
     title: str | None = None,
     k: int = 5,
     emit: Callable[[dict], None] = lambda event: None,
+    rewriter: Rewriter | None = None,
 ) -> str:
     """Run the search and return text for the model. Never raises on bad arguments or empty results.
-    `emit` receives the `citations` and `queries` events, and nothing when the search finds nothing."""
+    `emit` receives the `citations` and `queries` events, and nothing when the search finds nothing.
+    With a `rewriter` the search runs for the query and its rewrites, merged and de-duplicated to k chunks."""
     query = (query or "").strip()
     if not query:
         return "Error: query must not be empty."
     topic = (topic or "").strip().lower() or None
     title = (title or "").strip() or None
     filters = Filters(source_type=source_type, topics=(topic,) if topic else (), title=title)
-    chunks = retriever.retrieve(query, k, filters)
+    queries = [query, *(rewriter(query) if rewriter else [])]
+    chunks = merge_results([retriever.retrieve(q, k, filters) for q in queries], k)
     if not chunks:
         return NOT_FOUND
     emit({"type": "citations", "items": [citation_item(chunk) for chunk in chunks]})
-    emit({"type": "queries", "items": [query]})
+    emit({"type": "queries", "items": queries})
     return "\n\n".join(format_chunk(chunk) for chunk in chunks)
 
 
@@ -94,9 +98,9 @@ def short_validation_error(error: ValidationError) -> str:
     return f"Error: invalid arguments ({problems}). Fix them or leave the filter out and retry."
 
 
-def make_search_tool(retriever: Retriever, k: int = 5) -> StructuredTool:
+def make_search_tool(retriever: Retriever, k: int = 5, rewriter: Rewriter | None = None) -> StructuredTool:
     def run(query: str, source_type: str | None = None, topic: str | None = None, title: str | None = None) -> str:
-        return search_knowledge_base(retriever, query, source_type, topic, title, k, stream_writer())
+        return search_knowledge_base(retriever, query, source_type, topic, title, k, stream_writer(), rewriter)
 
     return StructuredTool.from_function(
         func=run,

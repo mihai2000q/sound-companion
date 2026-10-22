@@ -12,9 +12,9 @@ class FakeRetriever:
         return self.chunks
 
 
-def chunk(section="Design"):
+def chunk(section="Design", id="1"):
     return RetrievedChunk(
-        id="1", content="Cor anglais\nThe cor anglais is a double reed.", score=0.8312, title="Cor anglais",
+        id=id, content="Cor anglais\nThe cor anglais is a double reed.", score=0.8312, title="Cor anglais",
         section=section, url="https://example.org/Cor_anglais", license="CC BY-SA 4.0", revision_id="1",
         source_type="encyclopedia",
     )
@@ -88,7 +88,7 @@ def stream_events(chunks, replies=None):
 
 
 def test_citations_and_queries_arrive_between_tool_call_and_tool_result():
-    events = stream_events([chunk("Design"), chunk("History")])
+    events = stream_events([chunk("Design", "1"), chunk("History", "2")])
     types = [e["type"] for e in events if e["type"] != "token"]
     assert types == ["tool_call", "citations", "queries", "tool_result", "done"]
     citations = next(e for e in events if e["type"] == "citations")
@@ -104,3 +104,46 @@ def test_citations_and_queries_arrive_between_tool_call_and_tool_result():
 def test_empty_search_emits_no_citations_or_queries():
     types = [e["type"] for e in stream_events([])]
     assert "citations" not in types and "queries" not in types
+
+
+class PerQueryRetriever:
+    def __init__(self, by_query):
+        self.by_query = by_query
+        self.calls = []
+
+    def retrieve(self, query, k=5, filters=None):
+        self.calls.append(query)
+        return self.by_query.get(query, [])
+
+
+def chunk_with_id(id, score=0.5):
+    stored = chunk()
+    stored.id, stored.score = id, score
+    return stored
+
+
+def test_rewrites_are_searched_and_merged_without_duplicates():
+    fake = PerQueryRetriever({
+        "middle C": [chunk_with_id("a"), chunk_with_id("b")],
+        "C4": [chunk_with_id("b"), chunk_with_id("c")],
+    })
+    events = []
+    text = search_knowledge_base(fake, "middle C", k=3, emit=events.append, rewriter=lambda q: ["C4"])
+    assert fake.calls == ["middle C", "C4"]
+    assert text.count("[Cor anglais") == 3
+    citations = next(e for e in events if e["type"] == "citations")
+    assert [i["id"] for i in citations["items"]] == ["a", "b", "c"]
+    assert next(e for e in events if e["type"] == "queries")["items"] == ["middle C", "C4"]
+
+
+def test_merge_keeps_k_chunks_overall():
+    fake = PerQueryRetriever({"q": [chunk_with_id("a"), chunk_with_id("b")], "r": [chunk_with_id("c"), chunk_with_id("d")]})
+    events = []
+    search_knowledge_base(fake, "q", k=2, emit=events.append, rewriter=lambda q: ["r"])
+    assert [i["id"] for i in events[0]["items"]] == ["a", "c"]
+
+
+def test_without_a_rewriter_only_the_query_is_searched():
+    fake = PerQueryRetriever({"q": [chunk_with_id("a")]})
+    search_knowledge_base(fake, "q")
+    assert fake.calls == ["q"]

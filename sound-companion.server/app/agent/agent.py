@@ -5,6 +5,7 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 
 from app.agent.prompt import SYSTEM_PROMPT
 from app.rag.retriever import Retriever
+from app.rag.rewrite import make_rewriter
 from app.tools.registry import build_tools
 
 
@@ -20,8 +21,15 @@ def make_chat_model(model: str | None = None) -> ChatOpenAI:
     )
 
 
-def build_agent(model: BaseChatModel, retriever: Retriever, checkpointer: BaseCheckpointSaver | None = None):
-    """The agent: retrieval plus the music tools, no router. Memory only when a checkpointer is given."""
+def build_agent(
+    model: BaseChatModel,
+    retriever: Retriever,
+    checkpointer: BaseCheckpointSaver | None = None,
+    rewrite_model: BaseChatModel | None = None,
+):
+    """The agent: retrieval plus the music tools, no router. Memory only when a checkpointer is given.
+    The search tool rewrites queries with `rewrite_model` when one is given."""
+    rewriter = make_rewriter(rewrite_model) if rewrite_model else None
     return create_agent(
-        model, tools=build_tools(retriever), system_prompt=SYSTEM_PROMPT, checkpointer=checkpointer
+        model, tools=build_tools(retriever, rewriter), system_prompt=SYSTEM_PROMPT, checkpointer=checkpointer
     )
