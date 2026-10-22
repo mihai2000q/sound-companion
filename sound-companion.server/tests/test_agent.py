@@ -30,7 +30,7 @@ def run(replies, retriever):
 
 def test_agent_has_the_search_tool_and_system_prompt():
     model, result = run([AIMessage("hello")], FakeRetriever())
-    assert model.bound == ["search_knowledge_base", "chord_info", "scale_info", "interval_between", "note_frequency"]
+    assert model.bound == ["search_knowledge_base", "chord_info", "scale_info", "interval_between", "note_frequency", "transpose_for_instrument"]
     first = model.seen[0][0]
     assert isinstance(first, SystemMessage) and first.content == SYSTEM_PROMPT
 
