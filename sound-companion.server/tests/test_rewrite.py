@@ -8,7 +8,7 @@ class FakeModel:
     def with_structured_output(self, schema):
         return self
 
-    def invoke(self, prompt):
+    def invoke(self, prompt, config=None):
         self.prompts.append(prompt)
         if self.error:
             raise self.error
@@ -32,3 +32,21 @@ def test_empty_result_gives_no_rewrites():
 def test_clean_drops_blanks_copies_of_the_query_and_extras():
     cleaned = clean_rewrites("Clarinet", ["  ", "clarinet", "B-flat clarinet", "b-flat Clarinet", "reed", "a", "b"])
     assert cleaned == ["B-flat clarinet", "reed"][:MAX_REWRITES]
+
+
+class StubRetriever:
+    def __init__(self, by_query):
+        self.by_query = by_query
+
+    def retrieve(self, query, k=5, filters=None):
+        return self.by_query.get(query, [])
+
+
+def test_rewriting_retriever_merges_and_records_the_queries():
+    from app.rag.rewrite import RewritingRetriever
+    from tests.test_search_tool import chunk_with_id
+
+    inner = StubRetriever({"q": [chunk_with_id("a")], "r": [chunk_with_id("b"), chunk_with_id("a")]})
+    retriever = RewritingRetriever(inner, lambda query: ["r"])
+    assert [c.id for c in retriever.retrieve("q", 5)] == ["a", "b"]
+    assert retriever.queries_by_question == {"q": ["q", "r"]}

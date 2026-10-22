@@ -94,3 +94,14 @@ def test_compare_names_the_settings_that_differ():
     b = {"settings": {"k": 5, "chunking": {"chunk_chars": 500, "overlap_chars": 100}, "filters": "none"}}
     assert differing_settings(a, b) == {"chunking.chunk_chars": (800, 500)}
     assert differing_settings(a, a) == {}
+
+
+def test_group_means_split_single_and_multi_page_questions():
+    from app.rag.eval_results import group_means
+
+    run = {"questions": [
+        {"expected_pages": ["A"], "precision": 1.0, "recall": 1.0},
+        {"expected_pages": ["A"], "precision": 0.5, "recall": 1.0},
+        {"expected_pages": ["A", "B"], "precision": 0.4, "recall": 0.5},
+    ]}
+    assert group_means(run) == {"single-page": (2, 0.75, 1.0), "multi-page": (1, 0.4, 0.5)}

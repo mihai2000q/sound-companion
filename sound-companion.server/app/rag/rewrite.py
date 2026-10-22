@@ -6,7 +6,7 @@ from collections.abc import Callable
 from langchain_core.language_models import BaseChatModel
 from pydantic import BaseModel, Field
 
-from app.rag.retriever import RetrievedChunk
+from app.rag.retriever import Filters, RetrievedChunk, Retriever
 
 log = logging.getLogger(__name__)
 
@@ -26,14 +26,15 @@ class Rewrites(BaseModel):
     queries: list[str] = Field(description=f"At most {MAX_REWRITES} alternative search queries.")
 
 
-def make_rewriter(model: BaseChatModel) -> Rewriter:
+def make_rewriter(model: BaseChatModel, callbacks: list | None = None) -> Rewriter:
     """A function from a query to its rewrites (without the original), [] when the model fails or returns nothing.
+    `callbacks` see the model call (an evaluation counts its tokens with them).
     Hook for Story 11: write this call to `usage_log` here."""
     structured = model.with_structured_output(Rewrites)
 
     def rewrite(query: str) -> list[str]:
         try:
-            result = structured.invoke(PROMPT.format(query=query))
+            result = structured.invoke(PROMPT.format(query=query), config={"callbacks": callbacks or []})
             return clean_rewrites(query, result.queries)
         except Exception:  # any model or parsing failure falls back to the original query
             log.warning("query rewrite failed, searching with the original query", exc_info=True)
@@ -64,3 +65,26 @@ def merge_results(results: list[list[RetrievedChunk]], k: int) -> list[Retrieved
                 seen.add(chunks[rank].id)
                 merged.append(chunks[rank])
     return merged[:k]
+
+
+def retrieve_with_rewrites(
+    retriever: Retriever, rewriter: Rewriter | None, query: str, k: int, filters: Filters | None
+) -> tuple[list[str], list[RetrievedChunk]]:
+    """The queries searched (the original first) and the merged chunks, k overall."""
+    queries = [query, *(rewriter(query) if rewriter else [])]
+    return queries, merge_results([retriever.retrieve(q, k, filters) for q in queries], k)
+
+
+class RewritingRetriever:
+    """A `Retriever` that rewrites every query first, for the retrieval metrics. `queries_by_question`
+    records what was searched for each query."""
+
+    def __init__(self, retriever: Retriever, rewriter: Rewriter) -> None:
+        self._retriever = retriever
+        self._rewriter = rewriter
+        self.queries_by_question: dict[str, list[str]] = {}
+
+    def retrieve(self, query: str, k: int = 5, filters: Filters | None = None) -> list[RetrievedChunk]:
+        queries, chunks = retrieve_with_rewrites(self._retriever, self._rewriter, query, k, filters)
+        self.queries_by_question[query] = queries
+        return chunks

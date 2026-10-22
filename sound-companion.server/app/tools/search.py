@@ -6,7 +6,7 @@ from langgraph.config import get_stream_writer
 from pydantic import BaseModel, Field, ValidationError
 
 from app.rag.retriever import Filters, RetrievedChunk, Retriever
-from app.rag.rewrite import Rewriter, merge_results
+from app.rag.rewrite import Rewriter, retrieve_with_rewrites
 
 NOT_FOUND = (
     "Nothing relevant found in the knowledge base for this query. "
@@ -84,8 +84,7 @@ def search_knowledge_base(
     topic = (topic or "").strip().lower() or None
     title = (title or "").strip() or None
     filters = Filters(source_type=source_type, topics=(topic,) if topic else (), title=title)
-    queries = [query, *(rewriter(query) if rewriter else [])]
-    chunks = merge_results([retriever.retrieve(q, k, filters) for q in queries], k)
+    queries, chunks = retrieve_with_rewrites(retriever, rewriter, query, k, filters)
     if not chunks:
         return NOT_FOUND
     emit({"type": "citations", "items": [citation_item(chunk) for chunk in chunks]})
