@@ -495,6 +495,17 @@ Not checked by this run (the author's to confirm on the account): credits equal 
 - **Cost:** about 2,600 chat tokens for one grounded answer, a few hundredths of a cent.
 - **Fake model in tests:** `GenericFakeChatModel` has no `bind_tools`, so the tests subclass it (declare the extra fields, pydantic rejects unknown attributes).
 
+### C6. Memory per thread with a real model (Story 5, issue 31)
+
+`AsyncPostgresSaver` on `AsyncConnectionPool(url, kwargs={"autocommit": True, "prepare_threshold": 0, "row_factory": dict_row}, open=False)`, used as `async with` in `app/agent/memory.py`, with `await saver.setup()` on every start. Run with `scripts.chat`.
+
+- **Pool settings:** the three kwargs were enough, with the plain `postgresql://` URL (`settings.database_url`), not the SQLAlchemy one. `setup()` is safe to repeat. It created `checkpoints`, `checkpoint_blobs`, `checkpoint_writes` and `checkpoint_migrations`; `alembic check` still reports no drift because `include_object` in `env.py` ignores tables that are not in our models.
+- **Follow-up:** after "How does a clarinet produce sound?", "and what are its registers?" in the same thread was searched as `clarinet registers` and answered from the Clarinet page, so the model used the earlier turn.
+- **`aget_state`:** `state.values["messages"]` holds every message of the thread in order: `HumanMessage`, `AIMessage` with `tool_calls` (empty content), `ToolMessage` with our formatted chunks, final `AIMessage`. The retrieved chunks are part of the thread, so history grows by about one search result per turn. After two turns the thread had 15 checkpoint rows.
+- **Isolation:** two threads do not share messages (unit test with a fake model, and `--history` on the real thread shows only its own turns).
+- **Surprise:** in a new thread, "and what are its registers?" with nothing before it was searched as "registers of the clarinet" and answered, instead of asking what "its" refers to. The model guessed a referent that was nowhere in the thread. Rule 5 (ask when unclear) in the prompt did not stop it. This is for the clarify checks (q15 to q17) and the Story 9 eval, not a memory bug.
+- **Tests:** an `InMemorySaver` is enough to test that a second turn sees the first and that threads are separate, no database needed.
+
 ## Recommendation
 
 The Python stack is good enough for this project, with a few small workarounds. On the evidence of this spike it is better than the TypeScript store on ingest and filters, and roughly equal on hybrid search (library hybrid exists but has a bug to wrap).

@@ -54,3 +54,20 @@ def test_prompt_contains_the_rules_this_story_relies_on():
         "decline briefly",  # rule 10
     ):
         assert phrase in SYSTEM_PROMPT
+
+
+def test_second_turn_sees_the_first_and_threads_are_separate():
+    from langgraph.checkpoint.memory import InMemorySaver
+
+    model = FakeToolModel(messages=iter(AIMessage(f"reply {i}") for i in range(10)), seen=[], bound=[])
+    agent = build_agent(model, FakeRetriever(), InMemorySaver())
+
+    def ask(text, thread):
+        agent.invoke({"messages": [{"role": "user", "content": text}]}, {"configurable": {"thread_id": thread}})
+        return [m.content for m in model.seen[-1] if m.type == "human"]
+
+    assert ask("clarinet?", "a") == ["clarinet?"]
+    assert ask("and its registers?", "a") == ["clarinet?", "and its registers?"]
+    assert ask("hello", "b") == ["hello"]  # another thread starts empty
+    state = agent.get_state({"configurable": {"thread_id": "a"}})
+    assert [m.type for m in state.values["messages"]] == ["human", "ai", "human", "ai"]
