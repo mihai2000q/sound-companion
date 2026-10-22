@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { EventSourceParserStream } from 'eventsource-parser/stream'
-import type { ChatMessage, StreamEvent } from '../types/chat'
+import type { ChatMessage, StreamEvent, ToolCall } from '../types/chat'
 
 /** The server pings every 15 s, so this much silence means the connection is dead (a proxy may never close it). */
 const IDLE_MS = 45_000
@@ -31,6 +31,33 @@ async function* readEvents(response: Response, onChunk: () => void): AsyncGenera
   }
 }
 
+/** The music tools return `{ error, message }` for bad input. */
+function isToolError(content: string): boolean {
+  try {
+    const parsed = JSON.parse(content)
+    return typeof parsed?.error === 'string' && typeof parsed?.message === 'string'
+  } catch {
+    return false
+  }
+}
+
+function withResult(calls: ToolCall[] | undefined, event: Extract<StreamEvent, { type: 'tool_result' }>): ToolCall[] {
+  const result = {
+    status: isToolError(event.content) ? ('error' as const) : ('done' as const),
+    content: event.content,
+    durationMs: event.durationMs,
+  }
+  const all = calls ?? []
+  if (!all.some((call) => call.id === event.id)) return [...all, { id: event.id, name: event.name, args: {}, ...result }]
+  return all.map((call) => (call.id === event.id ? { ...call, ...result } : call))
+}
+
+/** No card stays on "running" once the stream is over. */
+function settled(message: ChatMessage): ChatMessage {
+  if (!message.toolCalls?.some((call) => call.status === 'running')) return message
+  return { ...message, toolCalls: message.toolCalls.map((call) => (call.status === 'running' ? { ...call, status: 'stopped' } : call)) }
+}
+
 const CONNECTION_LOST = 'The connection was lost.'
 
 export interface FieldError {
@@ -56,7 +83,7 @@ export function useChatStream() {
   }
 
   function fail(botId: string, error: string) {
-    updateMessage(botId, (message) => ({ ...message, error }))
+    updateMessage(botId, (message) => settled({ ...message, error }))
   }
 
   async function consume(response: Response, botId: string, onChunk: () => void, stopped: () => boolean) {
@@ -70,6 +97,11 @@ export function useChatStream() {
           updateMessage(botId, (message) => ({ ...message, citations: [...(message.citations ?? []), ...event.items] }))
         } else if (event.type === 'queries') {
           updateMessage(botId, (message) => ({ ...message, queries: [...(message.queries ?? []), ...event.items] }))
+        } else if (event.type === 'tool_call') {
+          const call: ToolCall = { id: event.id, name: event.name, args: event.args, status: 'running' }
+          updateMessage(botId, (message) => ({ ...message, toolCalls: [...(message.toolCalls ?? []), call] }))
+        } else if (event.type === 'tool_result') {
+          updateMessage(botId, (message) => ({ ...message, toolCalls: withResult(message.toolCalls, event) }))
         } else if (event.type === 'error') {
           return fail(botId, event.message)
         } else if (event.type === 'done') {
@@ -112,7 +144,7 @@ export function useChatStream() {
     } finally {
       watchdog.stop()
       stopRef.current = null
-      if (stopped) updateMessage(botId, (message) => ({ ...message, stopped: true }))
+      if (stopped) updateMessage(botId, (message) => settled({ ...message, stopped: true }))
       setStreaming(false)
     }
     return true
@@ -136,7 +168,7 @@ export function useChatStream() {
     const index = messages.findIndex((message) => message.id === botId)
     const question = messages[index - 1]
     if (!question) return
-    updateMessage(botId, (message) => ({ ...message, text: '', error: undefined, stopped: undefined, citations: undefined, queries: undefined }))
+    updateMessage(botId, (message) => ({ ...message, text: '', error: undefined, stopped: undefined, citations: undefined, queries: undefined, toolCalls: undefined }))
     void ask(question.text, question.id, botId)
   }
 
