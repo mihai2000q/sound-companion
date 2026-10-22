@@ -551,3 +551,18 @@ Biggest risks:
 3. Everything about real model behaviour is untested: OpenRouter usage and cost on streams, real token streaming latency through proxies, partial checkpoints after a client disconnect, tool-call argument streaming. The fake model does not exercise these.
 4. Insert speed and non-transactional batches could hurt if the corpus grows by an order of magnitude.
 5. Not tested: very large tables, real embeddings (hybrid ranking quality with RRF under real vectors), weighted-sum fusion, concurrent ingest, Windows event loop issues for the async saver (the docs mention a selector loop requirement on Windows only; this machine is macOS).
+
+### C6. SSE endpoint with a real model (Story 6, issue 35)
+
+`POST /api/chat` (`app/api/chat.py`, adapter in `app/agent/streaming.py`) run with `uvicorn` against OpenRouter (`openai/gpt-4o-mini`), `curl -N`, with a timestamp on each line.
+
+**Incremental streaming.** Passes. For "How does a clarinet produce sound?": headers at +0 s, `tool_call` at +0 s, `tool_result` at +0.6 s (the search), first `token` at +1.3 s, then 200+ one-word `token` events spread over about 4 s, then `done`. Response headers were `cache-control: no-cache` and `x-accel-buffering: no`. A search was fast here, so the `: keepalive` comment never fired live; it is covered by a unit test with a short interval.
+
+**Disconnect mid-stream** (curl cut after 2 s, then the checkpoint read with `saver.aget_tuple`):
+- Cut while the answer streamed: the checkpoint held `human`, `ai` (tool call) and `tool` (result), no final `ai` message. Step 2, source `loop`.
+- Cut before the first token (0.4 s): only the `human` message.
+- The next message on the same thread worked, and the saved history then had both turns, the first one without an answer. So the thread stays usable, with an unanswered question in its history (decision 57).
+
+**Bug found and fixed.** The first version of `with_keepalive` called `aclose()` on the event generator while a cancelled `__anext__` was still running: `RuntimeError: aclose(): asynchronous generator is already running` in the server log on every disconnect. The fix awaits the cancelled task before `aclose()`; after it the log was clean.
+
+**Mapping notes.** `tool_call` and `tool_result` come from `updates`, `token` from `messages` (node `model`), `custom` dicts with a `type` are forwarded unchanged. `durationMs` is measured between the `tool_call` and `tool_result` events, so it includes the graph's own overhead. A failure in the run is logged with its traceback and sent as `{"type":"error","code":"agent_error"}` with a fixed message, so provider text is not leaked, and no `done` follows.
