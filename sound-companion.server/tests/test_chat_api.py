@@ -5,12 +5,20 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from langchain_core.messages import AIMessage, AIMessageChunk
 from langchain_core.outputs import ChatGenerationChunk
+from langgraph.checkpoint.memory import InMemorySaver
 
 from app.agent.agent import build_agent
 from app.agent.streaming import agent_events
 from app.api import chat
 from tests.test_agent import FakeToolModel
 from tests.test_search_tool import FakeRetriever, chunk
+
+
+class NoHistory:
+    """The part of an agent that `agent_events` reads before a run: an empty thread."""
+
+    async def aget_state(self, config):
+        return type("State", (), {"values": {}})()
 
 
 class StreamingToolModel(FakeToolModel):
@@ -42,7 +50,7 @@ def make_client(replies=None, model_class=StreamingToolModel) -> TestClient:
     app = FastAPI()
     app.include_router(chat.router)
     model = model_class(messages=iter(replies or []), seen=[], bound=[])
-    app.state.agent = build_agent(model, FakeRetriever([chunk()]))
+    app.state.agent = build_agent(model, FakeRetriever([chunk()]), InMemorySaver())
     return TestClient(app)
 
 
@@ -92,7 +100,7 @@ def test_failure_inside_the_run_ends_with_an_error_event():
 
 
 def test_keepalive_comment_is_sent_while_nothing_arrives(monkeypatch):
-    class SlowAgent:
+    class SlowAgent(NoHistory):
         async def astream(self, *args, **kwargs):
             await asyncio.sleep(0.3)
             yield "custom", {"type": "progress", "message": "searching"}
@@ -106,7 +114,7 @@ def test_keepalive_comment_is_sent_while_nothing_arrives(monkeypatch):
 
 
 def test_custom_events_with_a_type_are_forwarded():
-    class Agent:
+    class Agent(NoHistory):
         async def astream(self, *args, **kwargs):
             yield "custom", {"type": "progress", "message": "searching"}
             yield "custom", {"no": "type"}

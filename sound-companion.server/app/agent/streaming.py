@@ -9,6 +9,7 @@ from langchain_core.messages import AIMessage, AIMessageChunk, ToolMessage
 logger = logging.getLogger(__name__)
 
 ERROR_MESSAGE = "Something went wrong while answering. Please try again."
+CANCELLED = "This tool call was cancelled before it finished, so there is no result."
 
 
 def text_of(content: str | list) -> str:
@@ -49,12 +50,34 @@ def update_events(data: dict, started: dict[str, float]) -> list[dict]:
     return events
 
 
+async def cancelled_tool_results(agent, config: dict) -> list[ToolMessage]:
+    """A stopped run can leave a tool call without its result, and providers reject such a history.
+    These messages answer the dangling calls, and go in front of the next user message."""
+    messages = (await agent.aget_state(config)).values.get("messages", [])
+    last = next((m for m in reversed(messages) if isinstance(m, AIMessage)), None)
+    if last is None:
+        return []
+    answered = {m.tool_call_id for m in messages[messages.index(last) + 1 :] if isinstance(m, ToolMessage)}
+    return [
+        ToolMessage(content=CANCELLED, tool_call_id=call["id"], name=call["name"])
+        for call in last.tool_calls
+        if call["id"] not in answered
+    ]
+
+
 async def agent_events(agent, thread_id: str, message: str) -> AsyncIterator[dict]:
     """Yield the events of one turn, ending with `done`, or with `error` when the run fails."""
     started: dict[str, float] = {}
+    config = {"configurable": {"thread_id": thread_id}}
+    try:
+        repair = await cancelled_tool_results(agent, config)
+    except Exception:
+        logger.exception("could not read thread %s", thread_id)
+        yield {"type": "error", "code": "agent_error", "message": ERROR_MESSAGE}
+        return
     stream = agent.astream(
-        {"messages": [{"role": "user", "content": message}]},
-        {"configurable": {"thread_id": thread_id}},
+        {"messages": [*repair, {"role": "user", "content": message}]},
+        config,
         stream_mode=["messages", "updates", "custom"],
     )
     try:

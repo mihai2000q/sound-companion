@@ -6,9 +6,10 @@ interface Props {
   error: FieldError | null
   onSend: (text: string) => Promise<boolean>
   onEdit: () => void
+  onStop: () => void
 }
 
-export function Composer({ disabled, error, onSend, onEdit }: Props) {
+export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
   const [text, setText] = useState('')
 
   function submit() {
@@ -49,9 +50,15 @@ export function Composer({ disabled, error, onSend, onEdit }: Props) {
           }}
           onKeyDown={onKeyDown}
         />
-        <button type="submit" className="btn btn-primary self-end" disabled={disabled || !text.trim()}>
-          Send
-        </button>
+        {disabled ? (
+          <button type="button" className="btn btn-neutral self-end" onClick={onStop}>
+            Stop
+          </button>
+        ) : (
+          <button type="submit" className="btn btn-primary self-end" disabled={!text.trim()}>
+            Send
+          </button>
+        )}
       </div>
       {error && (
         <p role="alert" className="text-error text-sm">

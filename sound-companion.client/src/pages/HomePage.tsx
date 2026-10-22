@@ -3,7 +3,7 @@ import { MessageList } from '../components/MessageList'
 import { useChatStream } from '../hooks/useChatStream'
 
 export function HomePage() {
-  const { messages, streaming, fieldError, clearFieldError, send, retry, newChat } = useChatStream()
+  const { messages, streaming, fieldError, clearFieldError, send, retry, stop, newChat } = useChatStream()
 
   return (
     <main className="h-screen flex flex-col bg-base-200">
@@ -15,7 +15,7 @@ export function HomePage() {
       </header>
       <div className="flex-1 min-h-0 w-full max-w-3xl mx-auto flex flex-col bg-base-100">
         <MessageList messages={messages} streaming={streaming} onRetry={retry} />
-        <Composer disabled={streaming} error={fieldError} onSend={send} onEdit={clearFieldError} />
+        <Composer disabled={streaming} error={fieldError} onSend={send} onEdit={clearFieldError} onStop={stop} />
       </div>
     </main>
   )

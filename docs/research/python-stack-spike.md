@@ -566,3 +566,15 @@ Biggest risks:
 **Bug found, then removed.** The first hand-written keepalive wrapper called `aclose()` on the event generator while a cancelled `__anext__` was still running: `RuntimeError: aclose(): asynchronous generator is already running` in the server log on every disconnect. The keepalive and SSE formatting now come from `sse-starlette` (default `\r\n` line ends overridden with `sep="\n"` on the response and each event), and the log is clean on disconnect.
 
 **Mapping notes.** `tool_call` and `tool_result` come from `updates`, `token` from `messages` (node `model`), `custom` dicts with a `type` are forwarded unchanged. `durationMs` is measured between the `tool_call` and `tool_result` events, so it includes the graph's own overhead. A failure in the run is logged with its traceback and sent as `{"type":"error","code":"agent_error"}` with a fixed message, so provider text is not leaked, and no `done` follows.
+
+### C7. Stopping a run while a tool runs (Story 6, issue 38)
+
+**Worry.** A tool call saved without its result makes the next model call fail, because providers reject an assistant tool call with no matching tool message.
+
+**What the checkpoint held** (Postgres saver, real model, curl cut at 0.3, 0.5 and 0.8 s, which is inside the 0.7 s search): in all three the cancelled turn left only the user message. The assistant tool-call message was not saved, because the saver writes a step's checkpoint in the background and the cancel arrives first. The next question on the thread was answered normally and the history was consistent (`h h a* t t a`: the first question has no answer, then the second turn). With `InMemorySaver` the same cancel did keep the tool-call message in `aget_state` (but the next run still did not send it to the model), so which case you get depends on timing and saver.
+
+**Fix kept as a safety net.** `cancelled_tool_results` in `app/agent/streaming.py` reads the thread before each turn. If the last assistant message has tool calls with no result, it puts a tool message ("cancelled before it finished") for each in front of the new user message, so the history is always valid. Tested by building that state by hand (`tests/test_cancel.py`); the real runs above never produced it, so only the unit test exercises it.
+
+**Server log.** No traceback after a client disconnect in the stop-mid-answer and stop-in-tool runs: `CancelledError` is a `BaseException`, so `agent_events` does not turn it into an `error` event.
+
+**Client.** Stop aborts the `fetch` (`AbortController`), the partial answer stays and shows "Stopped". The stream's idle watchdog (45 s, see issue 37) also aborts the same controller, so the hook tracks whether the user pressed Stop to tell the two apart.

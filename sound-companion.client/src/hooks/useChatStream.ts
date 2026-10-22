@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { EventSourceParserStream } from 'eventsource-parser/stream'
 import type { ChatMessage, StreamEvent } from '../types/chat'
 
@@ -49,6 +49,7 @@ export function useChatStream() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [streaming, setStreaming] = useState(false)
   const [fieldError, setFieldError] = useState<FieldError | null>(null)
+  const stopRef = useRef<(() => void) | null>(null)
 
   function updateMessage(id: string, change: (message: ChatMessage) => ChatMessage) {
     setMessages((all) => all.map((message) => (message.id === id ? change(message) : message)))
@@ -58,7 +59,7 @@ export function useChatStream() {
     updateMessage(botId, (message) => ({ ...message, error }))
   }
 
-  async function consume(response: Response, botId: string, onChunk: () => void) {
+  async function consume(response: Response, botId: string, onChunk: () => void, stopped: () => boolean) {
     let finished = false
     try {
       for await (const event of readEvents(response, onChunk)) {
@@ -72,7 +73,7 @@ export function useChatStream() {
       }
       if (!finished) fail(botId, CONNECTION_LOST)
     } catch {
-      fail(botId, CONNECTION_LOST)
+      if (!stopped()) fail(botId, CONNECTION_LOST)
     }
   }
 
@@ -82,6 +83,11 @@ export function useChatStream() {
     const controller = new AbortController()
     const watchdog = idleWatchdog(controller)
     watchdog.reset()
+    let stopped = false
+    stopRef.current = () => {
+      stopped = true
+      controller.abort()
+    }
     try {
       const response = await fetch('/api/chat', {
         signal: controller.signal,
@@ -95,11 +101,13 @@ export function useChatStream() {
         return false
       }
       if (!response.ok) fail(botId, `The server answered ${response.status}. Please try again.`)
-      else await consume(response, botId, watchdog.reset)
+      else await consume(response, botId, watchdog.reset, () => stopped)
     } catch {
-      fail(botId, CONNECTION_LOST)
+      if (!stopped) fail(botId, CONNECTION_LOST)
     } finally {
       watchdog.stop()
+      stopRef.current = null
+      if (stopped) updateMessage(botId, (message) => ({ ...message, stopped: true }))
       setStreaming(false)
     }
     return true
@@ -123,8 +131,13 @@ export function useChatStream() {
     const index = messages.findIndex((message) => message.id === botId)
     const question = messages[index - 1]
     if (!question) return
-    updateMessage(botId, (message) => ({ ...message, text: '', error: undefined }))
+    updateMessage(botId, (message) => ({ ...message, text: '', error: undefined, stopped: undefined }))
     void ask(question.text, question.id, botId)
+  }
+
+  /** Aborts the request. The partial answer stays and is marked as stopped. */
+  function stop() {
+    stopRef.current?.()
   }
 
   function newChat() {
@@ -133,5 +146,5 @@ export function useChatStream() {
     setFieldError(null)
   }
 
-  return { messages, streaming, fieldError, clearFieldError: () => setFieldError(null), send, retry, newChat }
+  return { messages, streaming, fieldError, clearFieldError: () => setFieldError(null), send, retry, stop, newChat }
 }

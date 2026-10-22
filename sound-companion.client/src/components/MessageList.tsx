@@ -18,7 +18,9 @@ export function MessageList({ messages, streaming, onRetry }: Props) {
 
   return (
     <div className="flex-1 overflow-y-auto flex flex-col gap-3 p-4">
-      {messages.map((message) => (
+      {messages.map((message) => {
+        if (message.text === '' && !message.error && !message.stopped) return null
+        return (
         <div key={message.id} className="flex flex-col gap-1">
           {message.text !== '' && (
             <div className={`chat ${message.role === 'user' ? 'chat-end' : 'chat-start'}`}>
@@ -27,6 +29,7 @@ export function MessageList({ messages, streaming, onRetry }: Props) {
               </div>
             </div>
           )}
+          {message.stopped && <p className="text-sm opacity-60 px-2">Stopped</p>}
           {message.error && (
             <div role="alert" className="alert alert-error alert-soft">
               <span>{message.error}</span>
@@ -38,7 +41,8 @@ export function MessageList({ messages, streaming, onRetry }: Props) {
             </div>
           )}
         </div>
-      ))}
+        )
+      })}
       {typing && (
         <div className="chat chat-start" aria-label="The bot is typing">
           <div className="chat-bubble">
