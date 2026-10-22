@@ -95,6 +95,7 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 - A follow-up question uses memory of the earlier turn.
 - An off-topic question gets a polite decline with no tool call.
 - The agent says so when retrieval is empty and does not answer from model memory.
+- A vague request ("Tell me about the guitar") gets one clarifying question that lists the options the Corpus has (acoustic, classical, electric, bass), and the answer follows the user's reply. A specific question is answered without asking.
 
 ## Story 6: SSE chat endpoint and streaming UI
 
