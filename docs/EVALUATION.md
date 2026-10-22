@@ -52,7 +52,15 @@ For each question with `expected_sources` (page titles), run the retriever with 
 - `precision@5` = relevant chunks in top 5 / 5
 - `recall@5` = expected pages found in top 5 / expected pages
 
-A chunk counts as relevant if its `title` or one of its Aliases is in the expected list. Compare vector-only, vector with filters, and hybrid. This is the comparison for the hybrid-search task. Include exact-term queries ("Neapolitan sixth") and concept queries.
+A chunk counts as relevant if its `title` or one of its Aliases is in the expected list.
+
+Run it with `uv run python -m scripts.eval_retrieval` (`-k` changes k, `--golden-set` picks another file). It first checks that every expected source, and every clarification option, is a Corpus title or Alias, and stops naming the ones that are not. Details of the numbers:
+
+- An expected Alias is mapped to its page, so a title and its Alias expected together count as one page.
+- `precision@k` always divides by k, so a query that returns fewer than k chunks scores lower.
+- The overall figures are the mean over the questions, not over chunks.
+- Entries whose `expected_behaviour` is not `answer` have nothing to find and are skipped (listed at the end of the run).
+- The run costs only the query embeddings (about 0.000004 credits for 14 questions). Compare vector-only, vector with filters, and hybrid. This is the comparison for the hybrid-search task. Include exact-term queries ("Neapolitan sixth") and concept queries.
 
 ## Layer 2: tool-calling accuracy
 
