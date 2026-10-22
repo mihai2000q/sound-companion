@@ -563,6 +563,6 @@ Biggest risks:
 - Cut before the first token (0.4 s): only the `human` message.
 - The next message on the same thread worked, and the saved history then had both turns, the first one without an answer. So the thread stays usable, with an unanswered question in its history (decision 57).
 
-**Bug found and fixed.** The first version of `with_keepalive` called `aclose()` on the event generator while a cancelled `__anext__` was still running: `RuntimeError: aclose(): asynchronous generator is already running` in the server log on every disconnect. The fix awaits the cancelled task before `aclose()`; after it the log was clean.
+**Bug found, then removed.** The first hand-written keepalive wrapper called `aclose()` on the event generator while a cancelled `__anext__` was still running: `RuntimeError: aclose(): asynchronous generator is already running` in the server log on every disconnect. The keepalive and SSE formatting now come from `sse-starlette` (default `\r\n` line ends overridden with `sep="\n"` on the response and each event), and the log is clean on disconnect.
 
 **Mapping notes.** `tool_call` and `tool_result` come from `updates`, `token` from `messages` (node `model`), `custom` dicts with a `type` are forwarded unchanged. `durationMs` is measured between the `tool_call` and `tool_result` events, so it includes the graph's own overhead. A failure in the run is logged with its traceback and sent as `{"type":"error","code":"agent_error"}` with a fixed message, so provider text is not leaked, and no `done` follows.
