@@ -4,6 +4,7 @@ A run is one JSON file in `eval/results/`: a label, the date, the settings it ra
 per-question and overall metrics. Compare two files with `scripts.compare_runs`."""
 
 import json
+import subprocess
 from dataclasses import asdict
 from datetime import date
 from pathlib import Path
@@ -11,6 +12,15 @@ from pathlib import Path
 from app.rag.evaluation import QuestionResult, Summary
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "eval" / "results"
+
+
+def git_state() -> str:
+    """The short commit hash, marked when the working tree has uncommitted changes."""
+
+    def git(*args: str) -> str:
+        return subprocess.run(["git", *args], capture_output=True, text=True).stdout.strip()
+
+    return git("rev-parse", "--short", "HEAD") + (" (uncommitted changes)" if git("status", "--porcelain") else "")
 
 
 def build_run(
