@@ -15,6 +15,7 @@ dependencies = [
     "langgraph==1.2.16",
     "langgraph-checkpoint-postgres==3.2.0",
     "psycopg[binary]==3.3.6",
+    "pychord==1.4.1",
     "pydantic-settings==2.16.0",
     "sqlalchemy==2.1.5",
     "sse-starlette>=3.5.0",

@@ -717,6 +717,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pychord"
+version = "1.4.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/50/f1/04db07eff6fc9cea6b6e919dc9df50d7022e80ae805b344b7e673dbe7ba4/pychord-1.4.1.tar.gz", hash = "sha256:b5fd9f5722b4a612e7ac6ab2e5d497e36220962523009cfd22b8190f22ce8314", size = 18974, upload-time = "2026-10-09T12:14:53.837Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4c/b7/87d34da61c50fa11000bc999df9ddcfa61e21bcbddbda7c191f90153186e/pychord-1.4.1-py3-none-any.whl", hash = "sha256:b19e64c142ef2735e8d9cd6459fc15307690eaf2aeb143ae23d901e2753694ac", size = 14594, upload-time = "2026-10-09T12:14:52.768Z" },
+]
+
+[[package]]
 name = "pydantic"
 version = "2.14.1"
 source = { registry = "https://pypi.org/simple" }
@@ -905,6 +914,7 @@ dependencies = [
     { name = "langgraph" },
     { name = "langgraph-checkpoint-postgres" },
     { name = "psycopg", extra = ["binary"] },
+    { name = "pychord" },
     { name = "pydantic-settings" },
     { name = "sqlalchemy" },
     { name = "sse-starlette" },
@@ -930,6 +940,7 @@ requires-dist = [
     { name = "langgraph", specifier = "==1.2.16" },
     { name = "langgraph-checkpoint-postgres", specifier = "==3.2.0" },
     { name = "psycopg", extras = ["binary"], specifier = "==3.3.6" },
+    { name = "pychord", specifier = "==1.4.1" },
     { name = "pydantic-settings", specifier = "==2.16.0" },
     { name = "sqlalchemy", specifier = "==2.1.5" },
     { name = "sse-starlette", specifier = ">=3.5.0" },
