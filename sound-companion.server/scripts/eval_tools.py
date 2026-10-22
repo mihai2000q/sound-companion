@@ -15,6 +15,8 @@ import hashlib
 import sys
 from pathlib import Path
 
+import httpx
+
 from app.agent.agent import build_agent, make_chat_model
 from app.agent.tool_eval import StubRetriever, build_run, evaluate, load_cases, prompt_and_tools, summarize
 from app.config import settings
@@ -25,6 +27,16 @@ GOLDEN_TOOLS = Path(__file__).resolve().parents[2] / "data" / "golden-tools.json
 
 def fmt(value: float | None) -> str:
     return "n/a" if value is None else f"{value:.2f}"
+
+
+def model_prices(model_id: str) -> tuple[float, float] | None:
+    """(input, output) USD per million tokens from OpenRouter's public model list, None when unavailable."""
+    try:
+        models = httpx.get("https://openrouter.ai/api/v1/models", timeout=10).json()["data"]
+        pricing = next(m["pricing"] for m in models if m["id"] == model_id)
+        return float(pricing["prompt"]) * 1e6, float(pricing["completion"]) * 1e6
+    except Exception:
+        return None
 
 
 def describe(calls: list[dict]) -> str:
@@ -54,13 +66,24 @@ def main(golden: Path, label: str | None, model: str | None, real_retriever: boo
     for r in failed:
         print(f"\n{r.id} {r.question}\n  expected: {describe(r.expected)}\n  actual:   {describe(r.actual)}"
               + (f"\n  error: {r.error}" if r.error else ""))
-    print(f"\n{sum(r.tokens for r in results)} tokens on {model_id}")
+    errored = [r.id for r in results if r.error]
+    if errored:
+        print(f"\nWARNING: the agent run raised on {len(errored)} cases ({', '.join(errored)}), for example a provider "
+              "rate limit. Those count as failures here, so the run is not saved: run again.")
+    input_tokens, output_tokens = sum(r.input_tokens for r in results), sum(r.output_tokens for r in results)
+    prices = model_prices(model_id)
+    cost = None if prices is None else (input_tokens * prices[0] + output_tokens * prices[1]) / 1e6
+    print(f"\n{input_tokens} input + {output_tokens} output tokens on {model_id}"
+          + ("" if cost is None else f", about ${cost:.4f} at ${prices[0]:g} / ${prices[1]:g} per million"))
 
+    if label and errored:
+        return 1
     if label:
         run = build_run(
             f"tools-{label}",
             {
                 "model": model_id,
+                "price_per_million_usd": None if prices is None else {"input": prices[0], "output": prices[1]},
                 "retriever": "real (VectorRetriever)" if real_retriever else "stub",
                 **prompt_and_tools(retriever),
                 "golden_tools": {

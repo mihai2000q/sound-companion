@@ -50,6 +50,8 @@ class CaseResult:
     args_matched: int
     error: str | None = None  # the agent run failed
     tokens: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
 
     @property
     def parameters_ok(self) -> bool | None:
@@ -118,8 +120,8 @@ def tool_calls_of(messages: list) -> list[dict]:
     ]
 
 
-def tokens_of(messages: list) -> int:
-    return sum((getattr(m, "usage_metadata", None) or {}).get("total_tokens", 0) for m in messages)
+def tokens_of(messages: list, kind: str = "total_tokens") -> int:
+    return sum((getattr(m, "usage_metadata", None) or {}).get(kind, 0) for m in messages)
 
 
 def run_case(agent, case: ToolCase) -> CaseResult:
@@ -136,6 +138,7 @@ def run_case(agent, case: ToolCase) -> CaseResult:
         expected=[asdict(c) for c in case.expected_tools], actual=calls,
         selection_ok=selection_ok and error is None, args_expected=expected_args, args_matched=matched,
         error=error, tokens=tokens_of(messages),
+        input_tokens=tokens_of(messages, "input_tokens"), output_tokens=tokens_of(messages, "output_tokens"),
     )
 
 
@@ -186,6 +189,8 @@ def build_run(label: str, settings: dict, results: list[CaseResult], when: date 
         "settings": settings,
         "summary": [asdict(s) for s in summarize(results)],
         "cost_tokens": sum(r.tokens for r in results),
+        "input_tokens": sum(r.input_tokens for r in results),
+        "output_tokens": sum(r.output_tokens for r in results),
         "questions": [asdict(r) | {"parameters_ok": r.parameters_ok} for r in results],
     }
 

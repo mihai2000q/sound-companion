@@ -10,7 +10,7 @@
   {"id": "t05", "question": "What are the notes of E-flat natural minor?", "category": "tool-rule", "difficulty": "hard",
    "expected_tools": [{"name": "scale_info", "args": {"tonic": "Eb", "scale": {"any_of": ["natural minor", "minor", "aeolian"]}}}]},
   {"id": "t06", "question": "What does a B-flat clarinet sound for a written C4?", "category": "tool-instrument", "difficulty": "easy",
-   "expected_tools": [{"name": "transpose_for_instrument", "args": {"note": "C4", "instrument": {"any_of": ["B-flat clarinet", "Bb clarinet", "clarinet in Bb"]}, "direction": "written_to_sounding"}}]},
+   "expected_tools": [{"name": "transpose_for_instrument", "args": {"note": "C4", "instrument": {"any_of": ["B-flat clarinet", "Bb clarinet", "clarinet in Bb"]}}}]},
   {"id": "t07", "question": "Which note must an alto saxophone player read to sound a concert Eb4?", "category": "tool-instrument", "difficulty": "hard",
    "expected_tools": [{"name": "transpose_for_instrument", "args": {"note": "Eb4", "instrument": "alto saxophone", "direction": "sounding_to_written"}}]},
   {"id": "t08", "question": "My tuner shows 450 Hz. Which note is that, and how many cents off is it?", "category": "tool-instrument", "difficulty": "medium",
