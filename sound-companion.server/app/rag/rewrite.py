@@ -14,7 +14,7 @@ MAX_REWRITES = 2
 
 PROMPT = f"""Rewrite a search query for a music theory and instruments knowledge base (Wikipedia and a theory textbook).
 Give {MAX_REWRITES} alternative queries that would match other pages or wordings of the same question: synonyms, \
-the formal term, or another tradition's name (for example German note names). Keep each short. Do not answer \
+the formal term, or another tradition's name (for example German note names). Make one of them name the broader subject the term belongs to (for example "written pitch" belongs to transposing instruments). Keep each short. Do not answer \
 the question and do not add facts the query does not mention.
 
 Query: {{query}}"""
