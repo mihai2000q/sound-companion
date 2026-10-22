@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     openrouter_api_key: str
     openrouter_base_url: str
     openrouter_chat_model: str = "openai/gpt-4o-mini"
+    openrouter_rewrite_model: str = "openai/gpt-4o-mini"  # cheap model for multi-query rewrite
     openrouter_embedding_model: str = "openai/text-embedding-3-small"
 
     backend_host: str = "127.0.0.1"

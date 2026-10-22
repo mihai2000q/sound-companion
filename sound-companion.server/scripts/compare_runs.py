@@ -9,7 +9,7 @@ import argparse
 from pathlib import Path
 
 from app.agent.tool_eval import KIND, compare as compare_tools
-from app.rag.eval_results import compare, load_run
+from app.rag.eval_results import compare, group_means, load_run
 
 
 def pct(value: float | None) -> str:
@@ -60,6 +60,11 @@ def main(path_a: Path, path_b: Path) -> None:
     sa, sb = a["summary"], b["summary"]
     print(f"\noverall precision {sa['precision']:.3f} -> {sb['precision']:.3f} ({result['precision_change']:+.3f}), "
           f"recall {sa['recall']:.3f} -> {sb['recall']:.3f} ({result['recall_change']:+.3f})")
+    groups_a, groups_b = group_means(a), group_means(b)
+    for name in groups_a.keys() & groups_b.keys():
+        (n, pa, ra), (_, pb, rb) = groups_a[name], groups_b[name]
+        print(f"{name} ({n} questions): precision {pa:.3f} -> {pb:.3f} ({pb - pa:+.3f}), "
+              f"recall {ra:.3f} -> {rb:.3f} ({rb - ra:+.3f})")
     for side, ids in (("only in A", result["only_in_a"]), ("only in B", result["only_in_b"])):
         if ids:
             print(f"{side}: {', '.join(ids)}")
