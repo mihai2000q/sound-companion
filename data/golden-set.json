@@ -1,0 +1,208 @@
+[
+  {
+    "id": "q01",
+    "question": "What is the circle of fifths and how does it relate to key signatures?",
+    "category": "descriptive-theory",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Circle of fifths",
+      "Key signature"
+    ],
+    "reference_answer": "The circle of fifths arranges pitches in a sequence of perfect fifths, usually drawn as a circle with the pitches and their keys in clockwise order; read counterclockwise it is a circle of fourths. C major sits at the top with no sharps or flats. Going clockwise each step up a fifth adds a sharp (G has one sharp, D has two); going counterclockwise adds flats (F has one flat, B-flat has two). Adjacent keys are the ones harmonic progressions commonly move between.",
+    "notes": "Answer from the Definition section of Circle of fifths. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q02",
+    "question": "How does a clarinet produce sound, and what are its registers?",
+    "category": "descriptive-instruments",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Clarinet"
+    ],
+    "reference_answer": "The clarinet is a single-reed woodwind with a nearly cylindrical bore and a flared bell. The player's lips seal around the mouthpiece and reed and blow air past the reed, which vibrates against the mouthpiece; the resulting pressure waves travel down the tube and are reflected back to keep the reed vibrating. The cylindrical bore gives it its distinctive timbre, which varies across three main registers: chalumeau, clarion and altissimo.",
+    "notes": "Answer from Clarinet (lead and Acoustics). The article names the three registers but never mentions a \"register break\", so the question does not ask for one. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q03",
+    "question": "What are the top-level classes of the Hornbostel-Sachs system, and where does a violin fit?",
+    "category": "descriptive-instruments",
+    "difficulty": "medium",
+    "expected_sources": [
+      "Hornbostel–Sachs"
+    ],
+    "reference_answer": "Hornbostel-Sachs has five top-level classes: idiophones (1), membranophones (2), chordophones (3), aerophones (4) and electrophones (5). A violin is a chordophone, specifically a composite chordophone (a lute-type instrument, where the resonator is an integral part of the instrument).",
+    "notes": "Answer from the lead and the class headings of Hornbostel–Sachs. The research draft said four classes; the Corpus text says five. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q04",
+    "question": "What is a Neapolitan sixth?",
+    "category": "exact-term",
+    "difficulty": "medium",
+    "expected_sources": [
+      "Neapolitan chord"
+    ],
+    "reference_answer": "A Neapolitan chord is a major chord built on the lowered (flat) second degree of the scale, written bII. In classical music it most commonly appears in first inversion, notated bII6 or N6, and is then called a Neapolitan sixth chord. It occurs far more often in minor keys than in major keys. It is a chromatic alteration, not mixture or tonicization, like the augmented sixth chords.",
+    "notes": "Answer from the lead of Neapolitan chord. \"Neapolitan sixth\" is an Alias of that page. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q05",
+    "question": "Is a cor anglais the same as an English horn, and what key is it in?",
+    "category": "alias",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Cor anglais"
+    ],
+    "reference_answer": "Yes. The cor anglais, or English horn (the name used mainly in North America), is a double-reed woodwind in the oboe family, about one and a half times the length of an oboe, essentially an alto oboe in F. It is a transposing instrument pitched in F, a perfect fifth lower than the oboe, so its music is written a perfect fifth higher than it sounds.",
+    "notes": "Answer from the lead of Cor anglais. \"English horn\" is an Alias of that page. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q06",
+    "question": "What is middle C called, and what do Germans call B-flat and B natural?",
+    "category": "convention-conflict",
+    "difficulty": "hard",
+    "expected_sources": [
+      "Scientific pitch notation",
+      "Pitches and octave designations",
+      "Musical note"
+    ],
+    "reference_answer": "In scientific pitch notation (the ISO register system) middle C is C4, and C4 is never any other note. Older and other systems name it differently: it is c' (the one-line octave) in Helmholtz notation, whereas a plain \"C\" means middle C in ABC notation but the C two octaves below middle C in Helmholtz's original notation. In German note names, what English calls B-flat is written B and B natural is written H.",
+    "notes": "Answer from Scientific pitch notation (Nomenclature, Use), Pitches and octave designations (Octave Designation) and Musical note (12-tone chromatic scale table). Show both Conventions when a source uses another one. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q07",
+    "question": "Compare the perfect authentic cadence with the half cadence and the plagal cadence.",
+    "category": "comparison",
+    "difficulty": "medium",
+    "expected_sources": [
+      "Cadence",
+      "Classical cadence types"
+    ],
+    "reference_answer": "A perfect authentic cadence ends a unit with V (or V7) going to I, with the melody arriving on the tonic. A half cadence ends the phrase on V without going to I, typically approached from I, II, IV or VI, and with V a root-position triad. A plagal cadence is IV going to I, also called the Amen cadence; some theorists, such as Caplin, dispute that it exists in classical-era music, though it appears in the nineteenth century.",
+    "notes": "Answer from Classical cadence types (Authentic and half cadences) and Cadence (Common classifications, nomenclature table). Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q08",
+    "question": "Compare the Dorian and Mixolydian modes: which scale degrees differ from the major scale?",
+    "category": "comparison",
+    "difficulty": "medium",
+    "expected_sources": [
+      "Dorian mode",
+      "Mixolydian mode",
+      "Mode (music)"
+    ],
+    "reference_answer": "Modern Dorian is the scale on the white keys from D to D. Compared with the major scale it has a minor third and a minor seventh (its second, fourth, fifth and sixth are the major scale's). Modern Mixolydian is the fifth mode of the major scale, built on the dominant; it has the same pattern of tones and semitones as the major scale but with a minor seventh, so its seventh degree is a subtonic, not a leading tone.",
+    "notes": "Answer from the modern-mode sections of Dorian mode and Mixolydian mode. Mode (music) is listed because it covers modes in general. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q09",
+    "question": "How do the viola and the violin differ in size, tuning and role?",
+    "category": "comparison",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Viola",
+      "Violin"
+    ],
+    "reference_answer": "The viola is slightly larger than the violin and sounds lower. The violin is the smallest, highest-pitched (soprano) instrument of the violin family, usually tuned in perfect fifths to G3, D4, A4, E5. The viola is the middle (alto) voice of the family, between the violin, which is tuned a perfect fifth higher, and the cello, an octave lower; its strings are usually tuned to C3, G3, D4, A4.",
+    "notes": "Answer from the leads of Viola and Violin. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q10",
+    "question": "What separates a trumpet from a cornet?",
+    "category": "comparison",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Trumpet",
+      "Cornet"
+    ],
+    "reference_answer": "Both are brass instruments and the most common type of each is a transposing instrument in B-flat. The cornet has a conical bore, a more compact shape and a mellower tone; the trumpet has a cylindrical bore, and its tubing is generally wound differently.",
+    "notes": "Answer from the leads of Cornet and Trumpet. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q11",
+    "question": "How does the white-key method help calculate intervals?",
+    "category": "textbook",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Calculating Intervals: The White-Key Method"
+    ],
+    "reference_answer": "You memorise the intervals between the white keys of the piano (the intervals in C major), then work out any other interval as an alteration of a white-key interval. For example D4-F#4 is a major third because D4-F4 is a minor third made one semitone larger. The white-key seconds are all major except E-F and B-C; the thirds are all minor except C-E, F-A and G-B; the fourths are all perfect except F-B (augmented); sevenths follow by inversion.",
+    "notes": "Textbook-only page (Open Music Theory). Its stored title currently has an HTML entity (&#58;) in place of the colon; the title is fixed in the next change. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q12",
+    "question": "What is the difference between concert pitch and written pitch?",
+    "category": "convention-conflict",
+    "difficulty": "medium",
+    "expected_sources": [
+      "Concert pitch",
+      "Transposing instrument"
+    ],
+    "reference_answer": "Concert pitch is the pitch as sounded on a non-transposing instrument such as the piano; the written pitch of a transposing instrument can differ from it. For example a written C on a B-flat clarinet or trumpet sounds a concert B-flat. The ISO standard reference is A440, the A above middle C at 440 Hz.",
+    "notes": "Answer from the leads of Concert pitch and Transposing instrument. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q13",
+    "question": "How does an acoustic guitar produce its sound?",
+    "category": "alias",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Guitar"
+    ],
+    "reference_answer": "A guitar is a chordophone: sound comes from a vibrating string stretched between two fixed points. On an acoustic guitar the strings' vibration is amplified by the hollow body, which acts as a resonating chamber (flat-top guitars typically have a large sound hole), so no electronics are needed. The strings are plucked or strummed with the dominant hand while the other hand presses them against frets, and the usual six strings are tuned E A D G B E from low to high.",
+    "notes": "Answer from the lead and Tuning > Standard of Guitar. \"Acoustic guitar\" is an Alias of the Guitar page, so this also tests Aliases. The Corpus text on how the body amplifies the sound is brief (resonating chamber, soundboard listed among the parts); anything beyond that is not in the Corpus. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q14",
+    "question": "How does an electric guitar work, and why does it need an amplifier?",
+    "category": "descriptive-instruments",
+    "difficulty": "medium",
+    "expected_sources": [
+      "Electric guitar"
+    ],
+    "reference_answer": "Unlike an acoustic guitar, an electric guitar needs external amplification to be heard at normal performance volumes. Its magnetic pickups, which are magnets wound with coils of very fine wire, turn string movement into a small induced electric current; the signal passes through the tone and volume circuits to the output jack and a cable to an amplifier and loudspeaker. A solid-body electric has no vibrating soundboard, so the amplified sound reproduces the string vibration alone and avoids the feedback of amplified acoustic guitars. Single-coil pickups pick up mains hum, which double-coil humbucker pickups cancel.",
+    "notes": "Answer from the lead, Types > Solid-body and Construction > Pickups of Electric guitar. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q15",
+    "question": "Tell me about the guitar.",
+    "category": "clarification",
+    "difficulty": "easy",
+    "expected_behaviour": "clarify",
+    "clarification_options": [
+      "Guitar",
+      "Classical guitar",
+      "Electric guitar",
+      "Bass guitar"
+    ],
+    "expected_sources": [],
+    "reference_answer": "Which guitar do you mean: an acoustic (steel-string) guitar, a classical guitar, an electric guitar or a bass guitar?",
+    "notes": "The Corpus has a page for each option (Guitar, which covers the acoustic guitar, Classical guitar, Electric guitar, Bass guitar). The bot should ask before answering and should not answer from memory. A reply such as \"electric\" should then be answered as q14. Draft: written by Claude, author review pending."
+  },
+  {
+    "id": "q16",
+    "question": "What is the range of a saxophone?",
+    "category": "clarification",
+    "difficulty": "medium",
+    "expected_behaviour": "clarify",
+    "clarification_options": [
+      "Soprano saxophone",
+      "Alto saxophone",
+      "Tenor saxophone",
+      "Baritone saxophone"
+    ],
+    "expected_sources": [],
+    "reference_answer": "Which saxophone do you mean: soprano, alto, tenor or baritone? Their ranges differ.",
+    "notes": "The Corpus has a page for each member of the family (and Saxophone for the family). Draft: written by Claude, author review pending."
+  },
+  {
+    "id": "q17",
+    "question": "Transpose it up a fifth.",
+    "category": "clarification",
+    "difficulty": "easy",
+    "expected_behaviour": "clarify",
+    "clarification_options": [],
+    "expected_sources": [],
+    "reference_answer": "What would you like me to transpose: a note, a chord or a key (for example Dm7)?",
+    "notes": "Nothing in the request says what to transpose, and there is no earlier turn. No options come from the Corpus, so the bot asks for the missing input and calls no tool. Draft: written by Claude, author review pending."
+  }
+]

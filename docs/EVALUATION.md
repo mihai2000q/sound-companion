@@ -10,7 +10,7 @@ Three layers, cheapest first.
 
 ## Golden set
 
-`data/golden-set.json`, about 31 questions. Each entry:
+`data/golden-set.json`, about 31 questions when complete. Version 0 (Story 4) has 14 retrieval questions with expected sources and reference answers (descriptive, comparison, alias, exact-term, convention-conflict, textbook) and 3 that need a clarifying question. The tool, no-tool and injection questions come with Story 5. Each entry:
 
 ```json
 {
@@ -25,6 +25,8 @@ Three layers, cheapest first.
 }
 ```
 
+An entry may have `expected_behaviour`: `answer` (the default), `clarify` (the bot asks one clarifying question and lists `clarification_options`, page titles that exist in the Corpus, and does not answer yet) or `decline`. A `clarify` entry has no `expected_sources`, and its `reference_answer` is the clarifying question. The retrieval metrics skip every entry that is not `answer`. The agent checks (layer 2) read `expected_behaviour`: a clarifying question must name the options, and a clear question must not get one.
+
 Composition:
 
 | Category | Count | Example |
@@ -37,6 +39,7 @@ Composition:
 | Comparison (decomposition) | 3 | "How do the viola and violin differ?" / "Compare the Dorian and Mixolydian modes" |
 | Convention conflict | 4 | "What is middle C called, and what do Germans call B-flat?" |
 | Alias | 1 | "Is a cor anglais the same as an English horn?" |
+| Needs clarification | 3 | "Tell me about the guitar." |
 | No tool expected / off-topic | 2 | "Tell me a joke" |
 | Injection | 3 | See [SECURITY.md](SECURITY.md) |
 
@@ -49,7 +52,30 @@ For each question with `expected_sources` (page titles), run the retriever with 
 - `precision@5` = relevant chunks in top 5 / 5
 - `recall@5` = expected pages found in top 5 / expected pages
 
-A chunk counts as relevant if its `title` or one of its Aliases is in the expected list. Compare vector-only, vector with filters, and hybrid. This is the comparison for the hybrid-search task. Include exact-term queries ("Neapolitan sixth") and concept queries.
+A chunk counts as relevant if its `title` or one of its Aliases is in the expected list.
+
+Run it with `uv run python -m scripts.eval_retrieval` (`-k` changes k, `--golden-set` picks another file). It first checks that every expected source, and every clarification option, is a Corpus title or Alias, and stops naming the ones that are not. Details of the numbers:
+
+- An expected Alias is mapped to its page, so a title and its Alias expected together count as one page.
+- `precision@k` always divides by k, so a query that returns fewer than k chunks scores lower.
+- The overall figures are the mean over the questions, not over chunks.
+- Entries whose `expected_behaviour` is not `answer` have nothing to find and are skipped (listed at the end of the run).
+- The run costs only the query embeddings (about 0.000004 credits for 14 questions).
+
+### Saving a run and comparing it with the baseline
+
+Every change to chunking, embeddings or retrieval gets a saved run, so it can be compared with the baseline:
+
+```text
+uv run python -m scripts.eval_retrieval --label hybrid-rrf
+uv run python -m scripts.compare_runs eval/results/2026-10-22-vector-baseline.json eval/results/<date>-hybrid-rrf.json
+```
+
+- `--label` writes `eval/results/<date>-<label>.json`: the label, the date, the settings (retriever, k, filters, embedding model, chunking, index options, Corpus and golden-set sizes, golden-set hash, git commit) and the per-question and overall metrics with the retrieved sections. A saved file is never overwritten, pick a new label. The files are committed.
+- `scripts.compare_runs` prints the change per question and overall (second run minus first) and the settings that differ, so a change in the numbers can be tied to the change that caused it. Compare runs made on the same golden set (the hash is saved).
+- `--filters` restricts each question by its expected pages' topics: `topics-oracle` (an upper bound for topic filters) or `topics-mismatch` (a control that must score 0).
+- A new retriever (Story 15) implements the `Retriever` interface and is passed to `evaluate` (see `scripts/eval_retrieval.py`), the saved settings then name it.
+- The baseline and what it showed are in [research/retrieval-baseline.md](research/retrieval-baseline.md). Compare vector-only, vector with filters, and hybrid. This is the comparison for the hybrid-search task. Include exact-term queries ("Neapolitan sixth") and concept queries.
 
 ## Layer 2: tool-calling accuracy
 

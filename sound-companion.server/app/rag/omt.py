@@ -1,3 +1,4 @@
+import html
 import re
 import subprocess
 from dataclasses import dataclass
@@ -178,7 +179,7 @@ def _split_front_matter(text: str, slug: str) -> tuple[str, str]:
     if match is None:
         return slug, text
     title = _TITLE.search(match.group(1))
-    return (title.group(1).strip("\"' ") if title else slug), text[match.end():]
+    return (html.unescape(title.group(1).strip("\"' ")) if title else slug), text[match.end():]
 
 
 def _clean(body: str) -> str:

@@ -1,0 +1,365 @@
+{
+  "label": "vector-topic-mismatch",
+  "date": "2026-10-22",
+  "settings": {
+    "retriever": "VectorRetriever (dense, cosine)",
+    "k": 5,
+    "filters": "topics-mismatch",
+    "embedding_model": "openai/text-embedding-3-small",
+    "chunking": {
+      "splitter": "RecursiveCharacterTextSplitter (langchain-text-splitters 1.1.3)",
+      "chunk_chars": 800,
+      "overlap_chars": 100
+    },
+    "index_query_options": "hnsw.ef_search = 100; hnsw.iterative_scan = relaxed_order; hnsw.max_scan_tuples = 20000",
+    "corpus": {
+      "documents": 276,
+      "chunks": 7329
+    },
+    "golden_set": {
+      "file": "golden-set.json",
+      "entries": 17,
+      "sha256": "1f13609f2847"
+    },
+    "git": "9fe42a6 (uncommitted changes)"
+  },
+  "summary": {
+    "k": 5,
+    "questions": 14,
+    "precision": 0.0,
+    "recall": 0.0
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "question": "What is the circle of fifths and how does it relate to key signatures?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Circle of fifths",
+        "Key signature"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Musical acoustics > Scales",
+        "Harmonic series (music) > Interval strength",
+        "Musical acoustics > Scales",
+        "Harmonic series (music) > Harmonics and tuning",
+        "Harmonic series (music) > Harmonics and tuning"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q02",
+      "question": "How does a clarinet produce sound, and what are its registers?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Clarinet"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Timbre > Psychoacoustic evidence",
+        "Bore (wind instruments) > Bore shapes > Cylindrical bore",
+        "Bore (wind instruments) > Bore shapes > Conical bore",
+        "Musical acoustics > Pitch ranges of musical instruments",
+        "Bore (wind instruments) > Woodwinds"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q03",
+      "question": "What are the top-level classes of the Hornbostel-Sachs system, and where does a violin fit?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Hornbostel–Sachs"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Musical acoustics > Pitch ranges of musical instruments",
+        "Harmonic series (music) > Frequencies, wavelengths, and musical intervals in example systems",
+        "Bore (wind instruments) > Bore shapes > Conical bore",
+        "Harmonic series (music) > Timbre of musical instruments",
+        "Harmonic series (music) > Timbre of musical instruments"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q04",
+      "question": "What is a Neapolitan sixth?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Neapolitan chord"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Harmonic series (music) > Harmonics and tuning",
+        "Harmonic series (music) > Interval strength",
+        "Harmonic series (music) > Harmonics and tuning",
+        "Harmonic series (music) > Frequencies, wavelengths, and musical intervals in example systems",
+        "Harmonic series (music) > Frequencies, wavelengths, and musical intervals in example systems"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q05",
+      "question": "Is a cor anglais the same as an English horn, and what key is it in?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Cor anglais"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Bore (wind instruments) > Bore shapes > Conical bore",
+        "Bore (wind instruments) > Bore shapes > Cylindrical bore",
+        "Reed (mouthpiece) > Double reeds",
+        "Bore (wind instruments) > Woodwinds",
+        "Bore (wind instruments) > Brasses"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q06",
+      "question": "What is middle C called, and what do Germans call B-flat and B natural?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Scientific pitch notation",
+        "Pitches and octave designations",
+        "Musical note"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Musical acoustics > Pitch ranges of musical instruments",
+        "Musical acoustics > Scales",
+        "Bore (wind instruments) > Bore shapes > Cylindrical bore",
+        "Harmonic series (music) > Harmonics and tuning",
+        "Bore (wind instruments) > Bore shapes > Conical bore"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q07",
+      "question": "Compare the perfect authentic cadence with the half cadence and the plagal cadence.",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Cadence",
+        "Classical cadence types"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Harmonic series (music) > Interval strength",
+        "Musical acoustics > Harmony",
+        "Harmonic series (music) > Harmonics and tuning",
+        "Harmonic series (music) > Harmonics and tuning",
+        "Musical acoustics > Scales"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q08",
+      "question": "Compare the Dorian and Mixolydian modes: which scale degrees differ from the major scale?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Dorian mode",
+        "Mixolydian mode",
+        "Mode (music)"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Harmonic series (music) > Harmonics and tuning",
+        "Musical acoustics > Scales",
+        "Harmonic series (music) > Harmonics and tuning",
+        "Musical acoustics > Scales",
+        "Harmonic series (music) > Harmonics and tuning"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q09",
+      "question": "How do the viola and the violin differ in size, tuning and role?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Viola",
+        "Violin"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Timbre > (lead)",
+        "Timbre > In music history",
+        "Timbre > Attributes > Harmonics",
+        "Musical acoustics > Scales",
+        "Timbre > Attributes > Harmonics"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q10",
+      "question": "What separates a trumpet from a cornet?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Trumpet",
+        "Cornet"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Bore (wind instruments) > Bore shapes > Cylindrical bore",
+        "Bore (wind instruments) > Bore shapes > Conical bore",
+        "Bore (wind instruments) > Brasses",
+        "Reed (mouthpiece) > Double reeds",
+        "Bore (wind instruments) > Woodwinds"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q11",
+      "question": "How does the white-key method help calculate intervals?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Calculating Intervals: The White-Key Method"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Harmonic series (music) > Harmonics and tuning",
+        "Harmonic series (music) > Interval strength",
+        "Musical acoustics > Scales",
+        "Harmonic series (music) > Harmonics and tuning",
+        "Musical acoustics > Scales"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q12",
+      "question": "What is the difference between concert pitch and written pitch?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Concert pitch",
+        "Transposing instrument"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Musical acoustics > Scales",
+        "Musical acoustics > Harmony",
+        "Harmonic series (music) > Timbre of musical instruments",
+        "Musical acoustics > Subjective aspects",
+        "Harmonic series (music) > (lead)"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q13",
+      "question": "How does an acoustic guitar produce its sound?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Guitar"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Musical acoustics > Scales",
+        "Musical acoustics > Subjective aspects",
+        "Musical acoustics > Physical aspects",
+        "Resonance > Types > Acoustic",
+        "Musical acoustics > Physical aspects"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    },
+    {
+      "id": "q14",
+      "question": "How does an electric guitar work, and why does it need an amplifier?",
+      "precision": 0.0,
+      "recall": 0.0,
+      "expected_pages": [
+        "Electric guitar"
+      ],
+      "found_pages": [],
+      "retrieved": [
+        "Musical acoustics > Physical aspects",
+        "Musical acoustics > Subjective aspects",
+        "Musical acoustics > Scales",
+        "Musical acoustics > Harmony",
+        "Musical acoustics > Physical aspects"
+      ],
+      "filter": {
+        "topics": [
+          "acoustics"
+        ],
+        "match": "all"
+      }
+    }
+  ]
+}
