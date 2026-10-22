@@ -60,7 +60,22 @@ Run it with `uv run python -m scripts.eval_retrieval` (`-k` changes k, `--golden
 - `precision@k` always divides by k, so a query that returns fewer than k chunks scores lower.
 - The overall figures are the mean over the questions, not over chunks.
 - Entries whose `expected_behaviour` is not `answer` have nothing to find and are skipped (listed at the end of the run).
-- The run costs only the query embeddings (about 0.000004 credits for 14 questions). Compare vector-only, vector with filters, and hybrid. This is the comparison for the hybrid-search task. Include exact-term queries ("Neapolitan sixth") and concept queries.
+- The run costs only the query embeddings (about 0.000004 credits for 14 questions).
+
+### Saving a run and comparing it with the baseline
+
+Every change to chunking, embeddings or retrieval gets a saved run, so it can be compared with the baseline:
+
+```text
+uv run python -m scripts.eval_retrieval --label hybrid-rrf
+uv run python -m scripts.compare_runs eval/results/2026-10-22-vector-baseline.json eval/results/<date>-hybrid-rrf.json
+```
+
+- `--label` writes `eval/results/<date>-<label>.json`: the label, the date, the settings (retriever, k, filters, embedding model, chunking, index options, Corpus and golden-set sizes, golden-set hash, git commit) and the per-question and overall metrics with the retrieved sections. A saved file is never overwritten, pick a new label. The files are committed.
+- `scripts.compare_runs` prints the change per question and overall (second run minus first) and the settings that differ, so a change in the numbers can be tied to the change that caused it. Compare runs made on the same golden set (the hash is saved).
+- `--filters` restricts each question by its expected pages' topics: `topics-oracle` (an upper bound for topic filters) or `topics-mismatch` (a control that must score 0).
+- A new retriever (Story 15) implements the `Retriever` interface and is passed to `evaluate` (see `scripts/eval_retrieval.py`), the saved settings then name it.
+- The baseline and what it showed are in [research/retrieval-baseline.md](research/retrieval-baseline.md). Compare vector-only, vector with filters, and hybrid. This is the comparison for the hybrid-search task. Include exact-term queries ("Neapolitan sixth") and concept queries.
 
 ## Layer 2: tool-calling accuracy
 

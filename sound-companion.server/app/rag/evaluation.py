@@ -4,6 +4,7 @@ the caller passes a `Retriever`, and the pieces are plain functions so they can 
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Literal
 
 from app.rag.retriever import Filters, RetrievedChunk, Retriever
 
@@ -128,3 +129,36 @@ def summarize(results: list[QuestionResult], k: int = K) -> Summary:
         sum(r.precision for r in results) / len(results),
         sum(r.recall for r in results) / len(results),
     )
+
+
+FilterMode = Literal["none", "topics-oracle", "topics-mismatch"]
+
+
+def derive_filters(
+    questions: list[GoldenQuestion],
+    names: dict[str, str],
+    topics_by_title: dict[str, list[str]],
+    mode: FilterMode,
+) -> dict[str, Filters]:
+    """Per-question filters taken from the golden set, to see what topic filters can do.
+
+    - `none`: no filters (the vector-only baseline).
+    - `topics-oracle`: any of the topics of the question's expected pages. The agent would have to
+      guess these, so this is an upper bound for what a topic filter can add.
+    - `topics-mismatch`: one topic none of the expected pages has. A control: every result then
+      belongs to another topic, so recall must fall to zero.
+    """
+    if mode == "none":
+        return {}
+    every_topic = sorted({t for topics in topics_by_title.values() for t in topics})
+    filters: dict[str, Filters] = {}
+    for q in questions:
+        if q.expected_behaviour != "answer" or not q.expected_sources:
+            continue
+        own = sorted({t for source in q.expected_sources for t in topics_by_title[names[source]]})
+        if mode == "topics-oracle":
+            filters[q.id] = Filters(topics=tuple(own), topic_match="any")
+        else:
+            other = next(t for t in every_topic if t not in own)
+            filters[q.id] = Filters(topics=(other,))
+    return filters
