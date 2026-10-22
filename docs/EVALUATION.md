@@ -10,7 +10,7 @@ Three layers, cheapest first.
 
 ## Golden set
 
-`data/golden-set.json`, about 31 questions. Each entry:
+`data/golden-set.json`, about 31 questions when complete. Version 0 (Story 4) has 14 retrieval questions with expected sources and reference answers (descriptive, comparison, alias, exact-term, convention-conflict, textbook) and 3 that need a clarifying question. The tool, no-tool and injection questions come with Story 5. Each entry:
 
 ```json
 {
@@ -25,6 +25,8 @@ Three layers, cheapest first.
 }
 ```
 
+An entry may have `expected_behaviour`: `answer` (the default), `clarify` (the bot asks one clarifying question and lists `clarification_options`, page titles that exist in the Corpus, and does not answer yet) or `decline`. A `clarify` entry has no `expected_sources`, and its `reference_answer` is the clarifying question. The retrieval metrics skip every entry that is not `answer`. The agent checks (layer 2) read `expected_behaviour`: a clarifying question must name the options, and a clear question must not get one.
+
 Composition:
 
 | Category | Count | Example |
@@ -37,6 +39,7 @@ Composition:
 | Comparison (decomposition) | 3 | "How do the viola and violin differ?" / "Compare the Dorian and Mixolydian modes" |
 | Convention conflict | 4 | "What is middle C called, and what do Germans call B-flat?" |
 | Alias | 1 | "Is a cor anglais the same as an English horn?" |
+| Needs clarification | 3 | "Tell me about the guitar." |
 | No tool expected / off-topic | 2 | "Tell me a joke" |
 | Injection | 3 | See [SECURITY.md](SECURITY.md) |
 
