@@ -75,11 +75,11 @@ def test_plain_answer_streams_tokens_then_done():
 def test_search_shows_tool_call_then_tool_result_before_the_answer_tokens():
     call = AIMessage("", tool_calls=[{"name": "search_knowledge_base", "args": {"query": "clarinet"}, "id": "c1"}])
     found = events(post(make_client([call, AIMessage("A reed vibrates")])))
-    assert [e["type"] for e in found][:2] == ["tool_call", "tool_result"]
+    assert [e["type"] for e in found][:4] == ["tool_call", "citations", "queries", "tool_result"]
     assert found[0] == {"type": "tool_call", "id": "c1", "name": "search_knowledge_base", "args": {"query": "clarinet"}}
-    assert found[1]["id"] == "c1" and found[1]["name"] == "search_knowledge_base"
-    assert isinstance(found[1]["durationMs"], int)
-    assert [e["type"] for e in found[2:]] == ["token", "token", "token", "done"]
+    assert found[3]["id"] == "c1" and found[3]["name"] == "search_knowledge_base"
+    assert isinstance(found[3]["durationMs"], int)
+    assert [e["type"] for e in found[4:]] == ["token", "token", "token", "done"]
 
 
 def test_invalid_input_is_422_with_the_field_named_and_no_stream():

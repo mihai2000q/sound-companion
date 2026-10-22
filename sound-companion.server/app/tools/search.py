@@ -1,6 +1,8 @@
+from collections.abc import Callable
 from typing import Annotated, Literal
 
 from langchain_core.tools import StructuredTool
+from langgraph.config import get_stream_writer
 from pydantic import BaseModel, Field, ValidationError
 
 from app.rag.retriever import Filters, RetrievedChunk, Retriever
@@ -40,6 +42,27 @@ def format_chunk(chunk: RetrievedChunk) -> str:
     )
 
 
+def citation_item(chunk: RetrievedChunk) -> dict:
+    """Stored metadata only, never model text. `id` lets the UI match a chip to a chunk, `content` feeds the inspector."""
+    return {
+        "id": chunk.id,
+        "title": chunk.title,
+        "section": chunk.section,
+        "url": chunk.url,
+        "score": chunk.score,
+        "license": chunk.license,
+        "content": chunk.content,
+    }
+
+
+def stream_writer() -> Callable[[dict], None]:
+    """The run's custom-event writer. Outside an agent run (a direct call, a script) there is none, so events are dropped."""
+    try:
+        return get_stream_writer()
+    except (RuntimeError, KeyError):  # no run: RuntimeError on older langgraph, KeyError for a missing runtime
+        return lambda event: None
+
+
 def search_knowledge_base(
     retriever: Retriever,
     query: str,
@@ -47,8 +70,10 @@ def search_knowledge_base(
     topic: str | None = None,
     title: str | None = None,
     k: int = 5,
+    emit: Callable[[dict], None] = lambda event: None,
 ) -> str:
-    """Run the search and return text for the model. Never raises on bad arguments or empty results."""
+    """Run the search and return text for the model. Never raises on bad arguments or empty results.
+    `emit` receives the `citations` and `queries` events, and nothing when the search finds nothing."""
     query = (query or "").strip()
     if not query:
         return "Error: query must not be empty."
@@ -58,6 +83,8 @@ def search_knowledge_base(
     chunks = retriever.retrieve(query, k, filters)
     if not chunks:
         return NOT_FOUND
+    emit({"type": "citations", "items": [citation_item(chunk) for chunk in chunks]})
+    emit({"type": "queries", "items": [query]})
     return "\n\n".join(format_chunk(chunk) for chunk in chunks)
 
 
@@ -68,7 +95,7 @@ def short_validation_error(error: ValidationError) -> str:
 
 def make_search_tool(retriever: Retriever, k: int = 5) -> StructuredTool:
     def run(query: str, source_type: str | None = None, topic: str | None = None, title: str | None = None) -> str:
-        return search_knowledge_base(retriever, query, source_type, topic, title, k)
+        return search_knowledge_base(retriever, query, source_type, topic, title, k, stream_writer())
 
     return StructuredTool.from_function(
         func=run,

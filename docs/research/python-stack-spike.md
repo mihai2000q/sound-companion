@@ -371,6 +371,7 @@ Mapping to typed SSE events:
 - `tool_call`: from `updates` (node `model`, `AIMessage.tool_calls`, complete name and args). The `messages` stream only has partial `tool_call_chunks` (args as incremental JSON strings with a real provider), so use `updates` for a clean event.
 - `tool_result`: `updates` (node `tools`, `ToolMessage`) or the `messages` mode `ToolMessage` (has `tool_call_id`, `name`).
 - `citations`, `queries`, progress: `custom` mode. A tool calls `get_stream_writer()` and writes any dict; it arrives unchanged. We put a `"type"` field in the dict and forward it as is (verified: `get_stream_writer` works inside a `@tool` in an async agent). The `custom` writer only works when the tool runs inside a LangGraph run (an agent), not when called directly.
+  - Issue 41: it also works inside a **sync** `StructuredTool` under `astream`. LangChain runs the function in an executor thread with the run's context copied, so `get_stream_writer()` finds the writer (checked with a fake model through `agent_events`). Called outside a run it raises `RuntimeError` or `KeyError` (`__pregel_runtime`), so the search tool catches both and drops the events.
 - `usage`: `usage_metadata` on the last chunk of each model call (sum them for the turn; the fake emitted 10/5/15 per call and the app reported 30/15/45 for 3 model calls). Real value depends on the provider (see C4).
 - Not covered by the fake: the final text also appears as one complete `AIMessage` in the `updates` event, so tokens do not need to be buffered for persistence (checkpointer stores them).
 

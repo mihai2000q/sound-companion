@@ -60,8 +60,8 @@ The backend returns `text/event-stream` from a FastAPI `StreamingResponse`. The 
 | `token` | `{ text }` | Append to the answer | `messages` mode, `AIMessageChunk` with content |
 | `tool_call` | `{ id, name, args }` | Show a tool card in "running" state | `updates` mode (complete call from the model node) |
 | `tool_result` | `{ id, name, content, durationMs }` | Fill the tool card | `updates` mode (tools node) |
-| `citations` | `{ items: [{ title, section, url, score, license }] }` | Citation chips and the inspector panel | `custom` mode, written by the retrieval tool with `get_stream_writer()` |
-| `queries` | `{ items: [original, rewritten...] }` | Inspector panel (RAG-process view) | `custom` mode, same writer |
+| `citations` | `{ items: [{ id, title, section, url, score, license, content }] }` (one per retrieved chunk, from stored metadata; `id` is the chunk id, `content` the chunk text) | Citation chips and the inspector panel | `custom` mode, written by the retrieval tool with `get_stream_writer()`. Not sent when the search finds nothing |
+| `queries` | `{ items: [original, rewritten...] }` (only `[original]` until query rewriting, Story 13) | Inspector panel (RAG-process view) | `custom` mode, same writer. Not sent when the search finds nothing |
 | `progress` | `{ message }` | Progress indicator on long tool calls | `custom` mode |
 | `usage` | `{ promptTokens, completionTokens, cost, totalSpend }` | Usage badge, soft-cap warning | Last chunk of each model call, plus OpenRouter cost (see below) |
 | `error` | `{ code, message }` | Inline error with retry | Backend |
