@@ -484,6 +484,17 @@ With it the aggregated stream and the agent's per-call `AIMessage` both carry `r
 
 Not checked by this run (the author's to confirm on the account): credits equal USD on the account page, and that the workspace guardrails are meant to allow the two models.
 
+### C5. Real model through `create_agent` with the search tool (Story 5, issue 30)
+
+`ChatOpenAI` (`openai/gpt-4o-mini`, OpenRouter base URL, `temperature=0`) with `create_agent(model, tools=[search_knowledge_base], system_prompt=...)`, run with `scripts.ask`. Same versions as C4 (`langchain-openai 1.7.2`, `langchain 1.4.6`, `langgraph 1.2.16`).
+
+- **Tool call shape:** one `AIMessage.tool_calls` entry, `{'name': 'search_knowledge_base', 'args': {'query': ..., 'source_type': 'encyclopedia'}}`, then a `ToolMessage` with our formatted chunks, then the final `AIMessage`. The `Literal` `source_type` in the args schema is passed through correctly. An invalid value is turned into an error message by `handle_validation_error` and does not raise.
+- **Citing:** "How does a clarinet produce sound?" gave a grounded answer naming `(Clarinet > Acoustics)` and ending with the page link and licence. With a first prompt that said "cite every claim", the model cited once at the end; asking for the cite right after each claim, not only at the end, gave a cite per paragraph.
+- **Surprise:** the model set `source_type='encyclopedia'` on its own although the tool description says to leave filters out unless asked. It was harmless here, but a wrong guess would hide textbook pages. Watch it in the tool-calling eval (Story 9) and tighten the description if it keeps happening.
+- **Off topic:** "Tell me a joke" got a polite decline and no tool call.
+- **Cost:** about 2,600 chat tokens for one grounded answer, a few hundredths of a cent.
+- **Fake model in tests:** `GenericFakeChatModel` has no `bind_tools`, so the tests subclass it (declare the extra fields, pydantic rejects unknown attributes).
+
 ## Recommendation
 
 The Python stack is good enough for this project, with a few small workarounds. On the evidence of this spike it is better than the TypeScript store on ingest and filters, and roughly equal on hybrid search (library hybrid exists but has a bug to wrap).
