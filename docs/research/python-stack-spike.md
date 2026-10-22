@@ -484,6 +484,46 @@ With it the aggregated stream and the agent's per-call `AIMessage` both carry `r
 
 Not checked by this run (the author's to confirm on the account): credits equal USD on the account page, and that the workspace guardrails are meant to allow the two models.
 
+### C5. Real model through `create_agent` with the search tool (Story 5, issue 30)
+
+`ChatOpenAI` (`openai/gpt-4o-mini`, OpenRouter base URL, `temperature=0`) with `create_agent(model, tools=[search_knowledge_base], system_prompt=...)`, run with `scripts.ask`. Same versions as C4 (`langchain-openai 1.7.2`, `langchain 1.4.6`, `langgraph 1.2.16`).
+
+- **Tool call shape:** one `AIMessage.tool_calls` entry, `{'name': 'search_knowledge_base', 'args': {'query': ..., 'source_type': 'encyclopedia'}}`, then a `ToolMessage` with our formatted chunks, then the final `AIMessage`. The `Literal` `source_type` in the args schema is passed through correctly. An invalid value is turned into an error message by `handle_validation_error` and does not raise.
+- **Citing:** "How does a clarinet produce sound?" gave a grounded answer naming `(Clarinet > Acoustics)` and ending with the page link and licence. With a first prompt that said "cite every claim", the model cited once at the end; asking for the cite right after each claim, not only at the end, gave a cite per paragraph.
+- **Surprise:** the model set `source_type='encyclopedia'` on its own although the tool description says to leave filters out unless asked. It was harmless here, but a wrong guess would hide textbook pages. Watch it in the tool-calling eval (Story 9) and tighten the description if it keeps happening.
+- **Off topic:** "Tell me a joke" got a polite decline and no tool call.
+- **Cost:** about 2,600 chat tokens for one grounded answer, a few hundredths of a cent.
+- **Fake model in tests:** `GenericFakeChatModel` has no `bind_tools`, so the tests subclass it (declare the extra fields, pydantic rejects unknown attributes).
+
+### C6. Memory per thread with a real model (Story 5, issue 31)
+
+`AsyncPostgresSaver` on `AsyncConnectionPool(url, kwargs={"autocommit": True, "prepare_threshold": 0, "row_factory": dict_row}, open=False)`, used as `async with` in `app/agent/memory.py`, with `await saver.setup()` on every start. Run with `scripts.chat`.
+
+- **Pool settings:** the three kwargs were enough, with the plain `postgresql://` URL (`settings.database_url`), not the SQLAlchemy one. `setup()` is safe to repeat. It created `checkpoints`, `checkpoint_blobs`, `checkpoint_writes` and `checkpoint_migrations`; `alembic check` still reports no drift because `include_object` in `env.py` ignores tables that are not in our models.
+- **Follow-up:** after "How does a clarinet produce sound?", "and what are its registers?" in the same thread was searched as `clarinet registers` and answered from the Clarinet page, so the model used the earlier turn.
+- **`aget_state`:** `state.values["messages"]` holds every message of the thread in order: `HumanMessage`, `AIMessage` with `tool_calls` (empty content), `ToolMessage` with our formatted chunks, final `AIMessage`. The retrieved chunks are part of the thread, so history grows by about one search result per turn. After two turns the thread had 15 checkpoint rows.
+- **Isolation:** two threads do not share messages (unit test with a fake model, and `--history` on the real thread shows only its own turns).
+- **Surprise:** in a new thread, "and what are its registers?" with nothing before it was searched as "registers of the clarinet" and answered, instead of asking what "its" refers to. The model guessed a referent that was nowhere in the thread. Rule 5 (ask when unclear) in the prompt did not stop it. This is for the clarify checks (q15 to q17) and the Story 9 eval, not a memory bug.
+- **Tests:** an `InMemorySaver` is enough to test that a second turn sees the first and that threads are separate, no database needed.
+
+### C7. Clarify, decline and empty retrieval with a real model (Story 5, issue 32)
+
+`scripts.check_behaviour` runs each case on its own in-memory thread and prints tool calls and answers (a person judges them, Story 9 automates it). `openai/gpt-4o-mini`, `temperature=0`.
+
+| Case | First prompt (rules only) | Final prompt (rules plus 3 worked examples) |
+|---|---|---|
+| q15 "Tell me about the guitar." | Answered, listed two types | One question: "Which type of guitar do you mean: classical, steel-string acoustic, electric, or another kind?" The reply "electric" is answered from the Electric guitar page |
+| q16 range of a saxophone | Answered with the alto range | Asks soprano, alto, tenor or baritone |
+| q17 "Transpose it up a fifth." | Asked what to transpose, no tool call | Same (one version declined it as off-topic, and one copied the wording of an example) |
+| q02, q04, q05, q13 specific questions | Answered with cites | Answered with cites, no question |
+| "Tell me a joke", pancake recipe | Declined, no tool call | Same |
+| "How do I tune a theremin?" | States the knowledge base has nothing on it | Same, one line, no answer from memory |
+
+- **What changed the behaviour:** rewording rule 5 as a checklist ("after searching, before answering, if one case fits your whole reply is one question") made q16 work and q17 worse. What fixed q15 and q16 was three worked examples with other subjects (drum, clarinet range, "play it an octave lower") plus "ask even when the pages already describe the kinds, do not summarise them". Examples must say the reply is a question about the user's own request, or the model copies their wording.
+- **Surprise:** the Guitar page has a "Types" section, so for "guitar" the model treats the question as answered. A search for "guitar" returns only chunks of the Guitar page, never the Classical, Electric or Bass guitar pages, so the options come from section text and the model's wording, and the question did not name the bass guitar. Retrieval cannot yet list which pages exist on a subject (hybrid search or a title listing would help).
+- **Judging by eye:** the empty-retrieval case needs a topic the Corpus truly lacks, "tune a theremin" works. "Range of a sousaphone" is covered by the Sousaphone page, so the answer there is grounded.
+- **Cost:** about a cent for the whole run of ten cases.
+
 ## Recommendation
 
 The Python stack is good enough for this project, with a few small workarounds. On the evidence of this spike it is better than the TypeScript store on ingest and filters, and roughly equal on hybrid search (library hybrid exists but has a bug to wrap).
