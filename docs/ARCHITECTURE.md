@@ -47,7 +47,7 @@ Eval scripts (pytest-style CLI, RAGAs) in the same Python project
 
 Behind a small `Retriever` interface in `sound-companion.server/app/rag/`:
 
-- **Baseline (core):** `langchain-postgres` `PGVectorStore` (v2 API, `PGEngine`) with real metadata columns, used through `add_documents` and `as_retriever(search_kwargs={"k": ..., "filter": ...})`, the pattern from the course.
+- **Baseline (core):** `langchain-postgres` `PGVectorStore` (v2 API, `PGEngine`) with real metadata columns, used through `add_documents` and `similarity_search_with_score` (`VectorRetriever` in `app/rag/retriever.py`). `as_retriever` is not used because LangChain retrievers return documents without scores, and the metrics script and Citations need them. `retrieve(query, k, Filters(source_type, topics, topic_match, title))` returns `RetrievedChunk`s with the Citation fields and a similarity score (1 minus cosine distance, higher is better).
 - **Hybrid (story 15, hard task):** our own SQL (vector similarity plus `ts_rank`, fused with reciprocal rank fusion) run through psycopg, see [DATABASE-SCHEMA.md](DATABASE-SCHEMA.md#hybrid-search-story-15). The library's `HybridSearchConfig` is a second mode for comparison only, because in `langchain-postgres` 0.0.19 it mutates the shared config and reuses the first query's keywords unless a fresh config copy is passed on every call (confirmed in the spike).
 - **HNSW:** created with `apply_vector_index(HNSWIndex(...))`. A selective filter returned 0 rows with the index forced until `hnsw.iterative_scan = relaxed_order` was set through a small custom `QueryOptions` subclass, so we ship that class.
 
