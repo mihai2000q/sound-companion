@@ -75,7 +75,7 @@ Streaming operations:
 - Send `X-Accel-Buffering: no` and `Cache-Control: no-cache`, and a `: keepalive` comment every 15 to 20 seconds while tools run.
 - Do not add gzip middleware to the stream.
 - In development, Vite proxies `/api` to the backend, so no CORS code is needed. Keep `CORSMiddleware` limited to `http://localhost:5173` as a fallback.
-- A client disconnect cancels the generator, and the checkpoint may hold a partial turn. Untested, so story 6 includes a test.
+- A client disconnect cancels the generator, and the checkpoint holds the partial turn and the thread stays usable (decision 57, [research](research/python-stack-spike.md#c6-sse-endpoint-with-a-real-model-story-6-issue-35)).
 
 ## UI layout
 
