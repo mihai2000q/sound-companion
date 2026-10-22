@@ -1,0 +1,8 @@
+# music21 spelling, weight and exceptions (story 46)
+
+Checked on 2026-10-22 with `music21` 10.5.0 and `pychord` 1.4.1 on Python 3.12, in a scratch venv.
+
+- **Spelling:** `key.Key('Eb')` has `sharps == -3` and `alteredPitches` `['B-', 'E-', 'A-']`; `MajorScale('Eb')` gives `E- F G A- B- C D E-`; `Note('C4').transpose('M-2').nameWithOctave` gives `B-3`. Sharps come out as `#` and double sharps as `##` (`C##`). Flats are always `-`, so one `normalise_flats` (`-` to `b`) step is enough. Double flats come out as `--` and become `bb`.
+- **Size and startup:** the `music21` venv is 186 MB in site-packages (the earlier estimate was 230 MB with a larger baseline). `import music21` takes about 1.5 s the first time (2.3 s cumulative in `-X importtime`), about 0.15 s once cached. Fine for a backend container, so no decision to change it: the hand-written fallback in decision 24 stays unused. `music21` was added in story 47 (`scale_info`, `interval_between`) and is imported inside the tool functions so the server starts fast.
+- **Exceptions:** `pitch.Pitch('H4')` and `Pitch('Xyz')` raise `music21.pitch.PitchException` (a `Music21Exception`, which subclasses `Exception`), message "Cannot make a step out of 'H'". Catch `Music21Exception` plus `ValueError` (`ChordSymbol` raises `ValueError`).
+- **pychord:** `find_chords_from_notes` raises `ValueError` for unknown notes ("Unknown note H"), for an empty list and for lowercase names. It accepts octave-bearing names without error but returns nonsense (`['C4','E4','G4']` gives `C4`, a chord quality "4"), and one note returns `[]`. `chord_info` therefore validates names itself (`A` to `G` plus `#`/`b`, no octave) before calling it.

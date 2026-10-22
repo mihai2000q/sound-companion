@@ -5,7 +5,7 @@ from langgraph.checkpoint.base import BaseCheckpointSaver
 
 from app.agent.prompt import SYSTEM_PROMPT
 from app.rag.retriever import Retriever
-from app.tools.search import make_search_tool
+from app.tools.registry import build_tools
 
 
 def make_chat_model() -> ChatOpenAI:
@@ -20,7 +20,7 @@ def make_chat_model() -> ChatOpenAI:
 
 
 def build_agent(model: BaseChatModel, retriever: Retriever, checkpointer: BaseCheckpointSaver | None = None):
-    """The agent: one retrieval tool, no router. Memory only when a checkpointer is given."""
+    """The agent: retrieval plus the music tools, no router. Memory only when a checkpointer is given."""
     return create_agent(
-        model, tools=[make_search_tool(retriever)], system_prompt=SYSTEM_PROMPT, checkpointer=checkpointer
+        model, tools=build_tools(retriever), system_prompt=SYSTEM_PROMPT, checkpointer=checkpointer
     )
