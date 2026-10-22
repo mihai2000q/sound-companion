@@ -65,6 +65,11 @@ export function useChatStream() {
       for await (const event of readEvents(response, onChunk)) {
         if (event.type === 'token') {
           updateMessage(botId, (message) => ({ ...message, text: message.text + event.text }))
+        } else if (event.type === 'citations') {
+          // a turn can search more than once, so the chunks of every search are kept
+          updateMessage(botId, (message) => ({ ...message, citations: [...(message.citations ?? []), ...event.items] }))
+        } else if (event.type === 'queries') {
+          updateMessage(botId, (message) => ({ ...message, queries: [...(message.queries ?? []), ...event.items] }))
         } else if (event.type === 'error') {
           return fail(botId, event.message)
         } else if (event.type === 'done') {
@@ -131,7 +136,7 @@ export function useChatStream() {
     const index = messages.findIndex((message) => message.id === botId)
     const question = messages[index - 1]
     if (!question) return
-    updateMessage(botId, (message) => ({ ...message, text: '', error: undefined, stopped: undefined }))
+    updateMessage(botId, (message) => ({ ...message, text: '', error: undefined, stopped: undefined, citations: undefined, queries: undefined }))
     void ask(question.text, question.id, botId)
   }
 
