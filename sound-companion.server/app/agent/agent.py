@@ -8,11 +8,12 @@ from app.rag.retriever import Retriever
 from app.tools.registry import build_tools
 
 
-def make_chat_model() -> ChatOpenAI:
+def make_chat_model(model: str | None = None) -> ChatOpenAI:
+    """The chat model from settings, or `model` (an OpenRouter id) when an evaluation compares models."""
     from app.config import settings
 
     return ChatOpenAI(
-        model=settings.openrouter_chat_model,
+        model=model or settings.openrouter_chat_model,
         api_key=settings.openrouter_api_key,
         base_url=settings.openrouter_base_url,
         temperature=0,

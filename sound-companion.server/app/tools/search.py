@@ -18,6 +18,7 @@ title, section, URL, licence and a similarity score. Cite the page and section o
 
 Use it for: what a concept is, how an instrument works, history, terminology, and which pages exist on \
 a subject (for example to list the kinds of guitar before asking the user which one they mean).
+To compare two things, call it once for each thing, not once with both names in the query.
 Do NOT use it for calculations (notes in a chord or scale, intervals, transposition, frequencies), which \
 need the music tools, or for requests outside music theory and instruments.
 

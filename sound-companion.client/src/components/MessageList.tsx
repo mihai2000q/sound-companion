@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { chipsFor, labelOf } from '../lib/citations'
-import type { ChatMessage } from '../types/chat'
+import type { ChatMessage, ToolCall } from '../types/chat'
 
 interface Props {
   messages: ChatMessage[]
@@ -12,7 +12,7 @@ interface Props {
 export function MessageList({ messages, streaming, onRetry, onOpenChunk }: Props) {
   const end = useRef<HTMLDivElement>(null)
   const last = messages.at(-1)
-  const typing = streaming && last?.role === 'bot' && last.text === '' && !last.error
+  const typing = streaming && last?.role === 'bot' && last.text === '' && !last.error && !last.toolCalls
 
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'end' })
@@ -21,9 +21,10 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk }: Props
   return (
     <div className="flex-1 overflow-y-auto flex flex-col gap-3 p-4">
       {messages.map((message) => {
-        if (message.text === '' && !message.error && !message.stopped) return null
+        if (message.text === '' && !message.error && !message.stopped && !message.toolCalls) return null
         return (
         <div key={message.id} className="flex flex-col gap-1">
+          <ToolCards calls={message.toolCalls} />
           {message.text !== '' && (
             <div className={`chat ${message.role === 'user' ? 'chat-end' : 'chat-start'}`}>
               <div className={`chat-bubble whitespace-pre-wrap ${message.role === 'user' ? 'chat-bubble-primary' : ''}`}>
@@ -90,5 +91,45 @@ function SourceChips({ message, onOpenChunk }: { message: ChatMessage; onOpenChu
         , CC BY-SA 4.0
       </p>
     </div>
+  )
+}
+
+const STATUS = {
+  running: { label: 'Running', badge: 'badge-info' },
+  done: { label: 'Done', badge: 'badge-success' },
+  error: { label: 'Error', badge: 'badge-error' },
+  stopped: { label: 'Stopped', badge: 'badge-warning' },
+}
+
+function ToolCards({ calls }: { calls: ToolCall[] | undefined }) {
+  if (!calls?.length) return null
+  return (
+    <ul className="flex flex-col gap-1 px-2">
+      {calls.map((call) => (
+        <ToolCard key={call.id} call={call} />
+      ))}
+    </ul>
+  )
+}
+
+function ToolCard({ call }: { call: ToolCall }) {
+  const status = STATUS[call.status]
+  return (
+    <li className={`card card-border card-sm bg-base-100 ${call.status === 'error' ? 'border-error' : ''}`}>
+      <div className="card-body gap-1 min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-sm font-medium break-all">{call.name}</span>
+          <span className={`badge badge-sm badge-soft ${status.badge}`}>
+            {call.status === 'running' && <span className="loading loading-spinner loading-xs" />}
+            {status.label}
+          </span>
+          {call.durationMs !== undefined && <span className="text-xs opacity-60">{call.durationMs} ms</span>}
+        </div>
+        <pre className="text-xs whitespace-pre-wrap break-all">{JSON.stringify(call.args)}</pre>
+        {call.content !== undefined && (
+          <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-y-auto">{call.content}</pre>
+        )}
+      </div>
+    </li>
   )
 }

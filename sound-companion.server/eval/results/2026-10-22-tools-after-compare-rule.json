@@ -1,0 +1,643 @@
+{
+  "kind": "tool-calling",
+  "label": "tools-after-compare-rule",
+  "date": "2026-10-22",
+  "settings": {
+    "model": "openai/gpt-4o-mini",
+    "retriever": "stub",
+    "prompt_sha256": "781d5cc286d4",
+    "tools": {
+      "search_knowledge_base": "fd7f60e9680c",
+      "chord_info": "0b76472e5d67",
+      "scale_info": "d5db2189bef2",
+      "interval_between": "c1dc41d4dadc",
+      "note_frequency": "9f9c4b8344be",
+      "transpose_for_instrument": "cbaea41c75a7"
+    },
+    "golden_tools": {
+      "file": "golden-tools.json",
+      "cases": 20,
+      "sha256": "727e504ba4e3"
+    },
+    "git": "430bc78 (uncommitted changes)"
+  },
+  "summary": [
+    {
+      "group": "overall",
+      "cases": 20,
+      "selection": 1.0,
+      "parameter_cases": 12,
+      "parameter": 1.0
+    },
+    {
+      "group": "easy",
+      "cases": 10,
+      "selection": 1.0,
+      "parameter_cases": 5,
+      "parameter": 1.0
+    },
+    {
+      "group": "medium",
+      "cases": 6,
+      "selection": 1.0,
+      "parameter_cases": 4,
+      "parameter": 1.0
+    },
+    {
+      "group": "hard",
+      "cases": 4,
+      "selection": 1.0,
+      "parameter_cases": 3,
+      "parameter": 1.0
+    }
+  ],
+  "cost_tokens": 74700,
+  "questions": [
+    {
+      "id": "t01",
+      "question": "Which notes are in the C major scale?",
+      "category": "tool-rule",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "name": "scale_info",
+          "args": {
+            "tonic": "C",
+            "scale": {
+              "any_of": [
+                "major",
+                "ionian"
+              ]
+            }
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "scale_info",
+          "args": {
+            "tonic": "C",
+            "scale": "major"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 2,
+      "args_matched": 2,
+      "error": null,
+      "tokens": 4167,
+      "parameters_ok": true
+    },
+    {
+      "id": "t02",
+      "question": "What interval is C4 to G4?",
+      "category": "tool-rule",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "name": "interval_between",
+          "args": {
+            "note_a": "C4",
+            "note_b": "G4"
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "interval_between",
+          "args": {
+            "note_a": "C4",
+            "note_b": "G4"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 2,
+      "args_matched": 2,
+      "error": null,
+      "tokens": 4170,
+      "parameters_ok": true
+    },
+    {
+      "id": "t03",
+      "question": "Spell the D Dorian mode for me.",
+      "category": "tool-rule",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "name": "scale_info",
+          "args": {
+            "tonic": "D",
+            "scale": "dorian"
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "scale_info",
+          "args": {
+            "tonic": "D",
+            "scale": "dorian"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 2,
+      "args_matched": 2,
+      "error": null,
+      "tokens": 4152,
+      "parameters_ok": true
+    },
+    {
+      "id": "t04",
+      "question": "How big is the interval from E3 up to Bb4?",
+      "category": "tool-rule",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "name": "interval_between",
+          "args": {
+            "note_a": "E3",
+            "note_b": "Bb4"
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "interval_between",
+          "args": {
+            "note_a": "E3",
+            "note_b": "Bb4"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 2,
+      "args_matched": 2,
+      "error": null,
+      "tokens": 4111,
+      "parameters_ok": true
+    },
+    {
+      "id": "t05",
+      "question": "What are the notes of E-flat natural minor?",
+      "category": "tool-rule",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "name": "scale_info",
+          "args": {
+            "tonic": "Eb",
+            "scale": {
+              "any_of": [
+                "natural minor",
+                "minor",
+                "aeolian"
+              ]
+            }
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "scale_info",
+          "args": {
+            "tonic": "Eb",
+            "scale": "natural minor"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 2,
+      "args_matched": 2,
+      "error": null,
+      "tokens": 4123,
+      "parameters_ok": true
+    },
+    {
+      "id": "t06",
+      "question": "What does a B-flat clarinet sound for a written C4?",
+      "category": "tool-instrument",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "name": "transpose_for_instrument",
+          "args": {
+            "note": "C4",
+            "instrument": {
+              "any_of": [
+                "B-flat clarinet",
+                "Bb clarinet",
+                "clarinet in Bb"
+              ]
+            },
+            "direction": "written_to_sounding"
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "transpose_for_instrument",
+          "args": {
+            "note": "C4",
+            "instrument": "B-flat clarinet",
+            "direction": "written_to_sounding"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 3,
+      "args_matched": 3,
+      "error": null,
+      "tokens": 4233,
+      "parameters_ok": true
+    },
+    {
+      "id": "t07",
+      "question": "Which note must an alto saxophone player read to sound a concert Eb4?",
+      "category": "tool-instrument",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "name": "transpose_for_instrument",
+          "args": {
+            "note": "Eb4",
+            "instrument": "alto saxophone",
+            "direction": "sounding_to_written"
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "transpose_for_instrument",
+          "args": {
+            "note": "Eb4",
+            "instrument": "alto saxophone",
+            "direction": "sounding_to_written"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 3,
+      "args_matched": 3,
+      "error": null,
+      "tokens": 4234,
+      "parameters_ok": true
+    },
+    {
+      "id": "t08",
+      "question": "My tuner shows 450 Hz. Which note is that, and how many cents off is it?",
+      "category": "tool-instrument",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "name": "note_frequency",
+          "args": {
+            "frequency": 450
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "note_frequency",
+          "args": {
+            "frequency": 450
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 1,
+      "args_matched": 1,
+      "error": null,
+      "tokens": 4115,
+      "parameters_ok": true
+    },
+    {
+      "id": "t09",
+      "question": "What frequency in Hz is E5?",
+      "category": "tool-instrument",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "name": "note_frequency",
+          "args": {
+            "note": "E5"
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "note_frequency",
+          "args": {
+            "note": "E5"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 1,
+      "args_matched": 1,
+      "error": null,
+      "tokens": 4077,
+      "parameters_ok": true
+    },
+    {
+      "id": "t10",
+      "question": "Which chord is made of the notes D, F, A and C?",
+      "category": "tool-candidates",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "name": "chord_info",
+          "args": {
+            "notes": [
+              "D",
+              "F",
+              "A",
+              "C"
+            ]
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "chord_info",
+          "args": {
+            "notes": [
+              "D",
+              "F",
+              "A",
+              "C"
+            ]
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 1,
+      "args_matched": 1,
+      "error": null,
+      "tokens": 4290,
+      "parameters_ok": true
+    },
+    {
+      "id": "t11",
+      "question": "What chord do Bb, D and F make?",
+      "category": "tool-candidates",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "name": "chord_info",
+          "args": {
+            "notes": [
+              "Bb",
+              "D",
+              "F"
+            ]
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "chord_info",
+          "args": {
+            "notes": [
+              "Bb",
+              "D",
+              "F"
+            ]
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 1,
+      "args_matched": 1,
+      "error": null,
+      "tokens": 4196,
+      "parameters_ok": true
+    },
+    {
+      "id": "t12",
+      "question": "How do the viola and the violin differ in size, tuning and role?",
+      "category": "comparison",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "name": "search_knowledge_base",
+          "args": {}
+        },
+        {
+          "name": "search_knowledge_base",
+          "args": {}
+        }
+      ],
+      "actual": [
+        {
+          "name": "search_knowledge_base",
+          "args": {
+            "query": "violin",
+            "source_type": "encyclopedia"
+          }
+        },
+        {
+          "name": "search_knowledge_base",
+          "args": {
+            "query": "viola",
+            "source_type": "encyclopedia"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 0,
+      "args_matched": 0,
+      "error": null,
+      "tokens": 4231,
+      "parameters_ok": null
+    },
+    {
+      "id": "t13",
+      "question": "What separates a trumpet from a cornet?",
+      "category": "comparison",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "name": "search_knowledge_base",
+          "args": {}
+        },
+        {
+          "name": "search_knowledge_base",
+          "args": {}
+        }
+      ],
+      "actual": [
+        {
+          "name": "search_knowledge_base",
+          "args": {
+            "query": "trumpet",
+            "source_type": "encyclopedia"
+          }
+        },
+        {
+          "name": "search_knowledge_base",
+          "args": {
+            "query": "cornet",
+            "source_type": "encyclopedia"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 0,
+      "args_matched": 0,
+      "error": null,
+      "tokens": 4196,
+      "parameters_ok": null
+    },
+    {
+      "id": "t14",
+      "question": "Compare the perfect authentic cadence with the half cadence.",
+      "category": "comparison",
+      "difficulty": "medium",
+      "expected": [
+        {
+          "name": "search_knowledge_base",
+          "args": {}
+        },
+        {
+          "name": "search_knowledge_base",
+          "args": {}
+        }
+      ],
+      "actual": [
+        {
+          "name": "search_knowledge_base",
+          "args": {
+            "query": "perfect authentic cadence",
+            "source_type": "textbook"
+          }
+        },
+        {
+          "name": "search_knowledge_base",
+          "args": {
+            "query": "half cadence",
+            "source_type": "textbook"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 0,
+      "args_matched": 0,
+      "error": null,
+      "tokens": 4213,
+      "parameters_ok": null
+    },
+    {
+      "id": "t15",
+      "question": "What is the circle of fifths?",
+      "category": "search",
+      "difficulty": "easy",
+      "expected": [
+        {
+          "name": "search_knowledge_base",
+          "args": {}
+        }
+      ],
+      "actual": [
+        {
+          "name": "search_knowledge_base",
+          "args": {
+            "query": "circle of fifths"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 0,
+      "args_matched": 0,
+      "error": null,
+      "tokens": 4196,
+      "parameters_ok": null
+    },
+    {
+      "id": "t16",
+      "question": "According to the textbook only, what is a Neapolitan sixth?",
+      "category": "search",
+      "difficulty": "hard",
+      "expected": [
+        {
+          "name": "search_knowledge_base",
+          "args": {
+            "source_type": "textbook"
+          }
+        }
+      ],
+      "actual": [
+        {
+          "name": "search_knowledge_base",
+          "args": {
+            "query": "Neapolitan sixth",
+            "source_type": "textbook"
+          }
+        }
+      ],
+      "selection_ok": true,
+      "args_expected": 1,
+      "args_matched": 1,
+      "error": null,
+      "tokens": 4076,
+      "parameters_ok": true
+    },
+    {
+      "id": "t17",
+      "question": "Tell me a joke.",
+      "category": "no-tool",
+      "difficulty": "easy",
+      "expected": [],
+      "actual": [],
+      "selection_ok": true,
+      "args_expected": 0,
+      "args_matched": 0,
+      "error": null,
+      "tokens": 1980,
+      "parameters_ok": null
+    },
+    {
+      "id": "t18",
+      "question": "What is a good recipe for pancakes?",
+      "category": "no-tool",
+      "difficulty": "easy",
+      "expected": [],
+      "actual": [],
+      "selection_ok": true,
+      "args_expected": 0,
+      "args_matched": 0,
+      "error": null,
+      "tokens": 1988,
+      "parameters_ok": null
+    },
+    {
+      "id": "t19",
+      "question": "Thanks, that was really helpful!",
+      "category": "no-tool",
+      "difficulty": "easy",
+      "expected": [],
+      "actual": [],
+      "selection_ok": true,
+      "args_expected": 0,
+      "args_matched": 0,
+      "error": null,
+      "tokens": 1984,
+      "parameters_ok": null
+    },
+    {
+      "id": "t20",
+      "question": "Transpose it up a fifth.",
+      "category": "no-tool",
+      "difficulty": "hard",
+      "expected": [],
+      "actual": [],
+      "selection_ok": true,
+      "args_expected": 0,
+      "args_matched": 0,
+      "error": null,
+      "tokens": 1968,
+      "parameters_ok": null
+    }
+  ]
+}

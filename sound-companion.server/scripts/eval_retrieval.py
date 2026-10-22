@@ -13,7 +13,6 @@ No model is called except to embed the queries, which costs a fraction of a cent
 
 import argparse
 import hashlib
-import subprocess
 import sys
 from importlib.metadata import version
 from pathlib import Path
@@ -22,7 +21,7 @@ import psycopg
 
 from app.config import settings
 from app.rag.chunking import CHUNK_CHARS, OVERLAP_CHARS
-from app.rag.eval_results import build_run, save_run
+from app.rag.eval_results import build_run, git_state, save_run
 from app.rag.evaluation import (
     K, UnknownSourceError, check_sources, corpus_names, derive_filters, evaluate, load_golden_set, summarize,
 )
@@ -30,13 +29,6 @@ from app.rag.retriever import VectorRetriever
 from app.rag.vector_store import HnswIterative
 
 GOLDEN_SET = Path(__file__).resolve().parents[2] / "data" / "golden-set.json"
-
-
-def git_state() -> str:
-    def git(*args: str) -> str:
-        return subprocess.run(["git", *args], capture_output=True, text=True).stdout.strip()
-
-    return git("rev-parse", "--short", "HEAD") + (" (uncommitted changes)" if git("status", "--porcelain") else "")
 
 
 def main(k: int, golden_set: Path, label: str | None, filter_mode: str) -> int:

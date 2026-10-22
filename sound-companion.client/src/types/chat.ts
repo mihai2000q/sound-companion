@@ -5,7 +5,9 @@ export type StreamEvent =
   | { type: 'done' }
   | { type: 'citations'; items: Citation[] }
   | { type: 'queries'; items: string[] }
-  | { type: 'tool_call' | 'tool_result' | 'progress' | 'usage' }
+  | { type: 'tool_call'; id: string; name: string; args: Record<string, unknown> }
+  | { type: 'tool_result'; id: string; name: string; content: string; durationMs: number }
+  | { type: 'progress' | 'usage' }
 
 /** A retrieved chunk, from stored metadata. `id` is the chunk id, `content` the chunk text. */
 export interface Citation {
@@ -18,6 +20,16 @@ export interface Citation {
   content: string
 }
 
+/** `stopped` is a call whose result never came (cancelled, failed or lost connection). */
+export interface ToolCall {
+  id: string
+  name: string
+  args: Record<string, unknown>
+  status: 'running' | 'done' | 'error' | 'stopped'
+  content?: string
+  durationMs?: number
+}
+
 export interface ChatMessage {
   id: string
   role: 'user' | 'bot'
@@ -26,4 +38,5 @@ export interface ChatMessage {
   stopped?: boolean
   citations?: Citation[]
   queries?: string[]
+  toolCalls?: ToolCall[]
 }
