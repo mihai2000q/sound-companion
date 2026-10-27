@@ -1,3 +1,4 @@
+from app.tools.delimit import parse_tool_result
 from app.tools.frequency import make_note_frequency_tool, note_frequency
 
 
@@ -33,5 +34,5 @@ def test_bad_input_is_a_structured_error():
 
 def test_tool_rejects_non_numeric_frequency():
     tool = make_note_frequency_tool()
-    assert tool.invoke({"frequency": "loud"})["error"] == "invalid_input"
-    assert tool.invoke({"frequency": 440})["nearest_note"] == "A4"
+    assert parse_tool_result(tool.invoke({"frequency": "loud"}))["error"] == "invalid_input"
+    assert parse_tool_result(tool.invoke({"frequency": 440}))["nearest_note"] == "A4"

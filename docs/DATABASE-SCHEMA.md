@@ -123,7 +123,7 @@ CREATE TABLE app_logs (
   id          BIGSERIAL PRIMARY KEY,
   request_id  UUID,
   level       TEXT NOT NULL,             -- info | warn | error
-  event       TEXT NOT NULL,             -- 'tool_call', 'retrieval', 'injection_flag', 'budget_block', ...
+  event       TEXT NOT NULL,             -- 'tool_call', 'retrieval', 'injection_flag', 'budget_block', 'input_rejected', 'rate_limit', 'tool_limit', ...
   data        JSONB NOT NULL DEFAULT '{}',
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );

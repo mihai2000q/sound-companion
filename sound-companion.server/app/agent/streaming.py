@@ -8,11 +8,13 @@ from collections.abc import AsyncIterator, Callable
 
 from langchain_core.messages import AIMessage, AIMessageChunk, ToolMessage
 
+from app.limits import MAX_TOOL_CALLS
 from app.db.usage import Ledger, open_scope, record_usage, usage_of_message
 
 logger = logging.getLogger(__name__)
 
 ERROR_MESSAGE = "Something went wrong while answering. Please try again."
+TOOL_LIMIT_MESSAGE = "This question needed too many steps, so it was stopped. Please ask something simpler."
 BUDGET_MESSAGE = "The spending limit for this app has been reached, so no more questions can be answered."
 CANCELLED = "This tool call was cancelled before it finished, so there is no result."
 
@@ -129,12 +131,19 @@ async def agent_events(
         config,
         stream_mode=["messages", "updates", "custom"],
     )
+    tool_calls = 0
     try:
         async for mode, data in stream:
             if mode == "messages":
                 events = token_events(data)
             elif mode == "updates":
                 events = update_events(data, started)
+                tool_calls += sum(event["type"] == "tool_call" for event in events)
+                if tool_calls > MAX_TOOL_CALLS:  # stop before the tools of this step run
+                    logger.warning("tool call limit reached (thread %s)", thread_id)
+                    await stream.aclose()
+                    yield {"type": "error", "code": "tool_limit", "message": TOOL_LIMIT_MESSAGE}
+                    return
                 if ledger is not None:
                     calls = model_calls(data)
                     for call in calls:

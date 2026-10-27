@@ -4,24 +4,36 @@ from collections.abc import AsyncIterator
 from contextlib import aclosing
 from typing import Annotated
 
-from fastapi import APIRouter, Request
-from pydantic import BaseModel, StringConstraints
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import AfterValidator, BaseModel, StringConstraints
 from sse_starlette import EventSourceResponse, ServerSentEvent
 
 from app.agent.request_log import logged_events
 from app.agent.streaming import agent_events
-from app.db.logs import LogWriter
+from app.limits import MAX_MESSAGE_LENGTH, UUID_PATTERN, RateLimiter, clean_message
+from app.db.logs import LogWriter, write_log
 
 router = APIRouter()
 
-MAX_MESSAGE_LENGTH = 4000
 KEEPALIVE_SECONDS = 15
 SEP = "\n"  # the library defaults to \r\n, the contract is \n\n
 
 
 class ChatRequest(BaseModel):
-    thread_id: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
-    message: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_MESSAGE_LENGTH)]
+    thread_id: Annotated[str, StringConstraints(strip_whitespace=True, pattern=UUID_PATTERN)]
+    message: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_MESSAGE_LENGTH), AfterValidator(clean_message)
+    ]
+
+
+async def invalid_request(request: Request, error: RequestValidationError) -> JSONResponse:
+    """The default 422 body, without `input` (it would echo a 50,000 character message back) and `ctx`. The refusal is logged."""
+    detail = [{"loc": e["loc"], "msg": e["msg"], "type": e["type"]} for e in error.errors()]
+    if (writer := getattr(request.app.state, "log_writer", None)) is not None:
+        write_log(writer, uuid.uuid4(), "warn", "input_rejected", fields=[".".join(map(str, d["loc"])) for d in detail])
+    return JSONResponse({"detail": detail}, status_code=422)
 
 
 async def sse_events(
@@ -38,6 +50,11 @@ async def sse_events(
 
 @router.post("/api/chat")
 async def chat(body: ChatRequest, request: Request):
+    limiter: RateLimiter | None = getattr(request.app.state, "rate_limiter", None)
+    if limiter is not None and (wait := limiter.retry_after()):
+        if (writer := getattr(request.app.state, "log_writer", None)) is not None:
+            write_log(writer, uuid.uuid4(), "warn", "rate_limit", retry_after=wait)
+        raise HTTPException(429, "Too many requests. Please wait a moment and try again.", headers={"Retry-After": str(wait)})
     return EventSourceResponse(
         sse_events(request.app.state.agent, body, getattr(request.app.state, "ledger", None), getattr(request.app.state, "log_writer", None)),
         sep=SEP,

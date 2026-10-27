@@ -7,6 +7,7 @@ from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 
 from app.tools.errors import tool_error
+from app.tools.delimit import delimited
 from app.tools.notes import CONVENTION, check_pitch_name
 
 A4_HZ = 440.0
@@ -66,7 +67,7 @@ def note_frequency(note: str | None = None, frequency: float | None = None) -> d
 
 def make_note_frequency_tool() -> StructuredTool:
     return StructuredTool.from_function(
-        func=note_frequency,
+        func=delimited("note_frequency", note_frequency),
         name="note_frequency",
         description=DESCRIPTION,
         args_schema=NoteFrequencyInput,

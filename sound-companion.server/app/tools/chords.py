@@ -5,6 +5,7 @@ from pychord import find_chords_from_notes
 from pydantic import BaseModel, Field
 
 from app.tools.errors import tool_error
+from app.tools.delimit import delimited
 from app.tools.notes import CONVENTION, check_note_names
 
 DESCRIPTION = """Name the chord formed by some notes. Returns every Candidate (an ambiguous set of notes has \
@@ -13,10 +14,13 @@ the Convention it uses. Use it for any "what chord is this" question instead of 
 Give note names without octaves; an invalid note returns an error to explain to the user."""
 
 
+MAX_NOTES = 12  # docs/SECURITY.md: a chord has few notes, and a model-made list of thousands is abuse
+
+
 class ChordInfoInput(BaseModel):
     notes: Annotated[
         list[str],
-        Field(description="Note names without octaves, for example ['D', 'F', 'A', 'C'] or ['Bb', 'D', 'F'].", min_length=2),
+        Field(description="Note names without octaves, for example ['D', 'F', 'A', 'C'] or ['Bb', 'D', 'F'].", min_length=2, max_length=MAX_NOTES),
     ]
 
 
@@ -43,9 +47,9 @@ def chord_info(notes: list[str]) -> dict:
 
 def make_chord_info_tool() -> StructuredTool:
     return StructuredTool.from_function(
-        func=chord_info,
+        func=delimited("chord_info", chord_info),
         name="chord_info",
         description=DESCRIPTION,
         args_schema=ChordInfoInput,
-        handle_validation_error=lambda e: tool_error("invalid_input", "notes must be a list of at least two note names."),
+        handle_validation_error=lambda e: tool_error("invalid_input", f"notes must be a list of two to {MAX_NOTES} note names."),
     )

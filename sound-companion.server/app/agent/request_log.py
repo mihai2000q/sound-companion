@@ -7,10 +7,12 @@ import uuid
 from collections.abc import AsyncIterator
 
 from app.db.logs import LogWriter, write_log
+from app.tools.delimit import unwrap_tool_result
 
 
 def is_error_result(content: str) -> bool:
     """Tools report failures as "Error: ..." text (search) or an `{"error": ...}` object (music tools)."""
+    content = unwrap_tool_result(content)
     if content.startswith("Error"):
         return True
     try:
@@ -31,6 +33,7 @@ async def logged_events(
     began = time.monotonic()
     outcome = "stopped"
     chunks: list[dict] = []
+    tool_calls = 0
 
     def write(level: str, event: str, **data) -> None:
         write_log(writer, request_id, level, event, **data)
@@ -43,6 +46,7 @@ async def logged_events(
         async for event in events:
             kind = event["type"]
             if kind == "tool_call":
+                tool_calls += 1
                 await write_async("info", "tool_call", id=event["id"], name=event["name"], args=event["args"])
             elif kind == "tool_result":
                 failed = is_error_result(event["content"])
@@ -58,6 +62,8 @@ async def logged_events(
                 code = event["code"]
                 if code == "budget_exceeded":
                     await write_async("warn", "budget_block")
+                elif code == "tool_limit":
+                    await write_async("warn", "tool_limit", tool_calls=tool_calls)
                 else:
                     await write_async("error", "error", code=code, exception="; ".join(failures or []) or None)
                 outcome = "error"

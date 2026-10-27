@@ -5,6 +5,7 @@ from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 
 from app.tools.errors import tool_error
+from app.tools.delimit import delimited
 from app.tools.instruments import INSTRUMENTS, find_instrument
 from app.tools.notes import CONVENTION, check_pitch_name, normalise_flats
 
@@ -60,7 +61,7 @@ def transpose_for_instrument(note: str, instrument: str, direction: str = "writt
 
 def make_transpose_tool() -> StructuredTool:
     return StructuredTool.from_function(
-        func=transpose_for_instrument,
+        func=delimited("transpose_for_instrument", transpose_for_instrument),
         name="transpose_for_instrument",
         description=DESCRIPTION,
         args_schema=TransposeInput,

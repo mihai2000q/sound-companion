@@ -76,7 +76,7 @@ def client(replies, ledger, retriever=None, model_class=PricedModel, rewriter_mo
 
 
 def ask(test_client, text="hi"):
-    return events(test_client.post("/api/chat", json={"thread_id": "t", "message": text}))
+    return events(test_client.post("/api/chat", json={"thread_id": "11111111-1111-4111-8111-111111111111", "message": text}))
 
 
 def usage_events(stream):
@@ -87,7 +87,7 @@ def test_each_model_call_of_a_turn_is_a_row_and_the_costs_sum():
     store = FakeStore()
     stream = ask(client([priced(tool_calls=[SEARCH], cost=0.002), priced("A reed.", cost=0.003)], Ledger(store, Budget(1, 4))))
     assert [u.purpose for _, _, u in store.rows] == ["answer", "answer"]
-    assert len({r for _, r, _ in store.rows}) == 1 and {t for t, _, _ in store.rows} == {"t"}
+    assert len({r for _, r, _ in store.rows}) == 1 and {t for t, _, _ in store.rows} == {"11111111-1111-4111-8111-111111111111"}
     last = usage_events(stream)[-1]
     assert last["cost"] == 0.005 and last["totalSpend"] == 0.005
     assert last["promptTokens"] == 20 and last["completionTokens"] == 10 and last["warning"] is False
@@ -163,7 +163,7 @@ def test_hard_cap_refuses_without_any_model_or_retriever_call_or_row():
     app.include_router(chat.router)
     app.state.agent = Boom()
     app.state.ledger = Ledger(store, Budget(0.1, 0.5))
-    stream = events(TestClient(app).post("/api/chat", json={"thread_id": "t", "message": "hi"}))
+    stream = events(TestClient(app).post("/api/chat", json={"thread_id": "11111111-1111-4111-8111-111111111111", "message": "hi"}))
     assert [e["type"] for e in stream] == ["usage", "error"]
     assert stream[1]["code"] == "budget_exceeded" and stream[0]["totalSpend"] == 0.5 and stream[0]["warning"] is True
     assert len(store.rows) == 1

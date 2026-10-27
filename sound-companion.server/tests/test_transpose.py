@@ -1,6 +1,7 @@
 import pytest
 from music21 import interval, pitch
 
+from app.tools.delimit import parse_tool_result
 from app.tools.instruments import INSTRUMENTS, find_instrument
 from app.tools.transpose import make_transpose_tool, transpose_for_instrument
 
@@ -56,5 +57,5 @@ def test_bad_note_and_direction():
 
 def test_tool_wrapper():
     tool = make_transpose_tool()
-    assert tool.invoke({"note": "C4", "instrument": "alto sax"})["result"] == "Eb3"
-    assert tool.invoke({"note": "C4"})["error"] == "invalid_input"
+    assert parse_tool_result(tool.invoke({"note": "C4", "instrument": "alto sax"}))["result"] == "Eb3"
+    assert parse_tool_result(tool.invoke({"note": "C4"}))["error"] == "invalid_input"

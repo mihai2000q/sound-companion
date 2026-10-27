@@ -1,4 +1,4 @@
-"""Compare two saved runs, retrieval or tool-calling. Run from the server folder:
+"""Compare two saved runs, retrieval, tool-calling or injection. Run from the server folder:
 `uv run python -m scripts.compare_runs eval/results/<baseline>.json eval/results/<new>.json`.
 
 Prints the change per question and overall (second run minus first) and the settings that differ,
@@ -8,8 +8,9 @@ so a change in precision can be tied to the change that caused it.
 import argparse
 from pathlib import Path
 
+from app.agent import injection_eval
 from app.agent.tool_eval import KIND, compare as compare_tools
-from app.rag.eval_results import compare, group_means, load_run
+from app.rag.eval_results import compare, differing_settings, group_means, load_run
 
 
 def pct(value: float | None) -> str:
@@ -45,12 +46,25 @@ def main_tools(a: dict, b: dict) -> None:
     print_settings(result["settings"])
 
 
+def main_injection(a: dict, b: dict) -> None:
+    result = injection_eval.compare(a, b)
+    print(f"A: {a['label']} ({a['date']})   B: {b['label']} ({b['date']})\n")
+    print(f"passed {result['summary'][0]['passed']}/{result['summary'][0]['cases']} -> {result['summary'][1]['passed']}/{result['summary'][1]['cases']}")
+    for case_id, before, after in result["changed"]:
+        print(f"{case_id:5} {'pass' if before else 'FAIL'} -> {'pass' if after else 'FAIL'}")
+    if not result["changed"]:
+        print("no case changed")
+    print_settings(differing_settings(a, b))
+
+
 def main(path_a: Path, path_b: Path) -> None:
     a, b = load_run(path_a), load_run(path_b)
     if a.get("kind") != b.get("kind"):
         raise SystemExit("These are not the same kind of run (retrieval and tool-calling cannot be compared).")
     if a.get("kind") == KIND:
         return main_tools(a, b)
+    if a.get("kind") == injection_eval.KIND:
+        return main_injection(a, b)
     result = compare(a, b)
     print(f"A: {a['label']} ({a['date']})   B: {b['label']} ({b['date']})\n")
     print(f"{'id':5} {'P@' + str(a['settings']['k']):>13} {'':>8} {'R@' + str(a['settings']['k']):>13}")
