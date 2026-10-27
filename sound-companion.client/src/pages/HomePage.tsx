@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import { Composer } from '../components/Composer'
 import { Inspector, type ChunkFocus } from '../components/Inspector'
 import { MessageList } from '../components/MessageList'
@@ -38,6 +39,9 @@ export function HomePage() {
           <button type="button" className="btn btn-sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
             Inspector
           </button>
+          <Link to="/monitoring" className="btn btn-sm">
+            Monitoring
+          </Link>
           <button type="button" className="btn btn-sm" disabled={streaming} onClick={startNewChat}>
             New chat
           </button>
