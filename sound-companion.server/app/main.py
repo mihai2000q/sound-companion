@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.agent.agent import build_agent, make_chat_model
 from app.agent.memory import open_checkpointer
-from app.api import chat, health
+from app.api import chat, health, monitoring
 from app.config import settings
 from app.db.logs import SqlLogWriter
 from app.db.migrate import run_migrations
@@ -34,6 +34,7 @@ app.add_middleware(
 )
 app.include_router(health.router)
 app.include_router(chat.router)
+app.include_router(monitoring.router)
 
 
 if __name__ == "__main__":
