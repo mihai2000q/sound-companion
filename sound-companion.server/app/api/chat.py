@@ -1,3 +1,4 @@
+import asyncio
 import json
 import uuid
 from collections.abc import AsyncIterator
@@ -14,6 +15,7 @@ from app.agent.request_log import logged_events
 from app.agent.streaming import agent_events
 from app.limits import MAX_MESSAGE_LENGTH, UUID_PATTERN, RateLimiter, clean_message
 from app.db.logs import LogWriter, write_log
+from app.db.threads import ensure_thread
 
 router = APIRouter()
 
@@ -55,6 +57,8 @@ async def chat(body: ChatRequest, request: Request):
         if (writer := getattr(request.app.state, "log_writer", None)) is not None:
             write_log(writer, uuid.uuid4(), "warn", "rate_limit", retry_after=wait)
         raise HTTPException(429, "Too many requests. Please wait a moment and try again.", headers={"Retry-After": str(wait)})
+    if (threads := getattr(request.app.state, "thread_store", None)) is not None:
+        await asyncio.to_thread(ensure_thread, threads, body.thread_id, body.message)  # before the model call
     return EventSourceResponse(
         sse_events(request.app.state.agent, body, getattr(request.app.state, "ledger", None), getattr(request.app.state, "log_writer", None)),
         sep=SEP,
