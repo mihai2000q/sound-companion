@@ -10,7 +10,7 @@ Three layers, cheapest first.
 
 ## Golden set
 
-`data/golden-set.json`, about 31 questions when complete. Version 0 (Story 4) has 14 retrieval questions with expected sources and reference answers (descriptive, comparison, alias, exact-term, convention-conflict, textbook) and 3 that need a clarifying question. The tool, no-tool and injection questions come with Story 5. Each entry:
+`data/golden-set.json`, about 31 questions when complete. Version 0 (Story 4) has 14 retrieval questions with expected sources and reference answers (descriptive, comparison, alias, exact-term, convention-conflict, textbook) and 3 that need a clarifying question. Story 15 (issue #88) adds 8 exact-term and Alias questions for the hybrid comparison (q18 to q25: Rhodes piano, kalimba, bari sax, 12-bar blues, Stuttgart pitch, Helmholtz pitch notation, viola da gamba, Eb clarinet), each an Alias of one Corpus page, so there are now 22 retrieval questions. Before them, 3 of the 14 were exact-term or Alias queries (q04, q05, q13), plus q06, which asks for German note names. No German-note-name question was added, because q06 covers it and no Corpus page was checked for it. The saved `vector-baseline` was made on the 14 questions, so the comparison uses `vector-baseline-25q` (same retriever, the 22-question set, golden-set hash in the file). The tool, no-tool and injection questions come with Story 5. Each entry:
 
 ```json
 {
@@ -54,7 +54,7 @@ For each question with `expected_sources` (page titles), run the retriever with 
 
 A chunk counts as relevant if its `title` or one of its Aliases is in the expected list.
 
-Run it with `uv run python -m scripts.eval_retrieval` (`-k` changes k, `--golden-set` picks another file). It first checks that every expected source, and every clarification option, is a Corpus title or Alias, and stops naming the ones that are not. Details of the numbers:
+Run it with `uv run python -m scripts.eval_retrieval` (`-k` changes k, `--golden-set` picks another file, `--mode vector|hybrid` picks the retriever and defaults to the `RETRIEVER_MODE` setting). It first checks that every expected source, and every clarification option, is a Corpus title or Alias, and stops naming the ones that are not. Details of the numbers:
 
 - An expected Alias is mapped to its page, so a title and its Alias expected together count as one page.
 - `precision@k` always divides by k, so a query that returns fewer than k chunks scores lower.

@@ -1,0 +1,487 @@
+{
+  "label": "vector-baseline-25q",
+  "date": "2026-10-27",
+  "settings": {
+    "retriever": "VectorRetriever (dense, cosine)",
+    "rewrite": null,
+    "k": 5,
+    "filters": "none",
+    "embedding_model": "openai/text-embedding-3-small",
+    "chunking": {
+      "splitter": "RecursiveCharacterTextSplitter (langchain-text-splitters 1.1.3)",
+      "chunk_chars": 800,
+      "overlap_chars": 100
+    },
+    "index_query_options": "hnsw.ef_search = 100; hnsw.iterative_scan = relaxed_order; hnsw.max_scan_tuples = 20000",
+    "corpus": {
+      "documents": 276,
+      "chunks": 7329
+    },
+    "golden_set": {
+      "file": "golden-set.json",
+      "entries": 25,
+      "sha256": "9d949fb50fde"
+    },
+    "git": "cb96cfd (uncommitted changes)"
+  },
+  "summary": {
+    "k": 5,
+    "questions": 22,
+    "precision": 0.8727272727272727,
+    "recall": 0.8863636363636364
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "question": "What is the circle of fifths and how does it relate to key signatures?",
+      "precision": 0.8,
+      "recall": 0.5,
+      "expected_pages": [
+        "Circle of fifths",
+        "Key signature"
+      ],
+      "found_pages": [
+        "Circle of fifths"
+      ],
+      "retrieved": [
+        "Key signatures > The circle of fifths",
+        "Circle of fifths > (lead)",
+        "Circle of fifths > Use",
+        "Circle of fifths > Structure and use > Diatonic key signatures",
+        "Circle of fifths > Definition"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q02",
+      "question": "How does a clarinet produce sound, and what are its registers?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Clarinet"
+      ],
+      "found_pages": [
+        "Clarinet"
+      ],
+      "retrieved": [
+        "Clarinet > Acoustics",
+        "Clarinet > Acoustics",
+        "Clarinet > Development",
+        "Clarinet > Clarinet family and ranges",
+        "Clarinet > Development"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q03",
+      "question": "What are the top-level classes of the Hornbostel-Sachs system, and where does a violin fit?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Hornbostel–Sachs"
+      ],
+      "found_pages": [
+        "Hornbostel–Sachs"
+      ],
+      "retrieved": [
+        "Hornbostel–Sachs > (lead)",
+        "Hornbostel–Sachs > (lead)",
+        "Hornbostel–Sachs > Application of the system",
+        "Hornbostel–Sachs > Suffixes and composite instruments",
+        "Hornbostel–Sachs > Electrophones (5)"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q04",
+      "question": "What is a Neapolitan sixth?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Neapolitan chord"
+      ],
+      "found_pages": [
+        "Neapolitan chord"
+      ],
+      "retrieved": [
+        "Neapolitan chord > Origin of the name",
+        "Neapolitan chord > Origin of the name",
+        "Neapolitan chord > (lead)",
+        "Neapolitan chord > Harmonic function",
+        "Neapolitan chord > In classical music"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q05",
+      "question": "Is a cor anglais the same as an English horn, and what key is it in?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Cor anglais"
+      ],
+      "found_pages": [
+        "Cor anglais"
+      ],
+      "retrieved": [
+        "Cor anglais > (lead)",
+        "Cor anglais > (lead)",
+        "Cor anglais > History and etymology",
+        "Cor anglais > History and etymology",
+        "Cor anglais > Description and timbre"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q06",
+      "question": "What is middle C called, and what do Germans call B-flat and B natural?",
+      "precision": 0.4,
+      "recall": 0.3333333333333333,
+      "expected_pages": [
+        "Scientific pitch notation",
+        "Pitches and octave designations",
+        "Musical note"
+      ],
+      "found_pages": [
+        "Musical note"
+      ],
+      "retrieved": [
+        "Musical note > Distinguishing pitch > Distinguishing pitches of different octaves",
+        "Clarinet > Clarinet family and ranges",
+        "Accidental (music) > History of notation",
+        "Clarinet > Clarinet family and ranges",
+        "Musical note > Distinguishing pitch > Pitch names and their history"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q07",
+      "question": "Compare the perfect authentic cadence with the half cadence and the plagal cadence.",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Cadence",
+        "Classical cadence types"
+      ],
+      "found_pages": [
+        "Cadence",
+        "Classical cadence types"
+      ],
+      "retrieved": [
+        "Cadence > Common classifications",
+        "Cadence > Common classifications > Half cadence",
+        "Classical cadence types > Authentic and half cadences",
+        "Cadence > In medieval and Renaissance polyphony > Plagal cadence",
+        "Cadence > Common classifications > Authentic cadence"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q08",
+      "question": "Compare the Dorian and Mixolydian modes: which scale degrees differ from the major scale?",
+      "precision": 0.8,
+      "recall": 0.6666666666666666,
+      "expected_pages": [
+        "Dorian mode",
+        "Mixolydian mode",
+        "Mode (music)"
+      ],
+      "found_pages": [
+        "Dorian mode",
+        "Mixolydian mode"
+      ],
+      "retrieved": [
+        "Mixolydian mode > Modern Mixolydian",
+        "Dorian mode > Modern Dorian mode",
+        "Pentatonic scale > Modes of the pentatonic scale > Relationship to diatonic modes",
+        "Dorian mode > Modern Dorian mode",
+        "Mixolydian mode > Ancient Mixolydian"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q09",
+      "question": "How do the viola and the violin differ in size, tuning and role?",
+      "precision": 0.8,
+      "recall": 0.5,
+      "expected_pages": [
+        "Viola",
+        "Violin"
+      ],
+      "found_pages": [
+        "Viola"
+      ],
+      "retrieved": [
+        "Viola > Form",
+        "Viola > Method of playing",
+        "Viola > Method of playing",
+        "Viola > Form",
+        "Viol > Different versions"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q10",
+      "question": "What separates a trumpet from a cornet?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Trumpet",
+        "Cornet"
+      ],
+      "found_pages": [
+        "Trumpet",
+        "Cornet"
+      ],
+      "retrieved": [
+        "Cornet > Relationship to trumpet",
+        "Cornet > (lead)",
+        "Cornet > Relationship to trumpet",
+        "Trumpet > Types",
+        "Cornet > Playing technique"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q11",
+      "question": "How does the white-key method help calculate intervals?",
+      "precision": 0.6,
+      "recall": 1.0,
+      "expected_pages": [
+        "Calculating Intervals: The White-Key Method"
+      ],
+      "found_pages": [
+        "Calculating Intervals: The White-Key Method"
+      ],
+      "retrieved": [
+        "Calculating Intervals: The White-Key Method > (lead)",
+        "Calculating Intervals: The White-Key Method > White-Key Method",
+        "Calculating Intervals: The White-Key Method > White-Key Method",
+        "Intervals and dyads > Methods for learning intervals",
+        "Intervals and dyads > Chromatic intervals"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q12",
+      "question": "What is the difference between concert pitch and written pitch?",
+      "precision": 0.8,
+      "recall": 0.5,
+      "expected_pages": [
+        "Concert pitch",
+        "Transposing instrument"
+      ],
+      "found_pages": [
+        "Concert pitch"
+      ],
+      "retrieved": [
+        "Concert pitch > (lead)",
+        "Pitch (music) > Pitch standards and standard pitch",
+        "Concert pitch > History of pitch standards in Western music",
+        "Concert pitch > History of pitch standards in Western music > Pitch inflation",
+        "Concert pitch > History of pitch standards in Western music > Pre-19th century"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q13",
+      "question": "How does an acoustic guitar produce its sound?",
+      "precision": 0.4,
+      "recall": 1.0,
+      "expected_pages": [
+        "Guitar"
+      ],
+      "found_pages": [
+        "Guitar"
+      ],
+      "retrieved": [
+        "Electric guitar > Construction > Pickups",
+        "Guitar > Construction > Components",
+        "Guitar > Construction > Components",
+        "Electric guitar > Types > Solid-body",
+        "Electric guitar > Types > Electric acoustic"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q14",
+      "question": "How does an electric guitar work, and why does it need an amplifier?",
+      "precision": 0.8,
+      "recall": 1.0,
+      "expected_pages": [
+        "Electric guitar"
+      ],
+      "found_pages": [
+        "Electric guitar"
+      ],
+      "retrieved": [
+        "Electric guitar > Construction > Pickups",
+        "Electric guitar > (lead)",
+        "Guitar > Accessories > Amplifiers, effects and speakers",
+        "Electric guitar > History",
+        "Electric guitar > Types > Electric acoustic"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q18",
+      "question": "What is a Rhodes piano?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Electric piano"
+      ],
+      "found_pages": [
+        "Electric piano"
+      ],
+      "retrieved": [
+        "Electric piano > (lead)",
+        "Electric piano > Types",
+        "Electric piano > Types > Other electric keyboard instruments",
+        "Electric piano > History",
+        "Electric piano > Types > Plucked reeds"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q19",
+      "question": "What is a kalimba and how do you play it?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Mbira"
+      ],
+      "found_pages": [
+        "Mbira"
+      ],
+      "retrieved": [
+        "Mbira > History",
+        "Mbira > Variants > Outside Africa",
+        "Mbira > Variants > Related instruments",
+        "Mbira > Variants > Outside Africa",
+        "Mbira > (lead)"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q20",
+      "question": "What is a bari sax and what key is it in?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Baritone saxophone"
+      ],
+      "found_pages": [
+        "Baritone saxophone"
+      ],
+      "retrieved": [
+        "Baritone saxophone > (lead)",
+        "Baritone saxophone > Transposition",
+        "Baritone saxophone > History",
+        "Baritone saxophone > History",
+        "Baritone saxophone > History"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q21",
+      "question": "How does a 12-bar blues go?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Twelve-bar blues"
+      ],
+      "found_pages": [
+        "Twelve-bar blues"
+      ],
+      "retrieved": [
+        "Twelve-bar blues > Basic progression",
+        "Twelve-bar blues > Variations > Shuffle blues",
+        "Twelve-bar blues > Variations > Other variations",
+        "Twelve-bar blues > (lead)",
+        "Twelve-bar blues > Background"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q22",
+      "question": "What is Stuttgart pitch?",
+      "precision": 0.8,
+      "recall": 1.0,
+      "expected_pages": [
+        "A440 (pitch standard)"
+      ],
+      "found_pages": [
+        "A440 (pitch standard)"
+      ],
+      "retrieved": [
+        "Concert pitch > History of pitch standards in Western music > 19th- and 20th-century standards",
+        "A440 (pitch standard) > (lead)",
+        "A440 (pitch standard) > Modern practices",
+        "A440 (pitch standard) > History and use",
+        "A440 (pitch standard) > History and use"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q23",
+      "question": "What is Helmholtz pitch notation?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Scientific pitch notation"
+      ],
+      "found_pages": [
+        "Scientific pitch notation"
+      ],
+      "retrieved": [
+        "Scientific pitch notation > Table of note frequencies",
+        "Scientific pitch notation > Use",
+        "Scientific pitch notation > Use",
+        "Scientific pitch notation > Table of note frequencies",
+        "Scientific pitch notation > Table of note frequencies"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q24",
+      "question": "What is a viola da gamba?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "Viol"
+      ],
+      "found_pages": [
+        "Viol"
+      ],
+      "retrieved": [
+        "Viol > (lead)",
+        "Viol > (lead)",
+        "Viol > Similar names and common confusions",
+        "Viol > Similar names and common confusions",
+        "Viol > Similar names and common confusions"
+      ],
+      "filter": null
+    },
+    {
+      "id": "q25",
+      "question": "What is an Eb clarinet used for?",
+      "precision": 1.0,
+      "recall": 1.0,
+      "expected_pages": [
+        "E-flat clarinet"
+      ],
+      "found_pages": [
+        "E-flat clarinet"
+      ],
+      "retrieved": [
+        "E-flat clarinet > (lead)",
+        "E-flat clarinet > Recent usage",
+        "E-flat clarinet > Use in concert and military bands",
+        "E-flat clarinet > Use as children's clarinet",
+        "E-flat clarinet > Solo and chamber literature for the E♭ (or D) clarinet"
+      ],
+      "filter": null
+    }
+  ]
+}

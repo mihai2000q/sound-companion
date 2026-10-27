@@ -4,10 +4,12 @@
     uv run python -m scripts.eval_retrieval --label vector-baseline
     uv run python -m scripts.eval_retrieval --label vector-topic-oracle --filters topics-oracle
     uv run python -m scripts.eval_retrieval --label vector-rewrite --rewrite
+    uv run python -m scripts.eval_retrieval --label hybrid --mode hybrid
 
 Checks every expected source is a Corpus title or Alias, runs the retriever for each question and
 prints precision@k and recall@k per question and overall. With `--label` the run is saved to
 `eval/results/<date>-<label>.json` (never overwritten), to compare later with `scripts.compare_runs`.
+`--mode vector|hybrid` picks the retriever (default `RETRIEVER_MODE`).
 `--filters` restricts each question by its expected pages' topics, see `derive_filters`.
 `--rewrite` runs every question through the multi-query rewrite and merge of the search tool (the
 `OPENROUTER_REWRITE_MODEL` call per question, a fraction of a cent) and saves the queries searched.
@@ -23,20 +25,24 @@ from pathlib import Path
 import psycopg
 from langchain_core.callbacks import UsageMetadataCallbackHandler
 
-from app.config import settings
+from app.config import RETRIEVER_MODES, settings
 from app.rag.chunking import CHUNK_CHARS, OVERLAP_CHARS
 from app.rag.eval_results import build_run, git_state, save_run
 from app.rag.evaluation import (
     K, UnknownSourceError, check_sources, corpus_names, derive_filters, evaluate, load_golden_set, summarize,
 )
-from app.rag.retriever import VectorRetriever
+from app.rag.factory import make_retriever
 from app.rag.rewrite import RewritingRetriever, make_rewriter
 from app.rag.vector_store import HnswIterative
 
+RETRIEVER_NAMES = {
+    "vector": "VectorRetriever (dense, cosine)",
+    "hybrid": "HybridRetriever (dense + keyword, RRF 60)",
+}
 GOLDEN_SET = Path(__file__).resolve().parents[2] / "data" / "golden-set.json"
 
 
-def main(k: int, golden_set: Path, label: str | None, filter_mode: str, rewrite: bool) -> int:
+def main(k: int, golden_set: Path, label: str | None, filter_mode: str, rewrite: bool, mode: str) -> int:
     questions = load_golden_set(golden_set)
     with psycopg.connect(settings.database_url) as connection:
         documents = connection.execute("SELECT title, aliases, topics FROM documents").fetchall()
@@ -50,12 +56,12 @@ def main(k: int, golden_set: Path, label: str | None, filter_mode: str, rewrite:
         return 1
 
     filters = derive_filters(questions, names, topics_by_title, filter_mode)
-    vector = VectorRetriever.from_settings()
-    retriever, usage = vector, UsageMetadataCallbackHandler()
+    base = make_retriever(mode)
+    retriever, usage = base, UsageMetadataCallbackHandler()
     if rewrite:
         from app.agent.agent import make_chat_model
 
-        retriever = RewritingRetriever(vector, make_rewriter(make_chat_model(settings.openrouter_rewrite_model), [usage]))
+        retriever = RewritingRetriever(base, make_rewriter(make_chat_model(settings.openrouter_rewrite_model), [usage]))
     results = evaluate(retriever, questions, names, k, filters)
     skipped = [q.id for q in questions if q.expected_behaviour != "answer" or not q.expected_sources]
 
@@ -69,7 +75,7 @@ def main(k: int, golden_set: Path, label: str | None, filter_mode: str, rewrite:
           f"recall@{k} {summary.recall:.3f}   [filters: {filter_mode}]")
     if skipped:
         print(f"skipped (no expected sources to find): {', '.join(skipped)}")
-    print(f"cost {vector.embedding_cost:.8f} credits for query embeddings")
+    print(f"cost {base.embedding_cost:.8f} credits for query embeddings")
     rewrite_settings = None
     if rewrite:
         from scripts.eval_tools import model_prices
@@ -92,7 +98,7 @@ def main(k: int, golden_set: Path, label: str | None, filter_mode: str, rewrite:
         run = build_run(
             label,
             {
-                "retriever": "VectorRetriever (dense, cosine)" + (" + multi-query rewrite" if rewrite else ""),
+                "retriever": RETRIEVER_NAMES[mode] + (" + multi-query rewrite" if rewrite else ""),
                 "rewrite": rewrite_settings,
                 "k": k,
                 "filters": filter_mode,
@@ -124,6 +130,7 @@ if __name__ == "__main__":
     parser.add_argument("--golden-set", type=Path, default=GOLDEN_SET)
     parser.add_argument("--label", help="save the run under this label")
     parser.add_argument("--rewrite", action="store_true", help="rewrite each question into queries, retrieve and merge")
+    parser.add_argument("--mode", choices=RETRIEVER_MODES, default=settings.retriever_mode)
     parser.add_argument("--filters", choices=["none", "topics-oracle", "topics-mismatch"], default="none")
     args = parser.parse_args()
-    sys.exit(main(args.k, args.golden_set, args.label, args.filters, args.rewrite))
+    sys.exit(main(args.k, args.golden_set, args.label, args.filters, args.rewrite, args.mode))

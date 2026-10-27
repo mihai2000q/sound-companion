@@ -204,5 +204,93 @@
     "expected_sources": [],
     "reference_answer": "What would you like me to transpose: a note, a chord or a key (for example Dm7)?",
     "notes": "Nothing in the request says what to transpose, and there is no earlier turn. No options come from the Corpus, so the bot asks for the missing input and calls no tool. Draft: written by Claude, author review pending."
+  },
+  {
+    "id": "q18",
+    "question": "What is a Rhodes piano?",
+    "category": "alias",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Electric piano"
+    ],
+    "reference_answer": "A Rhodes piano is an electric piano. An electric piano has a piano-style keyboard whose mechanical hammers strike metal strings, reeds or wire tines. Pickups (magnetic, electrostatic or piezoelectric) convert the vibrations into electrical signals, and an instrument amplifier and loudspeaker make the sound loud enough for the performer and audience.",
+    "notes": "Answer from the lead of Electric piano. \"Rhodes piano\" is an Alias of that page. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q19",
+    "question": "What is a kalimba and how do you play it?",
+    "category": "alias",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Mbira"
+    ],
+    "reference_answer": "A kalimba is another name for the mbira, a family of instruments traditional to the Shona people of Zimbabwe. It is a wooden board, often fitted with a resonator, with staggered metal tines, played by holding it in the hands and plucking the tines with the thumbs and/or fingers. Musicologists classify it as a lamellaphone, part of the plucked idiophone family.",
+    "notes": "Answer from the lead of Mbira. \"Kalimba\" is an Alias of that page. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q20",
+    "question": "What is a bari sax and what key is it in?",
+    "category": "alias",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Baritone saxophone"
+    ],
+    "reference_answer": "\"Bari sax\" is the common abbreviation of the baritone saxophone. It is larger and lower-pitched than the tenor saxophone and smaller and higher-pitched than the bass, and it is the lowest-pitched saxophone in common use. It is a single-reed instrument, and modern baritone saxophones are pitched in E-flat.",
+    "notes": "Answer from the lead of Baritone saxophone. \"Bari sax\" is an Alias of that page. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q21",
+    "question": "How does a 12-bar blues go?",
+    "category": "exact-term",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Twelve-bar blues"
+    ],
+    "reference_answer": "The twelve-bar blues (or blues changes) is one of the most prominent chord progressions in popular music. It has a distinctive form in lyrics, phrase, chord structure and duration, and in its basic form it is predominantly based on the I, IV and V chords of a key.",
+    "notes": "Answer from the lead of Twelve-bar blues. \"12-bar blues\" is an Alias of that page. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q22",
+    "question": "What is Stuttgart pitch?",
+    "category": "exact-term",
+    "difficulty": "easy",
+    "expected_sources": [
+      "A440 (pitch standard)"
+    ],
+    "reference_answer": "Stuttgart pitch is another name for A440, the musical pitch corresponding to an audio frequency of 440 Hz. It is the tuning standard for the note A above middle C (A4 in scientific pitch notation), standardized by the International Organization for Standardization as ISO 16, and the reference frequency for calibrating acoustic equipment and tuning instruments.",
+    "notes": "Answer from the lead of A440 (pitch standard). \"Stuttgart pitch\" is an Alias of that page. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q23",
+    "question": "What is Helmholtz pitch notation?",
+    "category": "exact-term",
+    "difficulty": "medium",
+    "expected_sources": [
+      "Scientific pitch notation"
+    ],
+    "reference_answer": "In this Corpus, Helmholtz pitch notation is an Alias of the page on scientific pitch notation (SPN, also known as American standard pitch notation and international pitch notation). That page describes a method of specifying musical pitch by combining a note name (with an accidental if needed) and a number identifying the pitch's octave.",
+    "notes": "Answer from the lead of Scientific pitch notation, which lists \"Helmholtz pitch notation\" as an Alias. The two systems are different in practice, so an answer should not claim they are the same without saying the Corpus groups them. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q24",
+    "question": "What is a viola da gamba?",
+    "category": "alias",
+    "difficulty": "easy",
+    "expected_sources": [
+      "Viol"
+    ],
+    "reference_answer": "The term viola da gamba may refer to the viol family as a whole, although without qualification it commonly refers to the bass viol. Viols remained prominent in European art music through the 17th and 18th centuries before declining in use, and were revived in the 20th century as part of the historically informed performance movement.",
+    "notes": "Answer from the lead of Viol. \"Viola da gamba\" is an Alias of that page. Draft: reference answer written by Claude from the Corpus text, author review pending."
+  },
+  {
+    "id": "q25",
+    "question": "What is an Eb clarinet used for?",
+    "category": "alias",
+    "difficulty": "easy",
+    "expected_sources": [
+      "E-flat clarinet"
+    ],
+    "reference_answer": "The E-flat clarinet is used in orchestras, concert bands and marching bands, and plays a central role in clarinet choirs, carrying melodies that would be uncomfortably high for the B-flat clarinet. Solo repertoire is limited, but composers from Berlioz to Mahler have used it extensively as a solo instrument in orchestral contexts.",
+    "notes": "Answer from the lead of E-flat clarinet. \"Eb clarinet\" is an Alias of that page. Draft: reference answer written by Claude from the Corpus text, author review pending."
   }
 ]
