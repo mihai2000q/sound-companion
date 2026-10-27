@@ -1,10 +1,14 @@
 """Turns an agent run into the typed events of the SSE contract (docs/ARCHITECTURE.md). No FastAPI in here."""
 
+import asyncio
 import logging
 import time
+import uuid
 from collections.abc import AsyncIterator
 
 from langchain_core.messages import AIMessage, AIMessageChunk, ToolMessage
+
+from app.db.usage import Ledger, open_scope, record_usage, usage_of_message
 
 logger = logging.getLogger(__name__)
 
@@ -65,11 +69,23 @@ async def cancelled_tool_results(agent, config: dict) -> list[ToolMessage]:
     ]
 
 
-async def agent_events(agent, thread_id: str, message: str) -> AsyncIterator[dict]:
-    """Yield the events of one turn, ending with `done`, or with `error` when the run fails."""
+def model_calls(data: dict) -> list[AIMessage]:
+    """The AI messages of an `updates` chunk: one per finished call of the answer model."""
+    return [
+        m for update in data.values() if isinstance(update, dict) for m in update.get("messages", [])
+        if isinstance(m, AIMessage)
+    ]
+
+
+async def agent_events(agent, thread_id: str, message: str, ledger: Ledger | None = None) -> AsyncIterator[dict]:
+    """Yield the events of one turn, ending with `done`, or with `error` when the run fails.
+    With a `ledger` every model call is written to `usage_log`."""
     started: dict[str, float] = {}
+    request_id = uuid.uuid4()
     config = {"configurable": {"thread_id": thread_id}}
     try:
+        if ledger is not None:
+            open_scope(ledger.store, thread_id, request_id)
         repair = await cancelled_tool_results(agent, config)
     except Exception:
         logger.exception("could not read thread %s", thread_id)
@@ -86,6 +102,9 @@ async def agent_events(agent, thread_id: str, message: str) -> AsyncIterator[dic
                 events = token_events(data)
             elif mode == "updates":
                 events = update_events(data, started)
+                if ledger is not None:
+                    for call in model_calls(data):
+                        await asyncio.to_thread(record_usage, usage_of_message("answer", call))
             else:  # custom: dicts written by tools with get_stream_writer()
                 events = [data] if isinstance(data, dict) and "type" in data else []
             for event in events:

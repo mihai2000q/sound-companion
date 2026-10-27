@@ -6,6 +6,7 @@ from collections.abc import Callable
 from langchain_core.language_models import BaseChatModel
 from pydantic import BaseModel, Field
 
+from app.db.usage import UsageCallback
 from app.rag.retriever import Filters, RetrievedChunk, Retriever
 
 log = logging.getLogger(__name__)
@@ -28,13 +29,13 @@ class Rewrites(BaseModel):
 
 def make_rewriter(model: BaseChatModel, callbacks: list | None = None) -> Rewriter:
     """A function from a query to its rewrites (without the original), [] when the model fails or returns nothing.
-    `callbacks` see the model call (an evaluation counts its tokens with them).
-    Hook for Story 11: write this call to `usage_log` here."""
+    `callbacks` see the model call (an evaluation counts its tokens with them). Inside a request the call
+    is also written to `usage_log`."""
     structured = model.with_structured_output(Rewrites)
 
     def rewrite(query: str) -> list[str]:
         try:
-            result = structured.invoke(PROMPT.format(query=query), config={"callbacks": callbacks or []})
+            result = structured.invoke(PROMPT.format(query=query), config={"callbacks": [*(callbacks or []), UsageCallback("rewrite")]})
             return clean_rewrites(query, result.queries)
         except Exception:  # any model or parsing failure falls back to the original query
             log.warning("query rewrite failed, searching with the original query", exc_info=True)

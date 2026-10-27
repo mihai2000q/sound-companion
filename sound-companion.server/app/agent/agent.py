@@ -9,11 +9,24 @@ from app.rag.rewrite import make_rewriter
 from app.tools.registry import build_tools
 
 
+class CostChatOpenAI(ChatOpenAI):
+    """`langchain-openai` drops OpenRouter's `usage.cost` from streamed chunks (decision 46). This keeps the raw
+    usage on the chunk, so the aggregated message has it in `response_metadata["token_usage"]["cost"]`, as
+    a non-streamed call does. It overrides a private method, so `langchain-openai` is pinned."""
+
+    def _convert_chunk_to_generation_chunk(self, chunk, default_chunk_class, base_generation_info):
+        generation = super()._convert_chunk_to_generation_chunk(chunk, default_chunk_class, base_generation_info)
+        usage = chunk.get("usage")
+        if generation is not None and usage and "cost" in usage:
+            generation.message.response_metadata["token_usage"] = usage  # on this chunk only: strings concatenate
+        return generation
+
+
 def make_chat_model(model: str | None = None) -> ChatOpenAI:
     """The chat model from settings, or `model` (an OpenRouter id) when an evaluation compares models."""
     from app.config import settings
 
-    return ChatOpenAI(
+    return CostChatOpenAI(
         model=model or settings.openrouter_chat_model,
         api_key=settings.openrouter_api_key,
         base_url=settings.openrouter_base_url,
