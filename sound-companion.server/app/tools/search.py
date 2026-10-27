@@ -5,6 +5,7 @@ from langchain_core.tools import StructuredTool
 from langgraph.config import get_stream_writer
 from pydantic import BaseModel, Field, ValidationError
 
+from app.tools.delimit import wrap_document
 from app.rag.retriever import Filters, RetrievedChunk, Retriever
 from app.rag.rewrite import Rewriter, retrieve_with_rewrites
 
@@ -39,9 +40,8 @@ class SearchInput(BaseModel):
 
 def format_chunk(chunk: RetrievedChunk) -> str:
     location = f"{chunk.title} > {chunk.section}" if chunk.section else chunk.title
-    return (
-        f"[{location}] url: {chunk.url} | license: {chunk.license} | score: {chunk.score:.3f}\n{chunk.content}"
-    )
+    header = f"[{location}] url: {chunk.url} | license: {chunk.license} | score: {chunk.score:.3f}"
+    return wrap_document(location, f"{header}\n{chunk.content}")
 
 
 def citation_item(chunk: RetrievedChunk) -> dict:

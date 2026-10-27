@@ -7,10 +7,12 @@ import uuid
 from collections.abc import AsyncIterator
 
 from app.db.logs import LogWriter, write_log
+from app.tools.delimit import unwrap_tool_result
 
 
 def is_error_result(content: str) -> bool:
     """Tools report failures as "Error: ..." text (search) or an `{"error": ...}` object (music tools)."""
+    content = unwrap_tool_result(content)
     if content.startswith("Error"):
         return True
     try:

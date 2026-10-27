@@ -5,6 +5,7 @@ from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 
 from app.tools.errors import tool_error
+from app.tools.delimit import delimited
 from app.tools.notes import CONVENTION, check_note_names, check_pitch_name, normalise_flats
 
 # Seven-note scales only: name -> (music21 class name, accepted aliases)
@@ -110,13 +111,13 @@ def _bad_arguments(_error) -> dict:
 
 def make_scale_info_tool() -> StructuredTool:
     return StructuredTool.from_function(
-        func=scale_info, name="scale_info", description=SCALE_DESCRIPTION, args_schema=ScaleInfoInput,
+        func=delimited("scale_info", scale_info), name="scale_info", description=SCALE_DESCRIPTION, args_schema=ScaleInfoInput,
         handle_validation_error=_bad_arguments,
     )
 
 
 def make_interval_between_tool() -> StructuredTool:
     return StructuredTool.from_function(
-        func=interval_between, name="interval_between", description=INTERVAL_DESCRIPTION, args_schema=IntervalInput,
+        func=delimited("interval_between", interval_between), name="interval_between", description=INTERVAL_DESCRIPTION, args_schema=IntervalInput,
         handle_validation_error=_bad_arguments,
     )

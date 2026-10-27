@@ -36,14 +36,14 @@ def test_no_filters_given():
 
 def test_chunk_format_has_what_a_citation_needs():
     text = search_knowledge_base(FakeRetriever([chunk()]), "English horn")
-    assert text.startswith("[Cor anglais > Design]")
+    assert text.startswith('<document source="Cor anglais > Design">\n[Cor anglais > Design]')
     assert "https://example.org/Cor_anglais" in text
     assert "CC BY-SA 4.0" in text and "0.831" in text
     assert "The cor anglais is a double reed." in text
 
 
 def test_lead_chunk_has_no_section_arrow():
-    assert search_knowledge_base(FakeRetriever([chunk("")]), "x").startswith("[Cor anglais]")
+    assert search_knowledge_base(FakeRetriever([chunk("")]), "x").startswith('<document source="Cor anglais">\n[Cor anglais]')
 
 
 def test_empty_result_is_explicit():

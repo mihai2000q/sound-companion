@@ -1,3 +1,4 @@
+from app.tools.delimit import parse_tool_result
 from app.tools.intervals import interval_between, make_interval_between_tool, make_scale_info_tool, scale_info
 
 
@@ -51,5 +52,5 @@ def test_interval_errors_are_structured():
 
 
 def test_tools_survive_bad_arguments():
-    assert make_scale_info_tool().invoke({"tonic": "C", "scale": "major"})["notes"][0] == "C"
-    assert make_interval_between_tool().invoke({"note_a": "C4"})["error"] == "invalid_input"
+    assert parse_tool_result(make_scale_info_tool().invoke({"tonic": "C", "scale": "major"}))["notes"][0] == "C"
+    assert parse_tool_result(make_interval_between_tool().invoke({"note_a": "C4"}))["error"] == "invalid_input"
