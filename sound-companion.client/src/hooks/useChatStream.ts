@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { EventSourceParserStream } from 'eventsource-parser/stream'
+import { isToolError } from '../lib/toolResult'
 import type { ChatMessage, StreamEvent, ToolCall, Usage } from '../types/chat'
 
 /** The server pings every 15 s, so this much silence means the connection is dead (a proxy may never close it). */
@@ -28,17 +29,6 @@ async function* readEvents(response: Response, onChunk: () => void): AsyncGenera
     .pipeThrough(new EventSourceParserStream())
   for await (const message of stream) {
     yield JSON.parse(message.data) as StreamEvent
-  }
-}
-
-/** The music tools return `{ error, message }` for bad input, inside <tool_result tool="...">...</tool_result>. */
-function isToolError(content: string): boolean {
-  const body = content.match(/^<tool_result tool="[^"]*">\n([\s\S]*)\n<\/tool_result>$/)?.[1] ?? content
-  try {
-    const parsed = JSON.parse(body)
-    return typeof parsed?.error === 'string' && typeof parsed?.message === 'string'
-  } catch {
-    return false
   }
 }
 
@@ -72,13 +62,20 @@ async function fieldErrorOf(response: Response): Promise<FieldError> {
   return { field: detail?.loc?.at(-1) ?? 'message', message: detail?.msg ?? 'The input is not valid.' }
 }
 
-export function useChatStream() {
-  const [threadId, setThreadId] = useState(() => crypto.randomUUID())
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+/** The chat of one Conversation. A different `threadId` needs a new instance (give it a `key`), which starts from
+ *  `initialMessages`. A running answer is aborted when the instance goes away. `setUsage` writes the page's usage, so
+ *  the badge outlives a switch. */
+export function useChatStream(
+  threadId: string,
+  initialMessages: ChatMessage[],
+  setUsage: Dispatch<SetStateAction<Usage | null>>,
+) {
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [streaming, setStreaming] = useState(false)
   const [fieldError, setFieldError] = useState<FieldError | null>(null)
-  const [usage, setUsage] = useState<Usage | null>(null)
   const stopRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => () => stopRef.current?.(), [])
 
   function updateMessage(id: string, change: (message: ChatMessage) => ChatMessage) {
     setMessages((all) => all.map((message) => (message.id === id ? change(message) : message)))
@@ -182,11 +179,5 @@ export function useChatStream() {
     stopRef.current?.()
   }
 
-  function newChat() {
-    setThreadId(crypto.randomUUID())
-    setMessages([])
-    setFieldError(null)
-  }
-
-  return { messages, streaming, usage, fieldError, clearFieldError: () => setFieldError(null), send, retry, stop, newChat }
+  return { messages, streaming, fieldError, clearFieldError: () => setFieldError(null), send, retry, stop }
 }

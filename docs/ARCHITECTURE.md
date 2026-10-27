@@ -17,7 +17,9 @@ FastAPI backend
    |      |-- tool: transpose_for_instrument -> instrument table (+ music21 spelling)
    |      |-- tool: note_frequency           -> hand-written maths
    |-- AsyncPostgresSaver checkpointer (memory per thread_id)
-   |-- usage + log writers -> Postgres
+   |-- usage + log + thread writers -> Postgres
+   |-- GET /api/threads -> the Conversations, newest first ({ thread_id, title, created_at })
+   |-- GET /api/threads/{id} (messages), /export (JSON file), DELETE /api/threads/{id} (row + checkpoint, decision 69)
 OpenRouter  (chat model, query-rewrite model, embeddings)
 Eval scripts (pytest-style CLI, RAGAs) in the same Python project
 ```
@@ -25,7 +27,7 @@ Eval scripts (pytest-style CLI, RAGAs) in the same Python project
 ## Request flow
 
 1. The UI sends the user message and `thread_id`.
-2. The backend validates input (length, characters), checks the rate limit, and checks cumulative spend against the caps.
+2. The backend validates input (length, characters), checks the rate limit, writes the `threads` row on the first request of a `thread_id` (title cut from the message, decision 68), and checks cumulative spend against the caps.
 3. The agent receives the message with the system prompt (see [DOMAIN.md](DOMAIN.md#bot-behaviour)).
 4. The model decides whether to call tools. For explanations it calls `search_knowledge_base`. For calculations it calls a music tool.
 5. `search_knowledge_base` rewrites the query into several variants (cheap model), retrieves for each variant, merges and de-duplicates, and returns chunks wrapped as data (see [SECURITY.md](SECURITY.md)). It also emits `citations` and `queries` events through the agent's custom stream.
@@ -152,7 +154,7 @@ newDir/
     src/
       App.tsx, providers.tsx, router.tsx   app shell, context providers, route table
       pages/                 one component per route (HomePage at /, HealthPage at /health)
-      components/            Chat, MessageBubble, ToolCard, Inspector, Composer
+      components/            Conversation, Sidebar, MessageList, ToolCard, Inspector, Composer
       hooks/                 useChatStream (fetch + stream reader)
       queries/               React Query keys and queryOptions per feature, used inline with useQuery
       state/                 conversation store

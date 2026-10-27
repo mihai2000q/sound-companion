@@ -66,3 +66,13 @@ class AppLog(Base):
     event: Mapped[str] = mapped_column(Text)
     data: Mapped[dict] = mapped_column(JSONB, server_default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ThreadRecord(Base):
+    """One Conversation. The title is made from the first user message (decision 68)."""
+
+    __tablename__ = "threads"
+
+    thread_id: Mapped[str] = mapped_column(Text, primary_key=True)
+    title: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

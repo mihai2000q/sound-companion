@@ -131,10 +131,12 @@ CREATE INDEX app_logs_event_idx ON app_logs (event, created_at);
 
 CREATE TABLE threads (
   thread_id   TEXT PRIMARY KEY,
-  title       TEXT,
+  title       TEXT,                 -- first user message, whitespace collapsed, cut to 60 characters (decision 68)
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ```
+
+`threads` has one row per Conversation, inserted by the chat route on the first request of a `thread_id` (`ON CONFLICT DO NOTHING`, migration 0007) and listed newest first by `GET /api/threads`. A delete removes the row and the checkpoint state, and keeps `usage_log` and `app_logs` rows (budget guard and monitoring). The export reads `usage_log` by `thread_id`.
 
 Total spend for the budget guard: `SELECT COALESCE(SUM(cost_credits),0) FROM usage_log;`
 

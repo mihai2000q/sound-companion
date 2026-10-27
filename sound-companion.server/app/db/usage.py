@@ -46,6 +46,8 @@ class UsageStore(Protocol):
 
     def total_spend(self) -> float: ...
 
+    def thread_rows(self, thread_id: str) -> list[dict]: ...
+
 
 class SqlUsageStore:
     def __init__(self, engine: Engine) -> None:
@@ -80,6 +82,20 @@ class SqlUsageStore:
         """The database sum is the source of truth for the badge and the caps."""
         with self._engine.connect() as conn:
             return float(conn.execute(select(func.coalesce(func.sum(UsageLog.cost_credits), 0))).scalar_one())
+
+    def thread_rows(self, thread_id: str) -> list[dict]:
+        """Every model call of a Conversation, oldest first, for the export (no ids of other tables)."""
+        query = (
+            select(UsageLog.purpose, UsageLog.model, UsageLog.prompt_tokens, UsageLog.completion_tokens, UsageLog.cost_credits, UsageLog.created_at)
+            .where(UsageLog.thread_id == thread_id)
+            .order_by(UsageLog.id)
+        )
+        with self._engine.connect() as conn:
+            return [
+                {"purpose": r.purpose, "model": r.model, "prompt_tokens": r.prompt_tokens, "completion_tokens": r.completion_tokens,
+                 "cost": float(r.cost_credits), "created_at": r.created_at.isoformat()}
+                for r in conn.execute(query)
+            ]
 
 
 @dataclass(frozen=True)
