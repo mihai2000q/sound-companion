@@ -4,7 +4,7 @@ import asyncio
 import logging
 import time
 import uuid
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable
 
 from langchain_core.messages import AIMessage, AIMessageChunk, ToolMessage
 
@@ -97,12 +97,17 @@ async def usage_event(ledger: Ledger, request_id: uuid.UUID) -> dict | None:
     }
 
 
-async def agent_events(agent, thread_id: str, message: str, ledger: Ledger | None = None) -> AsyncIterator[dict]:
+async def agent_events(
+    agent, thread_id: str, message: str, ledger: Ledger | None = None,
+    request_id: uuid.UUID | None = None, on_failure: Callable[[str], None] = lambda text: None,
+) -> AsyncIterator[dict]:
     """Yield the events of one turn, ending with `done`, or with `error` when the run fails.
     With a `ledger` the turn is refused at the hard cap (no model call), every model call is written to
-    `usage_log`, and `usage` events carry the turn's cost so far and the total spend."""
+    `usage_log`, and `usage` events carry the turn's cost so far and the total spend. `request_id` ties the
+    rows of other tables to this turn (made here when not given), `on_failure` gets the exception text, which
+    the events never carry."""
     started: dict[str, float] = {}
-    request_id = uuid.uuid4()
+    request_id = request_id or uuid.uuid4()
     config = {"configurable": {"thread_id": thread_id}}
     try:
         if ledger is not None:
@@ -114,8 +119,9 @@ async def agent_events(agent, thread_id: str, message: str, ledger: Ledger | Non
                 return
             open_scope(ledger.store, thread_id, request_id)
         repair = await cancelled_tool_results(agent, config)
-    except Exception:
+    except Exception as error:
         logger.exception("could not read thread %s", thread_id)
+        on_failure(repr(error))
         yield {"type": "error", "code": "agent_error", "message": ERROR_MESSAGE}
         return
     stream = agent.astream(
@@ -141,8 +147,9 @@ async def agent_events(agent, thread_id: str, message: str, ledger: Ledger | Non
                 events = [data] if isinstance(data, dict) and "type" in data else []
             for event in events:
                 yield event
-    except Exception:
+    except Exception as error:
         logger.exception("agent run failed (thread %s)", thread_id)
+        on_failure(repr(error))
         if ledger is not None and (usage := await usage_event(ledger, request_id)):
             yield usage  # a failed turn still shows what it spent
         yield {"type": "error", "code": "agent_error", "message": ERROR_MESSAGE}

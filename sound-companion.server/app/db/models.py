@@ -52,3 +52,17 @@ class UsageLog(Base):
     completion_tokens: Mapped[int] = mapped_column(Integer, server_default="0")
     cost_credits: Mapped[Decimal] = mapped_column(Numeric(12, 8), server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AppLog(Base):
+    """One row per notable event of a request (docs/DATABASE-SCHEMA.md). `data` never holds message text or tool arguments."""
+
+    __tablename__ = "app_logs"
+    __table_args__ = (Index("app_logs_event_idx", "event", "created_at"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    request_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    level: Mapped[str] = mapped_column(Text)  # info | warn | error
+    event: Mapped[str] = mapped_column(Text)
+    data: Mapped[dict] = mapped_column(JSONB, server_default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
