@@ -70,6 +70,23 @@ def ensure_vector_index(store: PGVectorStore) -> bool:
     return True
 
 
+def ensure_keyword_index(table: str = CHUNKS_TABLE) -> None:
+    """Add the generated `content_tsv` column and its GIN index for hybrid search. Safe to repeat.
+    Migration 0008 does the same when the table already exists."""
+    engine = create_engine(settings.database_url_async)
+    try:
+        with engine.begin() as connection:
+            connection.execute(text(
+                f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS content_tsv TSVECTOR "
+                "GENERATED ALWAYS AS (to_tsvector('english', content)) STORED"
+            ))
+            connection.execute(text(
+                f"CREATE INDEX IF NOT EXISTS {table}_tsv_idx ON {table} USING gin (content_tsv)"
+            ))
+    finally:
+        engine.dispose()
+
+
 def delete_stale_chunks(keep_ids: list[str], document_ids: list[str] | None = None) -> int:
     """Delete chunks whose id is not in `keep_ids`: those of `document_ids`, or of the whole table
     when it is None (a full run, which also removes chunks of documents that left the Corpus).

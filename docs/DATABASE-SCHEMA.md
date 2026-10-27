@@ -60,7 +60,7 @@ With the index forced, a selective filter returned 0 of 10 rows (a filter matchi
 
 ## Hybrid search (story 15)
 
-Add a generated keyword column and index in our own migration. The library's plain store never writes it (not yet tested together in Python, the JavaScript spike confirmed the same pattern works):
+The generated keyword column and its GIN index are built (issue #86). Migration `0008_chunks_keyword_column` adds them by hand, because `env.py` ignores the library's `chunks` table (so `alembic check` finds no drift). The migration does nothing when `chunks` does not exist yet, and `scripts.setup_chunks` adds the same column and index through `ensure_keyword_index()`, so either order works on a fresh database. All statements use `IF NOT EXISTS`, and the downgrade drops both. Checked in Python: the library's insert and its upsert on a repeated id (`ON CONFLICT DO UPDATE`) leave the column to Postgres and refresh it (`tests/test_keyword_column.py`), and `scripts.index` on one title fills it for that title's chunks and changes no other row. Adding the column to the 7,329 existing chunks rewrote the table once.
 
 ```sql
 ALTER TABLE chunks
