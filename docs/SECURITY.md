@@ -42,7 +42,8 @@ The app is local-only with one user, so authentication and network exposure are 
 - Fetch only from the allow-listed hosts (en.wikipedia.org, the OMT GitHub repo).
 - Strip scripts, HTML comments and hidden elements before chunking.
 - Record `revision_id` for every page so a poisoned revision can be identified and re-fetched.
-- Run a simple scan over chunks for instruction-like strings ("ignore previous", "system prompt") and report them for review (not auto-delete).
+- `uv run python -m scripts.scan_injection [--dry-run]` scans every chunk (`app/rag/injection_scan.py`) for instruction-like strings: "ignore previous", "system prompt", "you are now", "new instructions", "reveal your prompt", a `system:` or `assistant:` line start, chat-template tokens and delimiter look-alikes. It prints each hit with title, section, pattern and a short snippet, and writes one `injection_flag` row per chunk and pattern to `app_logs` (no `request_id`, no chunk text beyond the snippet). It never deletes or edits, and a re-run does not repeat a row.
+- Result on the real Corpus (276 documents, 7,329 chunks, 2026-10-27): 0 hits. Broader words would be noise: "instructions" is in 31 chunks, "act as" in 20, "you are" in 12, so the list stays narrow. It is a tripwire for planted text, not a filter: new patterns are added when an attack shows one.
 
 ### 5. Database
 
