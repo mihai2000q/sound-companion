@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from sqlalchemy import Engine, create_engine, select
+from sqlalchemy import Engine, create_engine, delete, select
 from sqlalchemy.dialects.postgresql import insert
 
 from app.db.models import ThreadRecord
@@ -26,6 +26,10 @@ class ThreadStore(Protocol):
     def ensure(self, thread_id: str, title: str) -> None: ...
 
     def list(self) -> list[Thread]: ...
+
+    def get(self, thread_id: str) -> Thread | None: ...
+
+    def delete(self, thread_id: str) -> bool: ...
 
 
 def make_title(message: str, length: int = TITLE_LENGTH) -> str:
@@ -55,6 +59,17 @@ class SqlThreadStore:
         )
         with self._engine.connect() as conn:
             return [Thread(*row) for row in conn.execute(query)]
+
+    def get(self, thread_id: str) -> Thread | None:
+        query = select(ThreadRecord.thread_id, ThreadRecord.title, ThreadRecord.created_at).where(ThreadRecord.thread_id == thread_id)
+        with self._engine.connect() as conn:
+            row = conn.execute(query).one_or_none()
+        return Thread(*row) if row else None
+
+    def delete(self, thread_id: str) -> bool:
+        """Removes the row only: `usage_log` and `app_logs` rows stay, they feed the budget guard and monitoring."""
+        with self._engine.begin() as conn:
+            return conn.execute(delete(ThreadRecord).where(ThreadRecord.thread_id == thread_id)).rowcount > 0
 
 
 def ensure_thread(store: ThreadStore, thread_id: str, message: str) -> None:
