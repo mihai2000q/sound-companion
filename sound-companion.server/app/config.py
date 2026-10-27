@@ -1,6 +1,10 @@
+from typing import Literal, get_args
 from urllib.parse import quote
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+RetrieverMode = Literal["vector", "hybrid"]
+RETRIEVER_MODES = get_args(RetrieverMode)
 
 
 class Settings(BaseSettings):
@@ -13,6 +17,9 @@ class Settings(BaseSettings):
     openrouter_chat_model: str = "openai/gpt-4o-mini"
     openrouter_rewrite_model: str = "openai/gpt-4o-mini"  # cheap model for multi-query rewrite
     openrouter_embedding_model: str = "openai/text-embedding-3-small"
+
+    # Which Retriever the chat route and the retrieval metrics use (decision log, Story 15).
+    retriever_mode: RetrieverMode = "vector"
 
     # Budget caps in OpenRouter credits, treated as USD (decision 37). Soft warns, hard refuses.
     budget_soft_credits: float = 1.0

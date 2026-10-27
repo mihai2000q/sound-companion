@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from app.rag.eval_results import build_run, compare, differing_settings, load_run, run_path, save_run
+from app.rag.eval_results import build_run, compare, differing_settings, group_means, load_run, run_path, save_run
 from app.rag.evaluation import GoldenQuestion, QuestionResult, Summary, derive_filters
 from app.rag.retriever import Filters
 
@@ -105,3 +105,11 @@ def test_group_means_split_single_and_multi_page_questions():
         {"expected_pages": ["A", "B"], "precision": 0.4, "recall": 0.5},
     ]}
     assert group_means(run) == {"single-page": (2, 0.75, 1.0), "multi-page": (1, 0.4, 0.5)}
+
+
+def test_group_means_has_the_extra_groups():
+    a = run("a", [result("q1", 1.0, 1.0), result("q2", 0.5, 0.0), result("q3", 0.0, 0.0)])
+    groups = group_means(a, {"exact": {"q1", "q2"}, "absent": {"q9"}})
+    assert groups["exact"] == (2, 0.75, 0.5)
+    assert "absent" not in groups
+    assert groups["single-page"][0] == 3

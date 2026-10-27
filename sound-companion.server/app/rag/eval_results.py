@@ -75,12 +75,16 @@ def differing_settings(a: dict, b: dict) -> dict[str, tuple[object, object]]:
     }
 
 
-def group_means(run: dict) -> dict[str, tuple[int, float, float]]:
+def group_means(run: dict, extra: dict[str, set[str]] | None = None) -> dict[str, tuple[int, float, float]]:
     """Questions, mean precision and mean recall of the single-page (one expected page) and multi-page
-    questions of a run. A group with no questions is left out."""
-    groups: dict[str, list[dict]] = {"single-page": [], "multi-page": []}
+    questions of a run, and of each `extra` group (a name and the question ids in it, for example the
+    exact-term questions). A group with no questions in the run is left out."""
+    groups: dict[str, list[dict]] = {"single-page": [], "multi-page": [], **{name: [] for name in extra or {}}}
     for q in run["questions"]:
         groups["single-page" if len(q["expected_pages"]) == 1 else "multi-page"].append(q)
+        for name, ids in (extra or {}).items():
+            if q["id"] in ids:
+                groups[name].append(q)
     return {
         name: (len(qs), sum(q["precision"] for q in qs) / len(qs), sum(q["recall"] for q in qs) / len(qs))
         for name, qs in groups.items()

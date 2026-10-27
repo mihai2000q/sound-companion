@@ -60,7 +60,7 @@ With the index forced, a selective filter returned 0 of 10 rows (a filter matchi
 
 ## Hybrid search (story 15)
 
-Add a generated keyword column and index in our own migration. The library's plain store never writes it (not yet tested together in Python, the JavaScript spike confirmed the same pattern works):
+The generated keyword column and its GIN index are built (issue #86). Migration `0008_chunks_keyword_column` adds them by hand, because `env.py` ignores the library's `chunks` table (so `alembic check` finds no drift). The migration does nothing when `chunks` does not exist yet, and `scripts.setup_chunks` adds the same column and index through `ensure_keyword_index()`, so either order works on a fresh database. All statements use `IF NOT EXISTS`, and the downgrade drops both. Checked in Python: the library's insert and its upsert on a repeated id (`ON CONFLICT DO UPDATE`) leave the column to Postgres and refresh it (`tests/test_keyword_column.py`), and `scripts.index` on one title fills it for that title's chunks and changes no other row. Adding the column to the 7,329 existing chunks rewrote the table once.
 
 ```sql
 ALTER TABLE chunks
@@ -95,7 +95,9 @@ ORDER BY score DESC
 LIMIT %(k)s;
 ```
 
-The query vector is passed as a pgvector value. `websearch_to_tsquery` accepts natural phrasing, unlike the library's `plainto_tsquery`, which ANDs every word. RRF is rank-only, so noise from the vector side competes with keyword hits (observed with useless fake vectors, smaller with real ones). Weights can be added later.
+`HybridRetriever` (`app/rag/hybrid.py`, issue #87) runs this query with the shared `WHERE` repeated on both halves: `source_type = ...`, `title = ...` and `topics LIKE ANY/ALL (patterns)`, where each pattern is `%|topic|%` with `\`, `%` and `_` escaped, so `any` and `all` map to `LIKE ANY` and `LIKE ALL`. The query vector goes in as a `'[x,y,...]'::vector` text literal (no pgvector Python package is needed), and the `hnsw.*` settings of `HnswIterative` are applied with `SET LOCAL` in the same transaction as the query. Checked on the real corpus with index scans forced (`enable_seqscan=off`): a dense-only query with `topics = post-tonal` returned 0 rows without `hnsw.iterative_scan` and 10 with it. Aliases need no extra column: the first line of every chunk is the title and Alias line, so the keyword half finds `English horn` in Cor anglais chunks. A query of only stop words gives an empty keyword half, so the result is the dense order. Tie scores are broken by chunk id.
+
+`websearch_to_tsquery` accepts natural phrasing, unlike the library's `plainto_tsquery`, which ANDs every word. RRF is rank-only, so noise from the vector side competes with keyword hits (observed with useless fake vectors, smaller with real ones). Weights can be added later.
 
 **Library mode (comparison only):** `HybridSearchConfig` with `tsv_column="content_tsv"` needs a table where `content_tsv` is a plain NOT NULL column that the library fills at insert, so it would need its own table. In 0.0.19 the first query's keyword text is stored on the shared config and every later query reuses it. The fix is to pass a fresh copy (with a copied `fusion_function_parameters`) as `hybrid_search_config=` on each call, plus a regression test with two different successive queries. The imports are not exported at top level: use `langchain_postgres.v2.hybrid_search_config` and `langchain_postgres.v2.indexes`.
 

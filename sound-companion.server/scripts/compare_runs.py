@@ -11,6 +11,10 @@ from pathlib import Path
 from app.agent import injection_eval
 from app.agent.tool_eval import KIND, compare as compare_tools
 from app.rag.eval_results import compare, differing_settings, group_means, load_run
+from app.rag.evaluation import load_golden_set
+
+GOLDEN_SET = Path(__file__).resolve().parents[2] / "data" / "golden-set.json"
+EXACT_CATEGORIES = ("exact-term", "alias")
 
 
 def pct(value: float | None) -> str:
@@ -74,8 +78,9 @@ def main(path_a: Path, path_b: Path) -> None:
     sa, sb = a["summary"], b["summary"]
     print(f"\noverall precision {sa['precision']:.3f} -> {sb['precision']:.3f} ({result['precision_change']:+.3f}), "
           f"recall {sa['recall']:.3f} -> {sb['recall']:.3f} ({result['recall_change']:+.3f})")
-    groups_a, groups_b = group_means(a), group_means(b)
-    for name in groups_a.keys() & groups_b.keys():
+    exact = {q.id for q in load_golden_set(GOLDEN_SET) if q.category in EXACT_CATEGORIES}
+    groups_a, groups_b = group_means(a, {"exact-term and alias": exact}), group_means(b, {"exact-term and alias": exact})
+    for name in groups_a.keys() & groups_b.keys():  # the groups of the current golden set
         (n, pa, ra), (_, pb, rb) = groups_a[name], groups_b[name]
         print(f"{name} ({n} questions): precision {pa:.3f} -> {pb:.3f} ({pb - pa:+.3f}), "
               f"recall {ra:.3f} -> {rb:.3f} ({rb - ra:+.3f})")

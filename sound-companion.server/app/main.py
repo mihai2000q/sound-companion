@@ -15,7 +15,7 @@ from app.db.logs import SqlLogWriter
 from app.db.migrate import run_migrations
 from app.db.threads import SqlThreadStore
 from app.db.usage import Ledger
-from app.rag.retriever import VectorRetriever
+from app.rag.factory import make_retriever
 
 
 @asynccontextmanager
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
     app.state.thread_store = SqlThreadStore.from_settings()
     app.state.rate_limiter = RateLimiter()
     async with open_checkpointer() as saver:
-        app.state.agent = build_agent(make_chat_model(), VectorRetriever.from_settings(), saver, make_chat_model(settings.openrouter_rewrite_model))
+        app.state.agent = build_agent(make_chat_model(), make_retriever(), saver, make_chat_model(settings.openrouter_rewrite_model))
         yield
 
 
