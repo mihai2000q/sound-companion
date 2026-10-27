@@ -63,8 +63,8 @@ The backend returns `text/event-stream` from a FastAPI `StreamingResponse`. The 
 | `citations` | `{ items: [{ id, title, section, url, score, license, content }] }` (one per retrieved chunk, from stored metadata; `id` is the chunk id, `content` the chunk text) | Citation chips and the inspector panel | `custom` mode, written by the retrieval tool with `get_stream_writer()`. Not sent when the search finds nothing |
 | `queries` | `{ items: [original, rewritten...] }` (only `[original]` until query rewriting, Story 13) | Inspector panel (RAG-process view) | `custom` mode, same writer. Not sent when the search finds nothing |
 | `progress` | `{ message }` | Progress indicator on long tool calls | `custom` mode |
-| `usage` | `{ promptTokens, completionTokens, cost, totalSpend }` (`cost` and tokens are this request's so far, `totalSpend` is the `usage_log` sum) | Usage badge, soft-cap warning | After each answer model call and each tool result, read from `usage_log` (also before an `error`, so a failed turn shows its spend) |
-| `error` | `{ code, message }` | Inline error with retry | Backend |
+| `usage` | `{ promptTokens, completionTokens, cost, totalSpend, warning }` (`cost` and tokens are this request's so far, `totalSpend` is the `usage_log` sum, `warning` is set at the soft cap) | Usage badge, soft-cap warning | After each answer model call and each tool result, read from `usage_log` (also before an `error`, so a failed turn shows its spend) |
+| `error` | `{ code, message }` (`agent_error`, or `budget_exceeded` at the hard cap, sent without any model call) | Inline error with retry (no retry for `budget_exceeded`) | Backend |
 | `done` | `{}` | End of stream | Backend |
 
 This mapping was verified with a fake model in the spike ([research/python-stack-spike.md](research/python-stack-spike.md)). Real streaming and tool calling were then verified against OpenRouter (section C4 of the spike). `langchain-openai` drops `usage.cost` on streamed chunks, so the backend uses a small `ChatOpenAI` subclass that keeps the raw `usage` on the chunk (decision 46).

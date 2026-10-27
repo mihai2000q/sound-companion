@@ -1,4 +1,4 @@
-"""The cost ledger: one `usage_log` row per model call and the spend sums (decision 46).
+"""The cost ledger: one `usage_log` row per model call, the spend sums, and the caps (decisions 37 and 46).
 
 A request opens a `UsageScope` (thread and request id) in a context variable. The code that makes a
 model call, wherever it runs in the agent (a tool in a worker thread, the model node), calls `record_usage`
@@ -83,14 +83,29 @@ class SqlUsageStore:
 
 
 @dataclass(frozen=True)
+class Budget:
+    soft: float
+    hard: float
+
+    def refuses(self, spend: float) -> bool:
+        return spend >= self.hard
+
+    def warns(self, spend: float) -> bool:
+        return spend >= self.soft
+
+
+@dataclass(frozen=True)
 class Ledger:
-    """What a request needs: where usage is written and read."""
+    """What a request needs: where usage is written and read, and the caps."""
 
     store: UsageStore
+    budget: Budget
 
     @classmethod
     def from_settings(cls) -> "Ledger":
-        return cls(SqlUsageStore.from_settings())
+        from app.config import settings
+
+        return cls(SqlUsageStore.from_settings(), Budget(settings.budget_soft_credits, settings.budget_hard_credits))
 
 
 @dataclass(frozen=True)

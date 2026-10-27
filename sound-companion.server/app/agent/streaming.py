@@ -13,6 +13,7 @@ from app.db.usage import Ledger, open_scope, record_usage, usage_of_message
 logger = logging.getLogger(__name__)
 
 ERROR_MESSAGE = "Something went wrong while answering. Please try again."
+BUDGET_MESSAGE = "The spending limit for this app has been reached, so no more questions can be answered."
 CANCELLED = "This tool call was cancelled before it finished, so there is no result."
 
 
@@ -92,18 +93,25 @@ async def usage_event(ledger: Ledger, request_id: uuid.UUID) -> dict | None:
         "completionTokens": turn.completion_tokens,
         "cost": turn.cost,
         "totalSpend": total,
+        "warning": ledger.budget.warns(total),
     }
 
 
 async def agent_events(agent, thread_id: str, message: str, ledger: Ledger | None = None) -> AsyncIterator[dict]:
     """Yield the events of one turn, ending with `done`, or with `error` when the run fails.
-    With a `ledger` every model call is written to `usage_log`, and `usage` events carry the turn's cost
-    so far and the total spend."""
+    With a `ledger` the turn is refused at the hard cap (no model call), every model call is written to
+    `usage_log`, and `usage` events carry the turn's cost so far and the total spend."""
     started: dict[str, float] = {}
     request_id = uuid.uuid4()
     config = {"configurable": {"thread_id": thread_id}}
     try:
         if ledger is not None:
+            spend = await asyncio.to_thread(ledger.store.total_spend)
+            if ledger.budget.refuses(spend):
+                logger.warning("request refused: spend %s is at the hard cap %s", spend, ledger.budget.hard)
+                yield {"type": "usage", "promptTokens": 0, "completionTokens": 0, "cost": 0, "totalSpend": spend, "warning": True}
+                yield {"type": "error", "code": "budget_exceeded", "message": BUDGET_MESSAGE}
+                return
             open_scope(ledger.store, thread_id, request_id)
         repair = await cancelled_tool_results(agent, config)
     except Exception:

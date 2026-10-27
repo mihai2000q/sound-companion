@@ -83,8 +83,8 @@ export function useChatStream() {
     setMessages((all) => all.map((message) => (message.id === id ? change(message) : message)))
   }
 
-  function fail(botId: string, error: string) {
-    updateMessage(botId, (message) => settled({ ...message, error }))
+  function fail(botId: string, error: string, errorCode?: string) {
+    updateMessage(botId, (message) => settled({ ...message, error, errorCode }))
   }
 
   async function consume(response: Response, botId: string, onChunk: () => void, stopped: () => boolean) {
@@ -104,9 +104,9 @@ export function useChatStream() {
         } else if (event.type === 'tool_result') {
           updateMessage(botId, (message) => ({ ...message, toolCalls: withResult(message.toolCalls, event) }))
         } else if (event.type === 'error') {
-          return fail(botId, event.message)
+          return fail(botId, event.message, event.code)
         } else if (event.type === 'usage') {
-          setUsage({ cost: event.cost, totalSpend: event.totalSpend })
+          setUsage({ cost: event.cost, totalSpend: event.totalSpend, warning: event.warning })
         } else if (event.type === 'done') {
           finished = true
         }

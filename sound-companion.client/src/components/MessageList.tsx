@@ -37,7 +37,7 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk }: Props
           {message.error && (
             <div role="alert" className="alert alert-error alert-soft">
               <span>{message.error}</span>
-              {message === last && !streaming && (
+              {message === last && !streaming && message.errorCode !== 'budget_exceeded' && (
                 <button type="button" className="btn btn-sm" onClick={() => onRetry(message.id)}>
                   Retry
                 </button>

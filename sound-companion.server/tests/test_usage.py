@@ -9,7 +9,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 
 from app.agent.agent import CostChatOpenAI, build_agent
 from app.api import chat
-from app.db.usage import Ledger, Totals, Usage, record_usage
+from app.db.usage import Budget, Ledger, Totals, Usage, record_usage
 from tests.test_chat_api import StreamingToolModel, events
 from tests.test_search_tool import FakeRetriever, chunk
 
@@ -59,6 +59,13 @@ class PricedModel(StreamingToolModel):
 SEARCH = {"name": "search_knowledge_base", "args": {"query": "clarinet"}, "id": "1"}
 
 
+class Boom:
+    """A model or retriever that must not be reached."""
+
+    def __getattr__(self, name):
+        raise AssertionError(f"{name} was called")
+
+
 def client(replies, ledger, retriever=None, model_class=PricedModel, rewriter_model=None):
     app = FastAPI()
     app.include_router(chat.router)
@@ -78,24 +85,24 @@ def usage_events(stream):
 
 def test_each_model_call_of_a_turn_is_a_row_and_the_costs_sum():
     store = FakeStore()
-    stream = ask(client([priced(tool_calls=[SEARCH], cost=0.002), priced("A reed.", cost=0.003)], Ledger(store)))
+    stream = ask(client([priced(tool_calls=[SEARCH], cost=0.002), priced("A reed.", cost=0.003)], Ledger(store, Budget(1, 4))))
     assert [u.purpose for _, _, u in store.rows] == ["answer", "answer"]
     assert len({r for _, r, _ in store.rows}) == 1 and {t for t, _, _ in store.rows} == {"t"}
     last = usage_events(stream)[-1]
     assert last["cost"] == 0.005 and last["totalSpend"] == 0.005
-    assert last["promptTokens"] == 20 and last["completionTokens"] == 10
+    assert last["promptTokens"] == 20 and last["completionTokens"] == 10 and last["warning"] is False
     assert stream[-1] == {"type": "done"}
 
 
 def test_total_spend_counts_earlier_requests_and_the_turn_cost_does_not():
     store = FakeStore([("old", uuid.uuid4(), Usage("answer", "m", cost=0.5))])
-    stream = ask(client([priced("Hi", cost=0.1)], Ledger(store)))
+    stream = ask(client([priced("Hi", cost=0.1)], Ledger(store, Budget(1, 4))))
     assert usage_events(stream)[-1]["cost"] == 0.1 and usage_events(stream)[-1]["totalSpend"] == 0.6
 
 
 def test_rewrite_and_embed_calls_in_a_request_share_its_request_id():
     store = FakeStore()
-    stream = ask(client([priced(tool_calls=[SEARCH]), priced("A reed.")], Ledger(store), retriever=EmbeddingRetriever()))
+    stream = ask(client([priced(tool_calls=[SEARCH]), priced("A reed.")], Ledger(store, Budget(1, 4)), retriever=EmbeddingRetriever()))
     assert sorted(u.purpose for _, _, u in store.rows) == ["answer", "answer", "embed"]
     assert len({r for _, r, _ in store.rows}) == 1
     embed_row = next(u for _, _, u in store.rows if u.purpose == "embed")
@@ -139,9 +146,33 @@ def test_rewrite_call_is_recorded_through_the_rewriter():
 
 def test_a_failing_write_is_logged_and_the_stream_goes_on(caplog):
     store = FakeStore(fail_writes=True)
-    stream = ask(client([priced("Hi")], Ledger(store)))
+    stream = ask(client([priced("Hi")], Ledger(store, Budget(1, 4))))
     assert "".join(e["text"] for e in stream if e["type"] == "token").strip() == "Hi"
     assert stream[-1] == {"type": "done"} and "could not write usage_log" in caplog.text
+
+
+def test_soft_cap_sets_the_warning_flag():
+    store = FakeStore([("old", uuid.uuid4(), Usage("answer", "m", cost=0.5))])
+    stream = ask(client([priced("Hi", cost=0.1)], Ledger(store, Budget(0.05, 4))))
+    assert usage_events(stream)[-1]["warning"] is True
+
+
+def test_hard_cap_refuses_without_any_model_or_retriever_call_or_row():
+    store = FakeStore([("old", uuid.uuid4(), Usage("answer", "m", cost=0.5))])
+    app = FastAPI()
+    app.include_router(chat.router)
+    app.state.agent = Boom()
+    app.state.ledger = Ledger(store, Budget(0.1, 0.5))
+    stream = events(TestClient(app).post("/api/chat", json={"thread_id": "t", "message": "hi"}))
+    assert [e["type"] for e in stream] == ["usage", "error"]
+    assert stream[1]["code"] == "budget_exceeded" and stream[0]["totalSpend"] == 0.5 and stream[0]["warning"] is True
+    assert len(store.rows) == 1
+
+
+def test_default_caps_are_one_and_four():
+    from app.config import Settings
+
+    assert (Settings.model_fields["budget_soft_credits"].default, Settings.model_fields["budget_hard_credits"].default) == (1.0, 4.0)
 
 
 def test_a_failed_turn_still_reports_what_it_spent():
@@ -152,7 +183,7 @@ def test_a_failed_turn_still_reports_what_it_spent():
             yield from super()._stream(messages, *args, **kwargs)
 
     store = FakeStore()
-    stream = ask(client([priced(tool_calls=[SEARCH], cost=0.002)], Ledger(store), model_class=FailsAfterToolCall))
+    stream = ask(client([priced(tool_calls=[SEARCH], cost=0.002)], Ledger(store, Budget(1, 4)), model_class=FailsAfterToolCall))
     assert [e["type"] for e in stream][-2:] == ["usage", "error"]
     assert stream[-2]["cost"] == 0.002
 

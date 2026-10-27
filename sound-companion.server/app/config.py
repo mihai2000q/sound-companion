@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     openrouter_rewrite_model: str = "openai/gpt-4o-mini"  # cheap model for multi-query rewrite
     openrouter_embedding_model: str = "openai/text-embedding-3-small"
 
+    # Budget caps in OpenRouter credits, treated as USD (decision 37). Soft warns, hard refuses.
+    budget_soft_credits: float = 1.0
+    budget_hard_credits: float = 4.0
+
     backend_host: str = "127.0.0.1"
     backend_port: int
     client_port: int
