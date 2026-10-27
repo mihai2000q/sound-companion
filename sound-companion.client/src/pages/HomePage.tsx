@@ -1,59 +1,76 @@
-import { useState } from 'react'
-import { Link } from 'react-router'
-import { Composer } from '../components/Composer'
-import { Inspector, type ChunkFocus } from '../components/Inspector'
-import { MessageList } from '../components/MessageList'
-import { UsageBadge } from '../components/UsageBadge'
-import { useChatStream } from '../hooks/useChatStream'
+import { useCallback, useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router'
+import { Conversation } from '../components/Conversation'
+import { Sidebar } from '../components/Sidebar'
+import { toChatMessages } from '../lib/conversation'
+import { threadQueries } from '../queries/threads'
+import type { Usage } from '../types/chat'
 
+/** What the chat route of the server accepts (a lowercase UUID). */
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+
+/** The selected Conversation is the `c` parameter of the URL, so a reload restores it. Without a valid one the page
+ *  starts a new Conversation: the id is made here, and the server writes the Conversation on its first message. */
 export function HomePage() {
-  const { messages, streaming, usage, fieldError, clearFieldError, send, retry, stop, newChat } = useChatStream()
-  const [inspectorOpen, setInspectorOpen] = useState(false)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [focus, setFocus] = useState<ChunkFocus | null>(null)
+  const [params, setParams] = useSearchParams()
+  const param = params.get('c')
+  const threadId = param && UUID.test(param) ? param : null
+  const [usage, setUsage] = useState<Usage | null>(null)
+  const [streaming, setStreaming] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const onStreamingChange = useCallback((value: boolean) => setStreaming(value), [])
 
-  // the latest answer with a search, unless a chip picked another one
-  const inspected =
-    messages.find((message) => message.id === selectedId) ??
-    messages.findLast((message) => message.role === 'bot' && (message.citations || message.queries))
+  useEffect(() => {
+    if (!threadId) setParams({ c: crypto.randomUUID() }, { replace: true })
+  }, [threadId, setParams])
 
-  function openChunk(messageId: string, chunkId: string) {
-    setSelectedId(messageId)
-    setFocus({ messageId, chunkId })
-    setInspectorOpen(true)
-  }
+  if (!threadId) return null
 
-  function startNewChat() {
-    newChat()
-    setSelectedId(null)
-    setFocus(null)
-    setInspectorOpen(false)
+  function select(id: string) {
+    setParams({ c: id })
+    setSidebarOpen(false)
   }
 
   return (
-    <main className="h-screen flex flex-col bg-base-200">
-      <header className="flex items-center justify-between p-4 border-b border-base-300">
-        <h1 className="text-xl font-bold">Sound Companion</h1>
-        <div className="flex items-center gap-2">
-          {usage && <UsageBadge usage={usage} />}
-          <button type="button" className="btn btn-sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
-            Inspector
-          </button>
-          <Link to="/monitoring" className="btn btn-sm">
-            Monitoring
-          </Link>
-          <button type="button" className="btn btn-sm" disabled={streaming} onClick={startNewChat}>
-            New chat
-          </button>
-        </div>
-      </header>
-      <div className="flex-1 min-h-0 flex">
-        <div className="flex-1 min-w-0 max-w-3xl mx-auto flex flex-col bg-base-100">
-          <MessageList messages={messages} streaming={streaming} onRetry={retry} onOpenChunk={openChunk} />
-          <Composer disabled={streaming} error={fieldError} onSend={send} onEdit={clearFieldError} onStop={stop} />
-        </div>
-        <Inspector message={inspected} open={inspectorOpen} focus={focus} onClose={() => setInspectorOpen(false)} />
-      </div>
+    <main className="h-screen flex bg-base-200">
+      <Sidebar
+        activeId={threadId}
+        open={sidebarOpen}
+        busy={streaming}
+        onSelect={select}
+        onNew={() => select(crypto.randomUUID())}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <Chat
+        key={threadId}
+        threadId={threadId}
+        usage={usage}
+        setUsage={setUsage}
+        onStreamingChange={onStreamingChange}
+        onNew={() => select(crypto.randomUUID())}
+        onOpenSidebar={() => setSidebarOpen(true)}
+      />
     </main>
   )
+}
+
+type ChatProps = Omit<React.ComponentProps<typeof Conversation>, 'initialMessages'>
+
+/** Reads the stored messages once, then hands them to the Conversation (which keeps its own state from there on). */
+function Chat(props: ChatProps) {
+  const { data, error, isPending, refetch } = useQuery(threadQueries.detail(props.threadId))
+  if (isPending) return <div className="flex-1 grid place-items-center bg-base-100"><span className="loading loading-spinner" /></div>
+  if (error)
+    return (
+      <div className="flex-1 grid place-items-center bg-base-100">
+        <div role="alert" className="alert alert-error alert-soft flex-col items-start">
+          <span>This Conversation could not be loaded.</span>
+          <button type="button" className="btn btn-sm" onClick={() => refetch()}>
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  return <Conversation {...props} initialMessages={toChatMessages(data?.messages ?? [])} />
 }
