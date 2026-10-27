@@ -7,7 +7,8 @@ export type StreamEvent =
   | { type: 'queries'; items: string[] }
   | { type: 'tool_call'; id: string; name: string; args: Record<string, unknown> }
   | { type: 'tool_result'; id: string; name: string; content: string; durationMs: number }
-  | { type: 'progress' | 'usage' }
+  | { type: 'usage'; promptTokens: number; completionTokens: number; cost: number; totalSpend: number }
+  | { type: 'progress' }
 
 /** A retrieved chunk, from stored metadata. `id` is the chunk id, `content` the chunk text. */
 export interface Citation {
@@ -28,6 +29,12 @@ export interface ToolCall {
   status: 'running' | 'done' | 'error' | 'stopped'
   content?: string
   durationMs?: number
+}
+
+/** Credits spent: `cost` by the current turn so far, `totalSpend` by everything (the database sum). */
+export interface Usage {
+  cost: number
+  totalSpend: number
 }
 
 export interface ChatMessage {

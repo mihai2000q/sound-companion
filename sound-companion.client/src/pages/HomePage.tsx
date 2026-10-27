@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Composer } from '../components/Composer'
 import { Inspector, type ChunkFocus } from '../components/Inspector'
 import { MessageList } from '../components/MessageList'
+import { UsageBadge } from '../components/UsageBadge'
 import { useChatStream } from '../hooks/useChatStream'
 
 export function HomePage() {
-  const { messages, streaming, fieldError, clearFieldError, send, retry, stop, newChat } = useChatStream()
+  const { messages, streaming, usage, fieldError, clearFieldError, send, retry, stop, newChat } = useChatStream()
   const [inspectorOpen, setInspectorOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [focus, setFocus] = useState<ChunkFocus | null>(null)
@@ -32,7 +33,8 @@ export function HomePage() {
     <main className="h-screen flex flex-col bg-base-200">
       <header className="flex items-center justify-between p-4 border-b border-base-300">
         <h1 className="text-xl font-bold">Sound Companion</h1>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          {usage && <UsageBadge usage={usage} />}
           <button type="button" className="btn btn-sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
             Inspector
           </button>

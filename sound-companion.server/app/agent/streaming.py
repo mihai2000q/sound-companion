@@ -77,9 +77,28 @@ def model_calls(data: dict) -> list[AIMessage]:
     ]
 
 
+async def usage_event(ledger: Ledger, request_id: uuid.UUID) -> dict | None:
+    """Tokens and cost of this request so far, and the database sum of all spend. None when it cannot be read."""
+    try:
+        turn, total = await asyncio.gather(
+            asyncio.to_thread(ledger.store.request_totals, request_id), asyncio.to_thread(ledger.store.total_spend)
+        )
+    except Exception:
+        logger.exception("could not read usage")
+        return None
+    return {
+        "type": "usage",
+        "promptTokens": turn.prompt_tokens,
+        "completionTokens": turn.completion_tokens,
+        "cost": turn.cost,
+        "totalSpend": total,
+    }
+
+
 async def agent_events(agent, thread_id: str, message: str, ledger: Ledger | None = None) -> AsyncIterator[dict]:
     """Yield the events of one turn, ending with `done`, or with `error` when the run fails.
-    With a `ledger` every model call is written to `usage_log`."""
+    With a `ledger` every model call is written to `usage_log`, and `usage` events carry the turn's cost
+    so far and the total spend."""
     started: dict[str, float] = {}
     request_id = uuid.uuid4()
     config = {"configurable": {"thread_id": thread_id}}
@@ -103,14 +122,21 @@ async def agent_events(agent, thread_id: str, message: str, ledger: Ledger | Non
             elif mode == "updates":
                 events = update_events(data, started)
                 if ledger is not None:
-                    for call in model_calls(data):
+                    calls = model_calls(data)
+                    for call in calls:
                         await asyncio.to_thread(record_usage, usage_of_message("answer", call))
+                    # after a model call, and after a tool result (a search can spend on a rewrite and an embedding)
+                    if calls or any(event["type"] == "tool_result" for event in events):
+                        usage = await usage_event(ledger, request_id)
+                        events = [*events, usage] if usage else events
             else:  # custom: dicts written by tools with get_stream_writer()
                 events = [data] if isinstance(data, dict) and "type" in data else []
             for event in events:
                 yield event
     except Exception:
         logger.exception("agent run failed (thread %s)", thread_id)
+        if ledger is not None and (usage := await usage_event(ledger, request_id)):
+            yield usage  # a failed turn still shows what it spent
         yield {"type": "error", "code": "agent_error", "message": ERROR_MESSAGE}
         return
     yield {"type": "done"}

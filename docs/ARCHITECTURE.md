@@ -63,7 +63,7 @@ The backend returns `text/event-stream` from a FastAPI `StreamingResponse`. The 
 | `citations` | `{ items: [{ id, title, section, url, score, license, content }] }` (one per retrieved chunk, from stored metadata; `id` is the chunk id, `content` the chunk text) | Citation chips and the inspector panel | `custom` mode, written by the retrieval tool with `get_stream_writer()`. Not sent when the search finds nothing |
 | `queries` | `{ items: [original, rewritten...] }` (only `[original]` until query rewriting, Story 13) | Inspector panel (RAG-process view) | `custom` mode, same writer. Not sent when the search finds nothing |
 | `progress` | `{ message }` | Progress indicator on long tool calls | `custom` mode |
-| `usage` | `{ promptTokens, completionTokens, cost, totalSpend }` | Usage badge, soft-cap warning | Last chunk of each model call, plus OpenRouter cost (see below) |
+| `usage` | `{ promptTokens, completionTokens, cost, totalSpend }` (`cost` and tokens are this request's so far, `totalSpend` is the `usage_log` sum) | Usage badge, soft-cap warning | After each answer model call and each tool result, read from `usage_log` (also before an `error`, so a failed turn shows its spend) |
 | `error` | `{ code, message }` | Inline error with retry | Backend |
 | `done` | `{}` | End of stream | Backend |
 

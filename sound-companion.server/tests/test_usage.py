@@ -72,23 +72,36 @@ def ask(test_client, text="hi"):
     return events(test_client.post("/api/chat", json={"thread_id": "t", "message": text}))
 
 
+def usage_events(stream):
+    return [e for e in stream if e["type"] == "usage"]
+
+
 def test_each_model_call_of_a_turn_is_a_row_and_the_costs_sum():
     store = FakeStore()
     stream = ask(client([priced(tool_calls=[SEARCH], cost=0.002), priced("A reed.", cost=0.003)], Ledger(store)))
     assert [u.purpose for _, _, u in store.rows] == ["answer", "answer"]
     assert len({r for _, r, _ in store.rows}) == 1 and {t for t, _, _ in store.rows} == {"t"}
-    assert [u.cost for _, _, u in store.rows] == [0.002, 0.003]
-    assert [(u.prompt_tokens, u.completion_tokens, u.model) for _, _, u in store.rows] == [(10, 5, "fake/model")] * 2
+    last = usage_events(stream)[-1]
+    assert last["cost"] == 0.005 and last["totalSpend"] == 0.005
+    assert last["promptTokens"] == 20 and last["completionTokens"] == 10
     assert stream[-1] == {"type": "done"}
+
+
+def test_total_spend_counts_earlier_requests_and_the_turn_cost_does_not():
+    store = FakeStore([("old", uuid.uuid4(), Usage("answer", "m", cost=0.5))])
+    stream = ask(client([priced("Hi", cost=0.1)], Ledger(store)))
+    assert usage_events(stream)[-1]["cost"] == 0.1 and usage_events(stream)[-1]["totalSpend"] == 0.6
 
 
 def test_rewrite_and_embed_calls_in_a_request_share_its_request_id():
     store = FakeStore()
-    ask(client([priced(tool_calls=[SEARCH]), priced("A reed.")], Ledger(store), retriever=EmbeddingRetriever()))
+    stream = ask(client([priced(tool_calls=[SEARCH]), priced("A reed.")], Ledger(store), retriever=EmbeddingRetriever()))
     assert sorted(u.purpose for _, _, u in store.rows) == ["answer", "answer", "embed"]
     assert len({r for _, r, _ in store.rows}) == 1
     embed_row = next(u for _, _, u in store.rows if u.purpose == "embed")
     assert embed_row.cost == 0.0001
+    # the usage event after the tool result already includes the embedding
+    assert [e["cost"] for e in usage_events(stream)] == [0.001, 0.0011, 0.0021]
 
 
 class EmbeddingRetriever(FakeRetriever):
@@ -129,6 +142,19 @@ def test_a_failing_write_is_logged_and_the_stream_goes_on(caplog):
     stream = ask(client([priced("Hi")], Ledger(store)))
     assert "".join(e["text"] for e in stream if e["type"] == "token").strip() == "Hi"
     assert stream[-1] == {"type": "done"} and "could not write usage_log" in caplog.text
+
+
+def test_a_failed_turn_still_reports_what_it_spent():
+    class FailsAfterToolCall(PricedModel):
+        def _stream(self, messages, *args, **kwargs):
+            if len(messages) > 2:
+                raise RuntimeError("provider down")
+            yield from super()._stream(messages, *args, **kwargs)
+
+    store = FakeStore()
+    stream = ask(client([priced(tool_calls=[SEARCH], cost=0.002)], Ledger(store), model_class=FailsAfterToolCall))
+    assert [e["type"] for e in stream][-2:] == ["usage", "error"]
+    assert stream[-2]["cost"] == 0.002
 
 
 def test_streamed_chunk_keeps_the_cost():
