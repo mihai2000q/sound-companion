@@ -75,7 +75,7 @@ uv run python -m scripts.compare_runs eval/results/2026-10-22-vector-baseline.js
 - `scripts.compare_runs` prints the change per question and overall (second run minus first) and the settings that differ, so a change in the numbers can be tied to the change that caused it. Compare runs made on the same golden set (the hash is saved).
 - `--filters` restricts each question by its expected pages' topics: `topics-oracle` (an upper bound for topic filters) or `topics-mismatch` (a control that must score 0).
 - A new retriever (Story 15) implements the `Retriever` interface and is passed to `evaluate` (see `scripts/eval_retrieval.py`), the saved settings then name it.
-- The baseline and what it showed are in [research/retrieval-baseline.md](research/retrieval-baseline.md). Compare vector-only, vector with filters, and hybrid. This is the comparison for the hybrid-search task. Include exact-term queries ("Neapolitan sixth") and concept queries.
+- The baseline and what it showed are in [research/retrieval-baseline.md](research/retrieval-baseline.md). Compare vector-only, vector with filters, and hybrid. This is the comparison for the hybrid-search task, done in issue 89: [research/hybrid-vs-vector.md](research/hybrid-vs-vector.md) (vector and hybrid, each with and without rewrite, on the 22-question set), with the default kept at `vector` (decision 71). `scripts.compare_runs` also prints the exact-term and alias group (golden-set categories `exact-term` and `alias`).
 
 ## Layer 2: tool-calling accuracy
 
