@@ -1,4 +1,4 @@
-"""The `app_logs` writer. Writing never raises: a failed write goes to stderr and the request goes on."""
+"""The `app_logs` writer. Every row is redacted on the way in. Writing never raises: a failed write goes to stderr and the request goes on."""
 import logging
 import uuid
 from typing import Protocol
@@ -6,6 +6,7 @@ from typing import Protocol
 from sqlalchemy import Engine, create_engine, insert
 
 from app.db.models import AppLog
+from app.security.redact import redact
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +32,6 @@ class SqlLogWriter:
 
 def write_log(writer: LogWriter, request_id: uuid.UUID, level: str, event: str, **data) -> None:
     try:
-        writer.add(request_id, level, event, data)
+        writer.add(request_id, level, event, redact(data))
     except Exception:
         log.exception("could not write app_logs (%s)", event)

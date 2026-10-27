@@ -110,3 +110,38 @@ def test_error_results_are_recognised():
     assert is_error_result("Error: query must not be empty.")
     assert is_error_result('{"error": "invalid_chord", "message": "x"}')
     assert not is_error_result('{"notes": ["C"]}') and not is_error_result("some text")
+
+
+KEY = "sk-or-v1-0123456789abcdef0123456789abcdef"
+SYSTEM_PROMPT = "You are Sound Companion, a patient teacher of music theory. " * 40
+
+
+def test_a_key_and_a_long_prompt_in_an_error_or_a_tool_call_reach_no_row(monkeypatch):
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "openrouter_api_key", KEY)
+
+    class Failing(StreamingToolModel):
+        def _stream(self, messages, *args, **kwargs):
+            raise RuntimeError(f"401 for key {KEY}; request was {SYSTEM_PROMPT}")
+
+    writer = FakeWriter()
+    app = FastAPI()
+    app.include_router(chat.router)
+    app.state.agent = build_agent(Failing(messages=iter([]), seen=[], bound=[]), FakeRetriever([chunk()]), InMemorySaver(), None)
+    app.state.log_writer = writer
+    post(TestClient(app))
+    leaky = {"name": "search_knowledge_base", "args": {"query": f"{SYSTEM_PROMPT} {KEY}"}, "id": "1"}
+    from app.db.logs import write_log  # redaction lives in write_log
+
+    write_log(writer, uuid.uuid4(), "info", "tool_call", **leaky)
+    text = str(writer.rows)
+    assert KEY not in text and SYSTEM_PROMPT not in text and "[redacted]" in text
+
+
+def test_redact_masks_and_truncates():
+    from app.security.redact import MAX_TEXT, redact
+
+    out = redact({"a": ["Bearer abcdefgh12345", "x" * 1000], "n": 3}, secrets=("hunter22",))
+    assert out["a"][0] == "[redacted]" and len(out["a"][1]) < MAX_TEXT + 40 and out["n"] == 3
+    assert redact("pw hunter22", secrets=("hunter22",)) == "pw [redacted]"

@@ -43,7 +43,7 @@ async def logged_events(
         async for event in events:
             kind = event["type"]
             if kind == "tool_call":
-                await write_async("info", "tool_call", id=event["id"], name=event["name"])
+                await write_async("info", "tool_call", id=event["id"], name=event["name"], args=event["args"])
             elif kind == "tool_result":
                 failed = is_error_result(event["content"])
                 await write_async(
