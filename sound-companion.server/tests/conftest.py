@@ -5,6 +5,7 @@ from langchain_core.documents import Document
 from langchain_core.embeddings import DeterministicFakeEmbedding
 
 from app.rag.chunking import METADATA_COLUMNS
+from app.rag.vector_store import ensure_keyword_index
 
 TABLE = "chunks_filter_test"
 DIMENSIONS = 8
@@ -33,6 +34,7 @@ def store():
         )
     except Exception as error:  # no environment or no database
         pytest.skip(f"database not available: {error}")
+    ensure_keyword_index(TABLE)
     store = PGVectorStore.create_sync(
         engine, DeterministicFakeEmbedding(size=DIMENSIONS), TABLE, metadata_columns=METADATA_COLUMNS
     )
