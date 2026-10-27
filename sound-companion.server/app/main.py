@@ -3,10 +3,12 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.agent.agent import build_agent, make_chat_model
 from app.agent.memory import open_checkpointer
+from app.limits import RateLimiter
 from app.api import chat, health, monitoring
 from app.config import settings
 from app.db.logs import SqlLogWriter
@@ -20,12 +22,14 @@ async def lifespan(app: FastAPI):
     await asyncio.to_thread(run_migrations)
     app.state.ledger = Ledger.from_settings()
     app.state.log_writer = SqlLogWriter.from_settings()
+    app.state.rate_limiter = RateLimiter()
     async with open_checkpointer() as saver:
         app.state.agent = build_agent(make_chat_model(), VectorRetriever.from_settings(), saver, make_chat_model(settings.openrouter_rewrite_model))
         yield
 
 
 app = FastAPI(lifespan=lifespan)
+app.add_exception_handler(RequestValidationError, chat.invalid_request)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.client_origins,

@@ -41,7 +41,7 @@ def client(replies, writer, ledger=None):
 
 
 def post(test_client, text="hi"):
-    return events(test_client.post("/api/chat", json={"thread_id": "t", "message": text}))
+    return events(test_client.post("/api/chat", json={"thread_id": "11111111-1111-4111-8111-111111111111", "message": text}))
 
 
 def test_a_search_turn_writes_its_rows_under_one_request_id():
@@ -50,7 +50,7 @@ def test_a_search_turn_writes_its_rows_under_one_request_id():
     assert writer.names() == ["request", "tool_call", "retrieval", "tool_result", "request_end"]
     assert len({r for r, *_ in writer.rows}) == 1
     by_event = {event: data for _, _, event, data in writer.rows}
-    assert by_event["request"] == {"thread_id": "t", "message_length": 2}
+    assert by_event["request"] == {"thread_id": "11111111-1111-4111-8111-111111111111", "message_length": 2}
     assert by_event["tool_result"]["name"] == "search_knowledge_base" and by_event["tool_result"]["error"] is False
     assert by_event["retrieval"]["queries"] == ["clarinet"] and by_event["retrieval"]["chunks"][0]["id"] == chunk().id
     assert by_event["request_end"]["outcome"] == "done"
@@ -63,7 +63,7 @@ def test_a_refused_request_writes_budget_block_and_calls_no_model():
     app.state.agent = Boom()
     app.state.log_writer = writer
     app.state.ledger = Ledger(FakeStore([("old", uuid.uuid4(), Usage("answer", "m", cost=0.5))]), Budget(0.1, 0.5))
-    post_events = events(TestClient(app).post("/api/chat", json={"thread_id": "t", "message": "hi"}))
+    post_events = events(TestClient(app).post("/api/chat", json={"thread_id": "11111111-1111-4111-8111-111111111111", "message": "hi"}))
     assert post_events[-1]["code"] == "budget_exceeded"
     assert writer.names() == ["request", "budget_block", "request_end"]
     assert writer.rows[-1][3]["outcome"] == "error"

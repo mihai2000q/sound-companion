@@ -59,7 +59,7 @@ def events(response) -> list[dict]:
 
 
 def post(client, **body):
-    return client.post("/api/chat", json={"thread_id": "t1", "message": "How does a clarinet work?"} | body)
+    return client.post("/api/chat", json={"thread_id": "11111111-1111-4111-8111-111111111111", "message": "How does a clarinet work?"} | body)
 
 
 def test_plain_answer_streams_tokens_then_done():

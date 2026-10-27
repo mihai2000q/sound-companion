@@ -24,9 +24,10 @@ The app is local-only with one user, so authentication and network exposure are 
 
 ### 2. Input validation
 
-- Maximum message length (for example 1000 characters), non-empty, string only.
-- Reject control characters, normalise whitespace.
-- `thread_id` validated as a UUID.
+- Maximum message length 1000 characters, non-empty, string only.
+- Reject control characters (newline and tab are allowed), normalise whitespace.
+- `thread_id` validated as a lowercase UUID (what the client's `crypto.randomUUID()` sends).
+- A violation is a 422 that names the field and never echoes the input. It is logged as `input_rejected`.
 - Tool arguments validated with pydantic models: note names matched against a pattern (letter A to G, accidentals, optional octave), instrument names from an enum (the transposition table), frequencies as numbers in a sensible range (for example 1 to 20,000 Hz), at most 12 notes in a chord analysis.
 - `pychord` and `music21` raise exceptions on bad musical input (`H4`, `Xyz`). Tools catch them and return a structured error instead of letting the model guess.
 
@@ -34,7 +35,7 @@ The app is local-only with one user, so authentication and network exposure are 
 
 - Strict schemas, no free-form "action" parameters.
 - All tools are local and read-only. They make no network calls, write nothing and execute nothing.
-- The agent loop has a maximum number of tool calls per request.
+- The agent loop has a maximum of 8 tool calls per request. The call over the limit never runs, the turn ends with an `error` event (`tool_limit`) and is logged as `tool_limit`.
 
 ### 4. Ingestion
 
@@ -51,7 +52,7 @@ The app is local-only with one user, so authentication and network exposure are 
 
 ### 6. Cost and rate
 
-- Per-process rate limit on `/api/chat` (for example 10 requests per minute).
+- Per-process rate limit on `/api/chat`: 10 requests per minute (sliding window), then 429 with `Retry-After`, logged as `rate_limit`.
 - Budget guard from `usage_log`: soft cap 1 credit, hard cap 4 credits (see [ARCHITECTURE.md](ARCHITECTURE.md#cost-guard)).
 
 ### 7. Secrets and errors

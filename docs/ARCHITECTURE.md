@@ -64,7 +64,7 @@ The backend returns `text/event-stream` from a FastAPI `StreamingResponse`. The 
 | `queries` | `{ items: [original, rewritten...] }` (only `[original]` until query rewriting, Story 13) | Inspector panel (RAG-process view) | `custom` mode, same writer. Not sent when the search finds nothing |
 | `progress` | `{ message }` | Progress indicator on long tool calls | `custom` mode |
 | `usage` | `{ promptTokens, completionTokens, cost, totalSpend, warning }` (`cost` and tokens are this request's so far, `totalSpend` is the `usage_log` sum, `warning` is set at the soft cap) | Usage badge, soft-cap warning | After each answer model call and each tool result, read from `usage_log` (also before an `error`, so a failed turn shows its spend) |
-| `error` | `{ code, message }` (`agent_error`, or `budget_exceeded` at the hard cap, sent without any model call) | Inline error with retry (no retry for `budget_exceeded`) | Backend |
+| `error` | `{ code, message }` (`agent_error`, `tool_limit` after 8 tool calls in one request, or `budget_exceeded` at the hard cap, sent without any model call) | Inline error with retry (no retry for `budget_exceeded`) | Backend |
 | `done` | `{}` | End of stream | Backend |
 
 This mapping was verified with a fake model in the spike ([research/python-stack-spike.md](research/python-stack-spike.md)). Real streaming and tool calling were then verified against OpenRouter (section C4 of the spike). `langchain-openai` drops `usage.cost` on streamed chunks, so the backend uses a small `ChatOpenAI` subclass that keeps the raw `usage` on the chunk (decision 46).
