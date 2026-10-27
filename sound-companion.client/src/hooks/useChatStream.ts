@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { EventSourceParserStream } from 'eventsource-parser/stream'
-import type { ChatMessage, StreamEvent, ToolCall } from '../types/chat'
+import type { ChatMessage, StreamEvent, ToolCall, Usage } from '../types/chat'
 
 /** The server pings every 15 s, so this much silence means the connection is dead (a proxy may never close it). */
 const IDLE_MS = 45_000
@@ -76,14 +76,15 @@ export function useChatStream() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [streaming, setStreaming] = useState(false)
   const [fieldError, setFieldError] = useState<FieldError | null>(null)
+  const [usage, setUsage] = useState<Usage | null>(null)
   const stopRef = useRef<(() => void) | null>(null)
 
   function updateMessage(id: string, change: (message: ChatMessage) => ChatMessage) {
     setMessages((all) => all.map((message) => (message.id === id ? change(message) : message)))
   }
 
-  function fail(botId: string, error: string) {
-    updateMessage(botId, (message) => settled({ ...message, error }))
+  function fail(botId: string, error: string, errorCode?: string) {
+    updateMessage(botId, (message) => settled({ ...message, error, errorCode }))
   }
 
   async function consume(response: Response, botId: string, onChunk: () => void, stopped: () => boolean) {
@@ -103,7 +104,9 @@ export function useChatStream() {
         } else if (event.type === 'tool_result') {
           updateMessage(botId, (message) => ({ ...message, toolCalls: withResult(message.toolCalls, event) }))
         } else if (event.type === 'error') {
-          return fail(botId, event.message)
+          return fail(botId, event.message, event.code)
+        } else if (event.type === 'usage') {
+          setUsage({ cost: event.cost, totalSpend: event.totalSpend, warning: event.warning })
         } else if (event.type === 'done') {
           finished = true
         }
@@ -117,6 +120,7 @@ export function useChatStream() {
   /** Streams the answer into `botId`. Resolves to false when the server rejected the input (422). */
   async function ask(text: string, userId: string, botId: string): Promise<boolean> {
     setStreaming(true)
+    setUsage((current) => current && { ...current, cost: 0 }) // a new turn starts at zero
     const controller = new AbortController()
     const watchdog = idleWatchdog(controller)
     watchdog.reset()
@@ -183,5 +187,5 @@ export function useChatStream() {
     setFieldError(null)
   }
 
-  return { messages, streaming, fieldError, clearFieldError: () => setFieldError(null), send, retry, stop, newChat }
+  return { messages, streaming, usage, fieldError, clearFieldError: () => setFieldError(null), send, retry, stop, newChat }
 }

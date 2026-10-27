@@ -1,6 +1,8 @@
 import httpx
 from langchain_core.embeddings import Embeddings
 
+from app.db.usage import Usage, record_usage
+
 BATCH_SIZE = 100  # the endpoint accepts up to 2,048 inputs (docs/research/embeddings-sample.md)
 
 
@@ -33,5 +35,8 @@ class OpenRouterEmbeddings(Embeddings):
         usage = body["usage"]
         self.tokens += usage["total_tokens"]
         self.cost += usage["cost"]
+        record_usage(  # this call's cost, not the running total; a no-op outside a request
+            Usage("embed", self._model, usage.get("prompt_tokens", usage["total_tokens"]), 0, usage["cost"])
+        )
         # `data` carries an `index` per vector, so do not rely on the order.
         return [item["embedding"] for item in sorted(body["data"], key=lambda item: item["index"])]

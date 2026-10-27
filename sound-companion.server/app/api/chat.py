@@ -20,15 +20,15 @@ class ChatRequest(BaseModel):
     message: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_MESSAGE_LENGTH)]
 
 
-async def sse_events(agent, body: ChatRequest) -> AsyncIterator[ServerSentEvent]:
-    async for event in agent_events(agent, body.thread_id, body.message):
+async def sse_events(agent, body: ChatRequest, ledger=None) -> AsyncIterator[ServerSentEvent]:
+    async for event in agent_events(agent, body.thread_id, body.message, ledger):
         yield ServerSentEvent(data=json.dumps(event), sep=SEP)
 
 
 @router.post("/api/chat")
 async def chat(body: ChatRequest, request: Request):
     return EventSourceResponse(
-        sse_events(request.app.state.agent, body),
+        sse_events(request.app.state.agent, body, getattr(request.app.state, "ledger", None)),
         sep=SEP,
         ping=KEEPALIVE_SECONDS,
         ping_message_factory=lambda: ServerSentEvent(comment="keepalive", sep=SEP),
