@@ -1,5 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
-import { threadQueries } from '../queries/threads'
+import { useEffect, useRef, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { deleteThread, exportThread, threadKeys, threadQueries } from '../queries/threads'
+import type { ThreadSummary } from '../types/threads'
 
 interface Props {
   activeId: string
@@ -14,6 +16,26 @@ interface Props {
 /** The Conversations, newest first. Beside the chat on wide screens, over it on narrow ones. */
 export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Props) {
   const { data, error, isPending, refetch } = useQuery(threadQueries.list())
+  const queryClient = useQueryClient()
+  const [asking, setAsking] = useState<ThreadSummary | null>(null)
+  const [failure, setFailure] = useState<string | null>(null)
+
+  const remove = useMutation({
+    mutationFn: (thread: ThreadSummary) => deleteThread(thread.thread_id),
+    onSuccess: async (_, thread) => {
+      setAsking(null)
+      await queryClient.invalidateQueries({ queryKey: threadKeys.list() })
+      if (thread.thread_id === activeId) onNew() // the open one is gone: an empty new Conversation
+    },
+    onError: () => {
+      setAsking(null)
+      setFailure('The Conversation could not be deleted.')
+    },
+  })
+  const download = useMutation({
+    mutationFn: exportThread,
+    onError: () => setFailure('The Conversation could not be exported.'),
+  })
   return (
     <aside
       aria-label="Conversations"
@@ -40,25 +62,90 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
             </button>
           </div>
         )}
+        {failure && (
+          <div role="alert" className="alert alert-error alert-soft mb-2 flex justify-between">
+            <span>{failure}</span>
+            <button type="button" className="btn btn-xs" onClick={() => setFailure(null)}>
+              Dismiss
+            </button>
+          </div>
+        )}
         {data?.length === 0 && <p className="text-sm opacity-60 p-2">No Conversations yet. Ask a question to start one.</p>}
         {data && data.length > 0 && (
           <ul className="menu w-full">
             {data.map((thread) => (
-              <li key={thread.thread_id}>
+              <li key={thread.thread_id} className="flex-row items-center">
                 <button
                   type="button"
-                  className={thread.thread_id === activeId ? 'menu-active' : ''}
+                  className={`flex-1 min-w-0 ${thread.thread_id === activeId ? 'menu-active' : ''}`}
                   aria-current={thread.thread_id === activeId ? 'true' : undefined}
                   disabled={busy && thread.thread_id !== activeId}
                   onClick={() => onSelect(thread.thread_id)}
                 >
                   <span className="truncate">{thread.title || 'Untitled Conversation'}</span>
                 </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs"
+                  aria-label={`Export ${thread.title || 'Untitled Conversation'}`}
+                  disabled={download.isPending}
+                  onClick={() => {
+                    setFailure(null)
+                    download.mutate(thread)
+                  }}
+                >
+                  Export
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs text-error"
+                  aria-label={`Delete ${thread.title || 'Untitled Conversation'}`}
+                  disabled={busy && thread.thread_id === activeId}
+                  onClick={() => {
+                    setFailure(null)
+                    setAsking(thread)
+                  }}
+                >
+                  Delete
+                </button>
               </li>
             ))}
           </ul>
         )}
       </div>
+      {asking && (
+        <DeleteDialog
+          thread={asking}
+          deleting={remove.isPending}
+          onConfirm={() => remove.mutate(asking)}
+          onCancel={() => setAsking(null)}
+        />
+      )}
     </aside>
+  )
+}
+
+/** A DaisyUI modal on a native `<dialog>`: focus stays inside it and Escape cancels. */
+function DeleteDialog({ thread, deleting, onConfirm, onCancel }: { thread: ThreadSummary; deleting: boolean; onConfirm: () => void; onCancel: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null)
+  useEffect(() => dialog.current?.showModal(), [])
+  return (
+    <dialog ref={dialog} className="modal" onClose={onCancel}>
+      <div className="modal-box">
+        <h3 className="font-bold text-lg">Delete this Conversation?</h3>
+        <p className="py-4 break-words">
+          “{thread.title || 'Untitled Conversation'}” and its messages will be removed. This cannot be undone.
+        </p>
+        <div className="modal-action">
+          <button type="button" className="btn" disabled={deleting} onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="button" className="btn btn-error" disabled={deleting} onClick={onConfirm}>
+            {deleting && <span className="loading loading-spinner loading-xs" />}
+            Delete
+          </button>
+        </div>
+      </div>
+    </dialog>
   )
 }

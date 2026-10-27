@@ -34,3 +34,26 @@ export const threadQueries = {
       refetchOnReconnect: false,
     }),
 }
+
+export async function deleteThread(threadId: string): Promise<void> {
+  const response = await fetch(`/api/threads/${threadId}`, { method: 'DELETE' })
+  if (!response.ok) throw new Error(`Server answered ${response.status}`)
+}
+
+/** The file name is the title (cut, with characters a file system dislikes replaced) and the day. */
+export function exportFileName(title: string | null, now = new Date()): string {
+  const name = (title ?? '').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 50) || 'conversation'
+  return `${name}-${now.toISOString().slice(0, 10)}.json`
+}
+
+/** Downloads the server's export as it is: the text is saved, not parsed and written again. */
+export async function exportThread(thread: { thread_id: string; title: string | null }): Promise<void> {
+  const response = await fetch(`/api/threads/${thread.thread_id}/export`)
+  if (!response.ok) throw new Error(`Server answered ${response.status}`)
+  const url = URL.createObjectURL(await response.blob())
+  const link = document.createElement('a')
+  link.href = url
+  link.download = exportFileName(thread.title)
+  link.click()
+  URL.revokeObjectURL(url)
+}
