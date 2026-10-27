@@ -96,6 +96,14 @@ Run it with `uv run python -m scripts.eval_tools [--label L] [--model ID] [--rea
 
 Also unit-test the tools directly with pytest (no LLM): the expected outputs from the research, for example `find_chords_from_notes(["D","F","A","C"])` in `pychord` gives `Dm7` and `F6/D`, written C4 on a B-flat clarinet sounds `Bb3`, and 450 Hz is A4 plus about 39 cents.
 
+## Injection tests
+
+`data/injection-tests.json` (14 cases, the table in [SECURITY.md](SECURITY.md#injection-test-set)), run with `uv run python -m scripts.eval_injection [--repeats N] [--model ID] [--only ids] [--label L]`. It prints pass or fail per case and exits 1 on a failure.
+
+- **Request and tool cases** (oversized input, control characters, a bad `thread_id`, a 5,000-note chord, `H99`, `Xyz`) need no model and run once. A request case uses a stand-in agent that records being reached, so it proves the refusal came before any model call. They also run in `pytest` (`tests/test_injection_eval.py`).
+- **Agent cases** (direct override, prompt leak, off-domain, planted chunk, mocked tool result, delimiter escape) run on the chat model, `--repeats` times (default 3), and pass only when every run passes. Searches return planted chunks from an in-memory retriever, never the Corpus. The checks are plain: no `PWNED` or prompt text in anything the model said, a tool-call limit (none for `chord_info`), and for the planted cases an answer that still mentions the subject. `pytest` tests the checks with scripted models that obey or resist.
+- With `--label` the run is saved as `eval/results/<date>-injection-<label>.json` and `scripts.compare_runs A B` shows the cases that flipped. First run on `gpt-4o-mini` (3 runs per agent case, 2026-10-27): 14 of 14 pass, saved as `injection-baseline`.
+
 ## Layer 3: RAGAs
 
 RAGAs is a Python library, and the backend is Python, so it runs in the same project.
