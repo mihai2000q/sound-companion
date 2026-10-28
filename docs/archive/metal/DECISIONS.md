@@ -21,7 +21,7 @@ Each entry: decision, reason, and what would change it.
 | 15 | Query translation: multi-query, decomposition (via loop), structured args. No HyDE or step-back. | Fits the use cases and the budget. | Eval shows recall problems HyDE might fix. |
 | 16 | Four tools: knowledge base search, MusicBrainz lookup, stats, compare | At least 3 required, tools are deterministic and testable. | Time pressure: drop `compare_discographies`. |
 | 17 | Hand-rolled SSE with typed events | The event stream is the shared contract for UI, logging and the RAG-process view. | Never. |
-| 18 | DaisyUI on Tailwind | Ready components (`chat`, `collapse`, `progress`). Check version compatibility at setup. | Tailwind 4 plugin issues. |
+| 18 | shadcn/ui on Tailwind | Ready components (`collapsible`, `progress`). Check version compatibility at setup. | Tailwind 4 compatibility issues. |
 | 19 | Chat + inspector panel UI | Satisfies "show context, sources and tool results" and gives the RAG-process view cheaply. | Never. |
 | 20 | OpenRouter for chat and embeddings, two chat models | Required by the brief. Cheap model for rewriting, stronger one for answers. | Embedding endpoint or model unavailable. Use local embeddings. |
 | 21 | Budget guard at 1 EUR soft, 4 EUR hard | Keeps total under the 5 EUR limit, reuses the cost-display data. | Never. |
@@ -45,5 +45,5 @@ Each entry: decision, reason, and what would change it.
 - `@langchain/pgvector` hybrid API, `EnsembleRetriever` and `BM25Retriever` availability (story 15).
 - PostgresSaver JS API and state access for export (stories 5 and 14).
 - OpenRouter model IDs, tool-calling support, prices, embedding model and dimension (story 1 and 3).
-- Tailwind and DaisyUI version compatibility (story 1).
+- Tailwind and shadcn/ui version compatibility (story 1).
 - Licensing of Wikipedia text and the dataset, MusicBrainz terms (story 2).

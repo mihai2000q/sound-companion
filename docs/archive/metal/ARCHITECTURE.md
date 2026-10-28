@@ -5,7 +5,7 @@
 One SvelteKit app serves the UI and the API. The server side owns all LangChain logic. Postgres (with pgvector) holds the knowledge base, conversation memory, usage and logs. A separate Python container runs RAGAs offline.
 
 ```
-Browser (Svelte 5 + DaisyUI)
+Browser (Svelte 5 + shadcn/ui)
    |  POST /api/chat  (fetch, body: thread_id + message)
    |  <- SSE stream of typed events
 SvelteKit server (+server.ts)
@@ -73,7 +73,7 @@ The same events feed logging, so the UI and the monitoring data cannot disagree.
 
 Chat on the left, collapsible inspector panel on the right.
 
-- Message list with DaisyUI `chat` bubbles, citation chips under each answer.
+- Message list with Tailwind chat bubbles, citation chips under each answer.
 - Inline tool-call cards (name, arguments, result, duration, status).
 - Inspector: rewritten queries, retrieved chunks with scores, tokens and cost, running spend against the caps.
 - Progress indicators: a skeleton while retrieving, a spinner on running tool cards, a typing indicator while tokens stream.

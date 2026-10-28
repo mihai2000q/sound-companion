@@ -122,9 +122,9 @@ while (true) {
 
 Add validation and error handling before real use. Check the current SvelteKit docs for the exact `RequestHandler` types.
 
-## 8. DaisyUI classes you will use
+## 8. shadcn/ui components you will use
 
-`chat chat-start chat-end chat-bubble`, `btn`, `badge`, `collapse`, `card`, `loading`, `progress`, `alert`, `drawer`, `tabs`. Themes switch with `data-theme="..."` on the root element (a dark theme suits this project). Confirm the Tailwind and DaisyUI versions work together at setup.
+`button`, `badge`, `collapsible`, `card`, `progress`, `alert`, `sheet`, `tabs` (there is no chat component, so bubbles are plain Tailwind). Themes switch with a `.dark` class on the root element (a dark theme suits this project). Confirm the Tailwind and shadcn/ui versions work together at setup.
 
 ## 9. Suggested components (about six)
 

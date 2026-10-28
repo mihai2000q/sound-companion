@@ -5,7 +5,7 @@
 One SvelteKit app serves the UI and the API. The server side owns all LangChain logic. Postgres (with pgvector) holds the knowledge base, conversation memory, usage and logs. A separate Python container runs RAGAs offline.
 
 ```
-Browser (Svelte 5 + DaisyUI)
+Browser (Svelte 5 + shadcn/ui)
    |  POST /api/chat  (fetch, body: thread_id + message)
    |  <- SSE stream of typed events
 SvelteKit server (+server.ts)
@@ -72,7 +72,7 @@ The same events feed logging, so the UI and the monitoring data cannot disagree.
 
 Chat on the left, collapsible inspector panel on the right.
 
-- Message list with DaisyUI `chat` bubbles, Citation chips under each answer, and attribution links (Wikipedia and OMT are CC BY-SA).
+- Message list with Tailwind chat bubbles, Citation chips under each answer, and attribution links (Wikipedia and OMT are CC BY-SA).
 - Inline tool-call cards (name, arguments, result, duration, status).
 - Inspector: rewritten queries, retrieved chunks with scores, tokens and cost, running spend against the caps.
 - Progress indicators: a skeleton while retrieving, a spinner on running tool cards, a typing indicator while tokens stream.
@@ -136,7 +136,7 @@ Rule: everything under `src/lib/server/` is framework-agnostic and imports nothi
 
 ## Tooling versions (from the research)
 
-Tailwind 4.3.3 and DaisyUI 5.7.50 install with `@import "tailwindcss"; @plugin "daisyui";` plus the `@tailwindcss/vite` plugin. SvelteKit 3.1 needs Node 22.17+, Vite 8 and TypeScript 6. The research agent did not run a build. This machine has Node 24, Docker 29 and Python 3.12.
+Tailwind 4.3.3 installs with `@import "tailwindcss";` plus the `@tailwindcss/vite` plugin. SvelteKit 3.1 needs Node 22.17+, Vite 8 and TypeScript 6. The research agent did not run a build. This machine has Node 24, Docker 29 and Python 3.12.
 
 ## Error handling
 
