@@ -7,6 +7,7 @@ import type { ChatMessage, Usage } from '../types/chat'
 import { Composer } from './Composer'
 import { Inspector, type ChunkFocus } from './Inspector'
 import { MessageList } from './MessageList'
+import { ThemeToggle } from './ThemeToggle'
 import { UsageBadge } from './UsageBadge'
 
 interface Props {
@@ -62,6 +63,7 @@ export function Conversation({ threadId, initialMessages, usage, setUsage, onStr
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           {usage && <UsageBadge usage={usage} />}
+          <ThemeToggle />
           <button type="button" className="btn btn-sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
             Inspector
           </button>
