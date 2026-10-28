@@ -75,6 +75,7 @@ Then open the client and ask a question: it answers with Citations (a chat turn 
 | [docs/GLOSSARY.md](docs/GLOSSARY.md) | Technical terms (RAG, RRF, SSE, ...) |
 | [docs/IMPLEMENTATION-PLAN.md](docs/IMPLEMENTATION-PLAN.md) | Ordered stories with acceptance criteria |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Decision log with reasons |
+| [docs/DEMO.md](docs/DEMO.md) | Demo script: questions to show, checks to run, known weak spots |
 | [docs/EVALUATION.md](docs/EVALUATION.md) | Golden set, metrics, RAGAs setup |
 | [docs/SECURITY.md](docs/SECURITY.md) | Threat model and defences |
 | [docs/research/](docs/research/) | Verified facts about data sources, libraries and APIs |
