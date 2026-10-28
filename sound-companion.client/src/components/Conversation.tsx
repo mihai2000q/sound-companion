@@ -1,13 +1,12 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router'
 import { useChatStream } from '../hooks/useChatStream'
 import { threadKeys } from '../queries/threads'
 import type { ChatMessage, Usage } from '../types/chat'
+import { AppBar } from './AppBar'
 import { Composer } from './Composer'
 import { Inspector, type ChunkFocus } from './Inspector'
 import { MessageList } from './MessageList'
-import { ThemeToggle } from './ThemeToggle'
 import { UsageBadge } from './UsageBadge'
 
 interface Props {
@@ -20,7 +19,7 @@ interface Props {
   onOpenSidebar: () => void
 }
 
-/** One Conversation: header, messages, composer and inspector. The page gives it a `key` of its `threadId`, so a
+/** One Conversation: app bar, messages, composer and inspector. The page gives it a `key` of its `threadId`, so a
  *  switch starts a fresh instance (messages, selection and inspector are reset). */
 export function Conversation({ threadId, initialMessages, usage, setUsage, onStreamingChange, onNew, onOpenSidebar }: Props) {
   const { messages, streaming, fieldError, clearFieldError, send, retry, stop } = useChatStream(threadId, initialMessages, setUsage)
@@ -54,27 +53,15 @@ export function Conversation({ threadId, initialMessages, usage, setUsage, onStr
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      <header className="flex items-center justify-between gap-2 p-4 border-b border-base-300">
-        <div className="flex items-center gap-2 min-w-0">
-          <button type="button" className="btn btn-sm lg:hidden" onClick={onOpenSidebar}>
-            Conversations
-          </button>
-          <h1 className="text-xl font-bold truncate max-sm:hidden">Sound Companion</h1>
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          {usage && <UsageBadge usage={usage} />}
-          <ThemeToggle />
-          <button type="button" className="btn btn-sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
-            Inspector
-          </button>
-          <Link to="/monitoring" className="btn btn-sm">
-            Monitoring
-          </Link>
-          <button type="button" className="btn btn-sm lg:hidden" disabled={streaming} onClick={onNew}>
-            New Conversation
-          </button>
-        </div>
-      </header>
+      <AppBar onOpenSidebar={onOpenSidebar}>
+        {usage && <UsageBadge usage={usage} />}
+        <button type="button" className="btn btn-sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
+          Inspector
+        </button>
+        <button type="button" className="btn btn-sm lg:hidden" disabled={streaming} onClick={onNew}>
+          New Conversation
+        </button>
+      </AppBar>
       <div className="flex-1 min-h-0 flex">
         <div className="flex-1 min-w-0 max-w-3xl mx-auto flex flex-col bg-base-100">
           <MessageList messages={messages} streaming={streaming} onRetry={retry} onOpenChunk={openChunk} />

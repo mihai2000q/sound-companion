@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
+import { AppBar } from '../components/AppBar'
 import { Conversation } from '../components/Conversation'
 import { Sidebar } from '../components/Sidebar'
 import { toChatMessages } from '../lib/conversation'
@@ -60,15 +61,24 @@ type ChatProps = Omit<React.ComponentProps<typeof Conversation>, 'initialMessage
 /** Reads the stored messages once, then hands them to the Conversation (which keeps its own state from there on). */
 function Chat(props: ChatProps) {
   const { data, error, isPending, refetch } = useQuery(threadQueries.detail(props.threadId))
-  if (isPending) return <div className="flex-1 grid place-items-center bg-base-100"><span className="loading loading-spinner" /></div>
+  if (isPending)
+    return (
+      <div className="flex-1 min-w-0 flex flex-col">
+        <AppBar onOpenSidebar={props.onOpenSidebar} />
+        <div className="flex-1 grid place-items-center bg-base-100"><span className="loading loading-spinner" /></div>
+      </div>
+    )
   if (error)
     return (
-      <div className="flex-1 grid place-items-center bg-base-100">
-        <div role="alert" className="alert alert-error alert-soft flex-col items-start">
-          <span>This Conversation could not be loaded.</span>
-          <button type="button" className="btn btn-sm" onClick={() => refetch()}>
-            Retry
-          </button>
+      <div className="flex-1 min-w-0 flex flex-col">
+        <AppBar onOpenSidebar={props.onOpenSidebar} />
+        <div className="flex-1 grid place-items-center bg-base-100">
+          <div role="alert" className="alert alert-error alert-soft flex-col items-start">
+            <span>This Conversation could not be loaded.</span>
+            <button type="button" className="btn btn-sm" onClick={() => refetch()}>
+              Retry
+            </button>
+          </div>
         </div>
       </div>
     )

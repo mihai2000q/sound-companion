@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router'
+import { AppBar } from '../components/AppBar'
 import { monitoringQueries } from '../queries/monitoring'
 
 const ms = (value: number) => `${Math.round(value).toLocaleString()} ms`
@@ -10,18 +10,13 @@ export function MonitoringPage() {
 
   return (
     <main className="min-h-screen bg-base-200">
-      <header className="flex items-center justify-between p-4 border-b border-base-300">
-        <h1 className="text-xl font-bold">Monitoring</h1>
-        <div className="flex items-center gap-2">
-          <button type="button" className="btn btn-sm" disabled={isFetching} onClick={() => refetch()}>
-            Refresh
-          </button>
-          <Link to="/" className="btn btn-sm">
-            Chat
-          </Link>
-        </div>
-      </header>
+      <AppBar>
+        <button type="button" className="btn btn-sm" disabled={isFetching} onClick={() => refetch()}>
+          Refresh
+        </button>
+      </AppBar>
       <div className="max-w-3xl mx-auto p-4 flex flex-col gap-4">
+        <h1 className="text-2xl font-bold">Monitoring</h1>
         {error && (
           <div role="alert" className="alert alert-error alert-soft">
             {error.message}
