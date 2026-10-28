@@ -5,6 +5,8 @@ import { deleteThread, exportThread, threadKeys, threadQueries } from '../querie
 import type { ThreadSummary } from '../types/threads'
 import { ContextMenu } from './ContextMenu'
 
+const TOAST_MS = 5000
+
 interface Props {
   activeId: string
   open: boolean
@@ -42,6 +44,12 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
   })
   const needle = filter.trim().toLowerCase()
   const shown = data?.filter((thread) => (thread.title || 'Untitled Conversation').toLowerCase().includes(needle))
+  // a toast goes away by itself; a new failure restarts the timer
+  useEffect(() => {
+    if (!failure) return
+    const timer = setTimeout(() => setFailure(null), TOAST_MS)
+    return () => clearTimeout(timer)
+  }, [failure])
   const closeMenu = useCallback(() => setMenu(null), [])
   return (
     <aside
@@ -84,14 +92,6 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
             <span>The Conversations could not be loaded.</span>
             <button type="button" className="btn btn-sm" onClick={() => refetch()}>
               Retry
-            </button>
-          </div>
-        )}
-        {failure && (
-          <div role="alert" className="alert alert-error alert-soft mb-2 flex justify-between">
-            <span>{failure}</span>
-            <button type="button" className="btn btn-xs" onClick={() => setFailure(null)}>
-              Dismiss
             </button>
           </div>
         )}
@@ -140,6 +140,16 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
           </ul>
         )}
       </div>
+      {failure && (
+        <div className="toast toast-end toast-bottom z-50">
+          <div role="alert" className="alert alert-error">
+            <span>{failure}</span>
+            <button type="button" className="btn btn-xs btn-ghost" onClick={() => setFailure(null)}>
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
       {menu && (
         <ContextMenu
           x={menu.x}
