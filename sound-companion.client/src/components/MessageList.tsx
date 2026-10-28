@@ -28,7 +28,7 @@ const SUGGESTIONS = [
 function RoleAvatar({ role }: { role: ChatMessage['role'] }) {
   return (
     <Avatar className="size-8" aria-hidden="true">
-      <AvatarFallback className={`text-xs ${role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
+      <AvatarFallback className={`text-xs ${role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-brass text-brass-foreground'}`}>
         {role === 'user' ? 'You' : 'SC'}
       </AvatarFallback>
     </Avatar>
@@ -38,9 +38,11 @@ function RoleAvatar({ role }: { role: ChatMessage['role'] }) {
 /** Shown for a Conversation with no messages: a few questions that start it. */
 function EmptyState({ onSuggest }: { onSuggest: Props['onSuggest'] }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center p-4">
-      <h2 className="text-2xl font-bold">What would you like to learn?</h2>
-      <p className="text-muted-foreground max-w-md">Ask about music theory or an instrument. Answers cite Wikipedia and Open Music Theory.</p>
+    <div className="flex flex-1 flex-col items-center justify-center gap-5 p-4 text-center">
+      <div className="staff w-full max-w-lg py-3">
+        <h2 className="mx-auto w-fit bg-background px-4 font-serif text-3xl font-medium tracking-tight">What would you like to learn?</h2>
+      </div>
+      <p className="max-w-md text-muted-foreground">Ask about music theory or an instrument. Answers cite Wikipedia and Open Music Theory.</p>
       <ul className="flex flex-wrap justify-center gap-2 max-w-xl">
         {SUGGESTIONS.map((question) => (
           <li key={question}>
@@ -79,8 +81,10 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
                 <div className="text-xs text-muted-foreground">{message.role === 'user' ? 'You' : 'Sound Companion'}</div>
                 <div
                   className={cn(
-                    'rounded-2xl px-4 py-2 whitespace-pre-wrap break-words',
-                    message.role === 'user' ? 'rounded-br-sm bg-primary text-primary-foreground' : 'rounded-bl-sm bg-muted text-foreground',
+                    'whitespace-pre-wrap break-words',
+                    message.role === 'user'
+                      ? 'rounded-2xl rounded-br-sm bg-primary px-4 py-2 text-primary-foreground'
+                      : 'border-l-2 border-brass pl-4 font-serif text-[1.0625rem] leading-relaxed text-foreground',
                   )}
                 >
                   {message.text}
@@ -129,7 +133,7 @@ function SourceChips({ message, onOpenChunk }: { message: ChatMessage; onOpenChu
       <ul className="flex flex-wrap gap-1">
         {chips.map((chip) => (
           <li key={labelOf(chip)}>
-            <Badge asChild variant="outline">
+            <Badge asChild variant="outline" className="border-brass/60 bg-accent text-accent-foreground hover:bg-brass/30">
               <button type="button" onClick={() => onOpenChunk(message.id, chip.id)}>
                 {labelOf(chip)}
               </button>

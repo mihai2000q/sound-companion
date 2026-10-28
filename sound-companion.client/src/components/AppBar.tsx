@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Menu } from 'lucide-react'
+import { Menu, Music2 } from 'lucide-react'
 import { Link, NavLink } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -29,7 +29,10 @@ export function AppBar({ onOpenSidebar, children }: Props) {
             <Menu className="size-5" />
           </Button>
         )}
-        <Link to="/" className="truncate px-2 text-lg font-bold">
+        <Link to="/" className="flex items-center gap-2 truncate px-2 font-serif text-xl font-medium tracking-tight">
+          <span className="grid size-7 place-items-center rounded-full bg-brass text-brass-foreground" aria-hidden="true">
+            <Music2 className="size-4" />
+          </span>
           Sound Companion
         </Link>
         <nav aria-label="Pages" className="flex gap-1 max-md:hidden">
