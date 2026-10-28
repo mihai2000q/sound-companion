@@ -64,7 +64,7 @@ export function Conversation({ threadId, initialMessages, usage, setUsage, onStr
       </AppBar>
       <div className="flex-1 min-h-0 flex">
         <div className="flex-1 min-w-0 max-w-3xl mx-auto flex flex-col bg-base-100">
-          <MessageList messages={messages} streaming={streaming} onRetry={retry} onOpenChunk={openChunk} />
+          <MessageList messages={messages} streaming={streaming} onRetry={retry} onOpenChunk={openChunk} onSuggest={(text) => void sendAndRefresh(text)} />
           <Composer disabled={streaming} error={fieldError} onSend={sendAndRefresh} onEdit={clearFieldError} onStop={stop} />
         </div>
         <Inspector message={inspected} open={inspectorOpen} focus={focus} onClose={() => setInspectorOpen(false)} />
