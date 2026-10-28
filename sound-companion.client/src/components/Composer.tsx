@@ -39,7 +39,7 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
     >
       <div className="flex gap-2">
         <textarea
-          className="textarea textarea-bordered flex-1"
+          className="textarea textarea-bordered flex-1 resize-none"
           rows={2}
           placeholder="Ask about music theory or an instrument"
           value={text}
@@ -52,14 +52,21 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
         />
         {disabled ? (
           <button type="button" className="btn btn-neutral self-end" onClick={onStop}>
+            <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6h12v12H6z" />
+            </svg>
             Stop
           </button>
         ) : (
           <button type="submit" className="btn btn-primary self-end" disabled={!text.trim()}>
             Send
+            <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M2 21 23 12 2 3v7l15 2-15 2v7Z" />
+            </svg>
           </button>
         )}
       </div>
+      <p className="text-xs opacity-60">Enter sends, Shift+Enter starts a new line.</p>
       {error && (
         <p role="alert" className="text-error text-sm">
           {error.field.charAt(0).toUpperCase() + error.field.slice(1)}: {error.message}

@@ -55,14 +55,17 @@ export function Inspector({ message, open, focus, onClose }: Props) {
                   id={`chunk-${chunk.id}`}
                   className={`card card-border card-sm bg-base-100 ${focus?.chunkId === chunk.id ? 'border-primary ring-2 ring-primary' : ''}`}
                 >
-                  <div className="card-body">
+                  <div className="card-body gap-2">
                     <div className="flex items-start justify-between gap-2">
-                      <a className="link text-sm font-medium" href={chunk.url} target="_blank" rel="noreferrer">
+                      <a className="link link-hover text-sm font-medium break-words min-w-0" href={chunk.url} target="_blank" rel="noreferrer">
                         {labelOf(chunk)}
                       </a>
-                      <span className="badge badge-sm badge-soft">{chunk.score.toFixed(3)}</span>
+                      <span className="badge badge-sm badge-soft badge-primary shrink-0" title="Retrieval score">
+                        {chunk.score.toFixed(3)}
+                      </span>
                     </div>
                     <p className="text-xs whitespace-pre-wrap max-h-40 overflow-y-auto">{chunk.content}</p>
+                    <span className="badge badge-xs badge-ghost self-start">{chunk.license}</span>
                   </div>
                 </article>
               ))}
