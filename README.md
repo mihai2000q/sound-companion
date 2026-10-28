@@ -77,6 +77,7 @@ Then open the client and ask a question: it answers with Citations (a chat turn 
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Decision log with reasons |
 | [docs/DEMO.md](docs/DEMO.md) | Demo script: questions to show, checks to run, known weak spots |
 | [docs/EVALUATION.md](docs/EVALUATION.md) | Golden set, metrics, RAGAs setup |
+| [docs/REFLECTION.md](docs/REFLECTION.md) | Known problems with evidence, ranked improvement ideas |
 | [docs/SECURITY.md](docs/SECURITY.md) | Threat model and defences |
 | [docs/research/](docs/research/) | Verified facts about data sources, libraries and APIs |
 
