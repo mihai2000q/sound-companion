@@ -19,8 +19,16 @@ def test_complete_answer_passes():
 def test_missing_convention_and_citation_are_named():
     result = check_answer(Q06, "Middle C is C4 (Scientific pitch notation > Nomenclature). The systems differ.")
     assert not result.ok
-    assert "Helmholtz c′" in result.missing_conventions and "German H = B natural" in result.missing_conventions
+    assert result.missing_conventions == ["German B = B-flat", "German H = B natural"]
     assert result.missing_citations == ["German names page"]
+
+
+def test_helmholtz_is_not_required_for_q06():
+    answer = (
+        "Middle C is C4 (Scientific pitch notation > Nomenclature). German names differ: B is B-flat and H is B natural "
+        "(Musical note > Pitch names and their history)."
+    )
+    assert check_answer(Q06, answer).ok
 
 
 def test_h_must_be_the_letter_not_part_of_a_word():
