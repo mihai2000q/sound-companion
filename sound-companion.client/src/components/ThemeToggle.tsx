@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 type Theme = 'light' | 'dark'
 
-/** The stored choice is applied by a script in `index.html`; without one the OS preference decides (DaisyUI `--prefersdark`). */
+/** The stored choice is applied by a script in `index.html`; without one the OS preference decides (DaisyUI `--prefersdark`, and the script sets `.dark`). */
 function currentTheme(): Theme {
   const set = document.documentElement.dataset.theme
   if (set === 'light' || set === 'dark') return set
@@ -16,6 +16,7 @@ export function ThemeToggle() {
   function toggle(dark: boolean) {
     const next: Theme = dark ? 'dark' : 'light'
     document.documentElement.dataset.theme = next
+    document.documentElement.classList.toggle('dark', next === 'dark')
     setTheme(next)
     try {
       localStorage.setItem('theme', next)
