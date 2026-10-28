@@ -108,16 +108,25 @@ Also unit-test the tools directly with pytest (no LLM): the expected outputs fro
 
 RAGAs is a Python library, and the backend is Python, so it runs in the same project.
 
-Export format (`data/runs/<timestamp>.json`), one entry per question:
+Export: `cd sound-companion.server && uv run python -m scripts.export_run [--only q01,q02] [--mode vector|hybrid]` runs each `answer` question of `data/golden-set.json` through the real agent (the `agent_events` stream the UI reads, the configured retriever with the rewrite, one fresh thread per question) and saves `data/runs/<timestamp>.json`. Clarify and decline questions (q15 to q17) are left out and listed under `skipped`, because they have no contexts to score. Every model call goes to `usage_log`, and the run's cost is printed and saved.
+
+Export format (`data/runs/<timestamp>.json`): the settings the run used (models, retriever mode, prompt hash, commit, golden set hash), `skipped`, `cost` and one entry per question:
 
 ```json
 {
+  "id": "q01",
   "question": "...",
   "answer": "...",
   "contexts": ["chunk text 1", "chunk text 2"],
-  "reference": "reference answer"
+  "tool_results": [{"name": "note_frequency", "args": {"note": "A4"}, "content": "{...}"}],
+  "reference": "reference answer",
+  "queries": ["query searched", "a rewrite"],
+  "cost": 0.004,
+  "error": null
 }
 ```
+
+`contexts` are the chunks the searches returned (from the `citations` events), each once. `tool_results` are the music tool calls (not searches), kept apart so the runner can pass them to RAGAs as contexts or leave them out (the decision of story 16). A run that failed keeps its entry with `error` set.
 
 Runner: `sound-companion.server/eval/run_ragas.py` reads the JSON and prints per-metric scores (RAGAs dependencies in an optional extras group so they do not bloat the app image). It uses the same OpenRouter key, so keep the golden set at about 31 questions to protect the budget. Run it on demand, never in the request path. Tool-only questions have no retrieved contexts, so score them with layers 1 and 2 and exclude them from the context metrics.
 
