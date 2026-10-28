@@ -9,6 +9,9 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Spinner } from './Spinner'
 
 const TOAST_MS = 5000
@@ -64,19 +67,14 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
     return () => clearTimeout(timer)
   }, [failure])
   const closeMenu = useCallback(() => setMenu(null), [])
-  return (
-    <aside
-      aria-label="Conversations"
-      className={`${open ? 'flex' : 'hidden'} flex-col fixed inset-0 z-30 bg-base-100 lg:flex lg:static lg:inset-auto lg:w-72 lg:shrink-0 lg:border-r lg:border-base-300`}
-    >
-      <div className="flex items-center justify-between gap-2 p-4 border-b border-base-300">
-        <h2 className="font-bold">Conversations</h2>
+  const desktop = useMediaQuery('(min-width: 1024px)')
+  const content = (
+    <>
+      <div className="flex items-center justify-between gap-2 p-4 border-b">
+        {desktop ? <h2 className="font-bold">Conversations</h2> : <SheetTitle>Conversations</SheetTitle>}
         <div className="flex gap-2">
           <Button type="button" size="sm" disabled={busy} onClick={onNew}>
             New Conversation
-          </Button>
-          <Button type="button" variant="outline" size="sm" className="lg:hidden" onClick={onClose}>
-            Close
           </Button>
         </div>
       </div>
@@ -92,7 +90,8 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
           />
         </div>
       )}
-      <div className="flex-1 overflow-y-auto p-2">
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="p-2">
         {isPending && (
           <div className="flex flex-col gap-2 p-2" aria-label="Loading Conversations" role="status">
             {[0, 1, 2, 3, 4].map((i) => (
@@ -165,7 +164,24 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
             ))}
           </ul>
         )}
-      </div>
+        </div>
+      </ScrollArea>
+    </>
+  )
+  return (
+    <>
+      {desktop ? (
+        <aside aria-label="Conversations" className="flex w-72 shrink-0 flex-col border-r bg-background">
+          {content}
+        </aside>
+      ) : (
+        <Sheet open={open} onOpenChange={(next) => !next && onClose()}>
+          <SheetContent side="left" aria-label="Conversations" className="w-full gap-0 sm:max-w-sm">
+            <SheetDescription className="sr-only">Your Conversations, newest first</SheetDescription>
+            {content}
+          </SheetContent>
+        </Sheet>
+      )}
       {failure && (
         <div className="toast toast-end toast-bottom z-50">
           <div role="alert" className="alert alert-error">
@@ -215,7 +231,7 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
           onCancel={() => setAsking(null)}
         />
       )}
-    </aside>
+    </>
   )
 }
 

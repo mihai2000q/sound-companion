@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react'
-import { Link, NavLink } from 'react-router'
-import { ThemeToggle } from './ThemeToggle'
 import { Menu } from 'lucide-react'
+import { Link, NavLink } from 'react-router'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
+import { ThemeToggle } from './ThemeToggle'
 
 const PAGES = [
   { to: '/', label: 'Chat' },
@@ -20,44 +22,49 @@ interface Props {
 /** The top bar of every page: brand, the pages, page-specific controls and the theme toggle. */
 export function AppBar({ onOpenSidebar, children }: Props) {
   return (
-    <header className="navbar flex-wrap gap-y-1 bg-base-100 border-b border-base-300 px-2 sm:px-4">
-      <div className="navbar-start w-auto flex-1 gap-1">
+    <header className="flex flex-wrap items-center gap-y-1 border-b bg-background px-2 py-2 sm:px-4">
+      <div className="flex flex-1 items-center gap-1">
         {onOpenSidebar && (
           <Button type="button" variant="ghost" size="icon-sm" className="lg:hidden" aria-label="Open Conversations" onClick={onOpenSidebar}>
             <Menu className="size-5" />
           </Button>
         )}
-        <Link to="/" className="text-lg font-bold px-2 truncate">
+        <Link to="/" className="truncate px-2 text-lg font-bold">
           Sound Companion
         </Link>
-        <nav aria-label="Pages" className="max-md:hidden">
-          <ul className="menu menu-horizontal menu-sm gap-1">
-            {PAGES.map((page) => (
-              <li key={page.to}>
-                <NavLink to={page.to} end className={({ isActive }) => (isActive ? 'menu-active' : '')}>
-                  {page.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+        <nav aria-label="Pages" className="flex gap-1 max-md:hidden">
+          {PAGES.map((page) => (
+            <NavLink
+              key={page.to}
+              to={page.to}
+              end
+              className={({ isActive }) =>
+                cn('rounded-md px-3 py-1 text-sm hover:bg-accent', isActive && 'bg-accent font-medium text-accent-foreground')
+              }
+            >
+              {page.label}
+            </NavLink>
+          ))}
         </nav>
       </div>
-      <div className="navbar-end w-auto flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {children}
-        <div className="dropdown dropdown-end md:hidden">
-          <Button type="button" variant="ghost" size="sm" tabIndex={0}>
-            Pages
-          </Button>
-          <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-40 mt-2 w-40 p-2 shadow">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" variant="ghost" size="sm" className="md:hidden">
+              Pages
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
             {PAGES.map((page) => (
-              <li key={page.to}>
-                <NavLink to={page.to} end className={({ isActive }) => (isActive ? 'menu-active' : '')}>
+              <DropdownMenuItem key={page.to} asChild>
+                <NavLink to={page.to} end className={({ isActive }) => (isActive ? 'bg-accent font-medium' : '')}>
                   {page.label}
                 </NavLink>
-              </li>
+              </DropdownMenuItem>
             ))}
-          </ul>
-        </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <ThemeToggle />
       </div>
     </header>
