@@ -139,7 +139,7 @@ CREATE TABLE threads (
 );
 ```
 
-`threads` has one row per Conversation, inserted by the chat route on the first request of a `thread_id` (`ON CONFLICT DO NOTHING`, migration 0007) and listed newest first by `GET /api/threads`. A delete removes the row and the checkpoint state, and keeps `usage_log` and `app_logs` rows (budget guard and monitoring). The export reads `usage_log` by `thread_id`.
+`threads` has one row per Conversation, inserted by the chat route on the first request of a `thread_id` (`ON CONFLICT DO NOTHING`, migration 0007) listed newest first by `GET /api/threads`, and its `title` changed by `PATCH /api/threads/{id}`. A delete removes the row and the checkpoint state, and keeps `usage_log` and `app_logs` rows (budget guard and monitoring). The export reads `usage_log` by `thread_id`.
 
 Two views over `app_logs` (migration `0006`) feed `GET /api/monitoring` and the `/monitoring` page: `monitoring_daily` (requests, errors, error rate, average and p95 duration per day, from `request_end` rows) and `monitoring_tools` (calls, errors and average duration per tool, from `tool_result` rows).
 

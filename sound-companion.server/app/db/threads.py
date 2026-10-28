@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from sqlalchemy import Engine, create_engine, delete, select
+from sqlalchemy import Engine, create_engine, delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from app.db.models import ThreadRecord
@@ -13,6 +13,7 @@ from app.db.models import ThreadRecord
 log = logging.getLogger(__name__)
 
 TITLE_LENGTH = 60
+MAX_TITLE_LENGTH = 100  # a title the user types is cut by nobody: longer is refused
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,8 @@ class ThreadStore(Protocol):
     def list(self) -> list[Thread]: ...
 
     def get(self, thread_id: str) -> Thread | None: ...
+
+    def rename(self, thread_id: str, title: str) -> bool: ...
 
     def delete(self, thread_id: str) -> bool: ...
 
@@ -65,6 +68,11 @@ class SqlThreadStore:
         with self._engine.connect() as conn:
             row = conn.execute(query).one_or_none()
         return Thread(*row) if row else None
+
+    def rename(self, thread_id: str, title: str) -> bool:
+        """False when there is no row of that id."""
+        with self._engine.begin() as conn:
+            return conn.execute(update(ThreadRecord).where(ThreadRecord.thread_id == thread_id).values(title=title)).rowcount > 0
 
     def delete(self, thread_id: str) -> bool:
         """Removes the row only: `usage_log` and `app_logs` rows stay, they feed the budget guard and monitoring."""

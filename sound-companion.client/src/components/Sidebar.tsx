@@ -1,11 +1,12 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { groupThreads } from '../lib/threadGroups'
-import { deleteThread, exportThread, threadKeys, threadQueries } from '../queries/threads'
+import { deleteThread, exportThread, renameThread, threadKeys, threadQueries } from '../queries/threads'
 import type { ThreadSummary } from '../types/threads'
 import { ContextMenu } from './ContextMenu'
 
 const TOAST_MS = 5000
+const MAX_TITLE_LENGTH = 100 // the server refuses a longer one
 
 interface Props {
   activeId: string
@@ -24,6 +25,7 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
   const [asking, setAsking] = useState<ThreadSummary | null>(null)
   const [failure, setFailure] = useState<string | null>(null)
   const [filter, setFilter] = useState('')
+  const [renaming, setRenaming] = useState<string | null>(null)
   const [menu, setMenu] = useState<{ thread: ThreadSummary; x: number; y: number; opener: HTMLElement } | null>(null)
 
   const remove = useMutation({
@@ -37,6 +39,11 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
       setAsking(null)
       setFailure('The Conversation could not be deleted.')
     },
+  })
+  const rename = useMutation({
+    mutationFn: ({ thread, title }: { thread: ThreadSummary; title: string }) => renameThread(thread.thread_id, title),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: threadKeys.list() }),
+    onError: () => setFailure('The Conversation could not be renamed.'),
   })
   const download = useMutation({
     mutationFn: exportThread,
@@ -103,37 +110,50 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
               <Fragment key={group.label}>
                 <li className="menu-title">{group.label}</li>
                 {group.threads.map((thread) => (
-                  <li key={thread.thread_id} className="group flex-row items-center">
-                    <button
-                      type="button"
-                      className={`flex-1 min-w-0 ${thread.thread_id === activeId ? 'menu-active' : ''}`}
-                      aria-current={thread.thread_id === activeId ? 'true' : undefined}
-                      aria-haspopup="menu"
-                      disabled={busy && thread.thread_id !== activeId}
-                      onClick={() => onSelect(thread.thread_id)}
-                      onContextMenu={(event) => {
-                        event.preventDefault()
-                        setMenu({ thread, x: event.clientX, y: event.clientY, opener: event.currentTarget })
-                      }}
-                    >
-                      <span className="truncate">{thread.title || 'Untitled Conversation'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-xs btn-square lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
-                      aria-label={`Actions for ${thread.title || 'Untitled Conversation'}`}
-                      aria-haspopup="menu"
-                      aria-expanded={menu?.thread.thread_id === thread.thread_id}
-                      onClick={(event) => {
-                        const box = event.currentTarget.getBoundingClientRect()
-                        setMenu({ thread, x: box.left, y: box.bottom + 4, opener: event.currentTarget })
-                      }}
-                    >
-                      <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
-                      </svg>
-                    </button>
-                  </li>
+                  renaming === thread.thread_id ? (
+                    <li key={thread.thread_id}>
+                      <RenameField
+                        initial={thread.title || ''}
+                        onSave={(title) => {
+                          setRenaming(null)
+                          rename.mutate({ thread, title })
+                        }}
+                        onCancel={() => setRenaming(null)}
+                      />
+                    </li>
+                  ) : (
+                    <li key={thread.thread_id} className="group flex-row items-center">
+                      <button
+                        type="button"
+                        className={`flex-1 min-w-0 ${thread.thread_id === activeId ? 'menu-active' : ''}`}
+                        aria-current={thread.thread_id === activeId ? 'true' : undefined}
+                        aria-haspopup="menu"
+                        disabled={busy && thread.thread_id !== activeId}
+                        onClick={() => onSelect(thread.thread_id)}
+                        onContextMenu={(event) => {
+                          event.preventDefault()
+                          setMenu({ thread, x: event.clientX, y: event.clientY, opener: event.currentTarget })
+                        }}
+                      >
+                        <span className="truncate">{thread.title || 'Untitled Conversation'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-xs btn-square lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
+                        aria-label={`Actions for ${thread.title || 'Untitled Conversation'}`}
+                        aria-haspopup="menu"
+                        aria-expanded={menu?.thread.thread_id === thread.thread_id}
+                        onClick={(event) => {
+                          const box = event.currentTarget.getBoundingClientRect()
+                          setMenu({ thread, x: box.left, y: box.bottom + 4, opener: event.currentTarget })
+                        }}
+                      >
+                        <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                        </svg>
+                      </button>
+                    </li>
+                  )
                 ))}
               </Fragment>
             ))}
@@ -166,6 +186,10 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
               },
             },
             {
+              label: 'Rename',
+              onSelect: () => setRenaming(menu.thread.thread_id),
+            },
+            {
               label: 'Delete',
               danger: true,
               disabled: busy && menu.thread.thread_id === activeId,
@@ -186,6 +210,33 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
         />
       )}
     </aside>
+  )
+}
+
+/** The title of a row as a text field: Enter and a click away save, Escape cancels. A title that is empty or unchanged is not sent. */
+function RenameField({ initial, onSave, onCancel }: { initial: string; onSave: (title: string) => void; onCancel: () => void }) {
+  const finished = useRef(false) // Escape unmounts the field, which can still fire a blur
+  const finish = (title: string | null) => {
+    if (finished.current) return
+    finished.current = true
+    if (title === null || title.trim() === '' || title.trim() === initial) onCancel()
+    else onSave(title.trim())
+  }
+  return (
+    <input
+      type="text"
+      className="input input-sm w-full"
+      aria-label="Conversation title"
+      defaultValue={initial}
+      maxLength={MAX_TITLE_LENGTH}
+      autoFocus
+      onFocus={(event) => event.currentTarget.select()}
+      onBlur={(event) => finish(event.currentTarget.value)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') finish(event.currentTarget.value)
+        else if (event.key === 'Escape') finish(null)
+      }}
+    />
   )
 }
 
