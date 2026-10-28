@@ -1,6 +1,6 @@
 # Open facts: verification report
 
-> **Status note:** this report was written for the abandoned metal subject. Sections 2 to 5 (LangChain.js, PostgresSaver and streaming, OpenRouter, Tailwind and DaisyUI) and the Wikipedia and MusicBrainz parts of section 6 still apply to Sound Companion. Sections 1 and 7 (the `music-wiki` dataset and MusicBrainz release groups) and the Encyclopaedia Metallum part of section 6 are archived context only. Current subject research: [music-theory-data.md](music-theory-data.md) and [instruments-data.md](instruments-data.md).
+> **Status note:** this report was written for the abandoned metal subject. Sections 2 to 5 (LangChain.js, PostgresSaver and streaming, OpenRouter, Tailwind) and the Wikipedia and MusicBrainz parts of section 6 still apply to Sound Companion. Sections 1 and 7 (the `music-wiki` dataset and MusicBrainz release groups) and the Encyclopaedia Metallum part of section 6 are archived context only. Current subject research: [music-theory-data.md](music-theory-data.md) and [instruments-data.md](instruments-data.md).
 
 Date of research: 2026-10-19. Only primary sources were used: the Hugging Face dataset files and card, package source code installed from npm (read in a scratch directory), first-party API responses (OpenRouter, MusicBrainz), and official documentation or licence pages. "Verified" means checked against such a source today. Anything else is marked "unverified". Prices and model lists change daily, so re-check them when you implement the story.
 
@@ -12,7 +12,7 @@ Date of research: 2026-10-19. Only primary sources were used: the Hugging Face d
 | 2 | LangChain.js v1: `createAgent`, retrievers, `PGVectorStore` | Verified from installed source and the type definitions | High. There is no hybrid search in `@langchain/pgvector`. `BM25Retriever` is in-memory and lives in a deprecated package. The table layout in `DATABASE-SCHEMA.md` does not fit `PGVectorStore`. |
 | 3 | `PostgresSaver`, state export, streaming | Verified (docs plus a live run of `createAgent` with `MemorySaver`; `PostgresSaver` itself read from source, not run against a database) | Medium. No API mismatch, so the fallback in decision 14 is not needed. SSE mapping is now known. |
 | 4 | OpenRouter models, embeddings, usage | Verified (live API calls with the project key) | Medium. Embedding model and dimension can be fixed. Cost is reported in "credits", not EUR. |
-| 5 | Tailwind 4 and DaisyUI 5 | Verified (official install pages and npm metadata) | Low to medium. Install steps differ from Tailwind 3 habits. SvelteKit 3 needs Node 22.17+ and Vite 8. |
+| 5 | Tailwind 4 | Verified (official install pages and npm metadata) | Low to medium. Install steps differ from Tailwind 3 habits. SvelteKit 3 needs Node 22.17+ and Vite 8. |
 | 6 | Licences and terms | Partly. Wikimedia and MusicBrainz verified. Encyclopaedia Metallum: no scraping clause found on reachable pages, no content licence found. | Medium. The reason for not scraping Metallum should change. Dataset licence statement needs fixing. |
 | 7 | MusicBrainz v2 request shapes | Verified with live requests for Metallica | Medium. "Studio album" needs a client-side filter on `secondary-types`. About 10 pages for Metallica. |
 
@@ -204,13 +204,11 @@ Verified. `new ChatOpenAI({ model: "openai/gpt-4o-mini", apiKey, configuration: 
 
 ---
 
-## 5. Tailwind CSS and DaisyUI
+## 5. Tailwind CSS
 
-- Current versions on npm today: `tailwindcss` 4.3.3, `@tailwindcss/vite` 4.3.3, `daisyui` 5.7.50 (dist-tag `latest`), `@sveltejs/kit` 3.1.0, `svelte` 5.57.2. Source: `npm view`.
-- DaisyUI install (official, `https://daisyui.com/docs/install/`): `npm i -D daisyui@latest`, then in `app.css`: `@import "tailwindcss";` and `@plugin "daisyui";`. No `tailwind.config.js`.
-- DaisyUI for SvelteKit (`https://daisyui.com/docs/install/sveltekit/`): `npx sv create ./`, `npm install tailwindcss@latest @tailwindcss/vite@latest daisyui@latest`, add `tailwindcss()` before `sveltekit()` in `vite.config`, put the two lines above in `src/app.css`, import `../app.css` in a layout or page.
+- Current versions on npm today: `tailwindcss` 4.3.3, `@tailwindcss/vite` 4.3.3, `@sveltejs/kit` 3.1.0, `svelte` 5.57.2. Source: `npm view`.
 - Tailwind's own SvelteKit guide (`https://tailwindcss.com/docs/installation/framework-guides/sveltekit`) says the same, and notes that `<style>` blocks in Svelte files need `@reference "tailwindcss";` to use Tailwind theme values.
-- Compatibility: `daisyui` 5.7.50 declares no peer dependencies. `@tailwindcss/vite` 4.3.3 peers on `vite ^5.2 || ^6 || ^7 || ^8`. `@sveltejs/kit` 3.1.0 peers on `vite ^8.0.12`, `svelte ^5.57.1`, `typescript ^6.0.0`, `@sveltejs/vite-plugin-svelte ^7.0.0`, and requires Node `>=22.17` (`npm view`). So the working combination is Node 22.17+, Vite 8, TypeScript 6, Tailwind 4.3, DaisyUI 5. Use a current `sv create` rather than copying older tutorials.
+- Compatibility: `@tailwindcss/vite` 4.3.3 peers on `vite ^5.2 || ^6 || ^7 || ^8`. `@sveltejs/kit` 3.1.0 peers on `vite ^8.0.12`, `svelte ^5.57.1`, `typescript ^6.0.0`, `@sveltejs/vite-plugin-svelte ^7.0.0`, and requires Node `>=22.17` (`npm view`). So the working combination is Node 22.17+, Vite 8, TypeScript 6, Tailwind 4.3. Use a current `sv create` rather than copying older tutorials.
 - Verdict for decision 18: no known blocker. The "Tailwind 4 plugin issues" risk did not show up in the official instructions. I did not run a build.
 
 ---
@@ -297,7 +295,7 @@ Pick the top hit only when `score` is high and the name matches exactly. Otherwi
 - Row 5 and row 6: "Static, MIT licensed, reproducible." Replace "MIT licensed" with "dataset card MIT, text CC BY-SA". Row 6 also needs the fallback made the main path for missing bands: Wikipedia API gap filling will be needed for several famous bands (Black Sabbath, Judas Priest, Metallica, Megadeth, Opeth, Deep Purple).
 - Row 7: "Terms unchecked, no free dump found." Update as in `DOMAIN.md` line 17.
 - Row 14: "API mismatch in JS. Fall back to MemorySaver plus own messages table." The JS API exists (`PostgresSaver.fromConnString`, `setup()`, `agent.getState`). Remove or soften the risk.
-- Row 18: "Tailwind 4 plugin issues." Official instructions work with `@plugin "daisyui"`; add the version floor (Node 22.17+, Vite 8, TypeScript 6 with SvelteKit 3.1).
+- Row 18: "Tailwind 4 plugin issues." Add the version floor (Node 22.17+, Vite 8, TypeScript 6 with SvelteKit 3.1).
 - Row 20: "Embedding endpoint or model unavailable." The endpoint exists and `openai/text-embedding-3-small` works with 1536 dimensions. Note that workspace guardrails can block models (bge-m3 was blocked on this account).
 - "Open facts" section (lines 37 to 44): mark each item as answered and point to this file.
 
