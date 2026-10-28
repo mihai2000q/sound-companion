@@ -12,6 +12,7 @@ import httpx
 
 from app.config import settings
 
+MAX_TOKENS = 4096  # RAGAs' default cuts off the statement list of a long answer (IncompleteOutputException)
 Scorer = Callable[[dict], Awaitable[float]]  # takes an export entry, returns a score from 0 to 1
 
 
@@ -41,13 +42,18 @@ def metered_client(spend: Spend, transport: httpx.AsyncBaseTransport | None = No
 
     async def meter(response: httpx.Response) -> None:
         await response.aread()
+        if response.status_code != 200:  # an error body (a 429) spent nothing
+            return
         try:
             spend.add(response.json())
         except ValueError:  # not JSON, an error page: nothing to count
             pass
 
     http = httpx.AsyncClient(event_hooks={"response": [meter]}, transport=transport, timeout=120)
-    return AsyncOpenAI(api_key=settings.openrouter_api_key, base_url=settings.openrouter_base_url, http_client=http)
+    # the free upstream pool of some models answers 429 now and then, so retry longer than the default 2
+    return AsyncOpenAI(
+        api_key=settings.openrouter_api_key, base_url=settings.openrouter_base_url, http_client=http, max_retries=6
+    )
 
 
 def import_ragas():
@@ -68,10 +74,10 @@ def import_ragas():
     return llm_factory, embedding_factory, collections
 
 
-def make_scorers(client, judge_model: str, embedding_model: str, contexts_of: Callable[[dict], list[str]]) -> dict[str, Scorer]:
-    """The four metrics as scorers of one export entry. `contexts_of` says what counts as its retrieved contexts."""
+def make_scorers(client, judge_model: str, embedding_model: str, contexts_of: Callable[[dict, str], list[str]]) -> dict[str, Scorer]:
+    """The four metrics as scorers of one export entry. `contexts_of(entry, metric)` says what counts as its contexts for that metric."""
     llm_factory, embedding_factory, metrics = import_ragas()
-    llm = llm_factory(judge_model, client=client, temperature=0)
+    llm = llm_factory(judge_model, client=client, temperature=0, max_tokens=MAX_TOKENS)
     embeddings = embedding_factory("openai", model=embedding_model, client=client)
     faithfulness = metrics.Faithfulness(llm=llm)
     relevancy = metrics.AnswerRelevancy(llm=llm, embeddings=embeddings)
@@ -82,8 +88,8 @@ def make_scorers(client, judge_model: str, embedding_model: str, contexts_of: Ca
         return float((await metric.ascore(**kwargs)).value)
 
     return {
-        "faithfulness": lambda e: run(faithfulness, user_input=e["question"], response=e["answer"], retrieved_contexts=contexts_of(e)),
+        "faithfulness": lambda e: run(faithfulness, user_input=e["question"], response=e["answer"], retrieved_contexts=contexts_of(e, "faithfulness")),
         "answer_relevancy": lambda e: run(relevancy, user_input=e["question"], response=e["answer"]),
-        "context_precision": lambda e: run(precision, user_input=e["question"], reference=e["reference"], retrieved_contexts=contexts_of(e)),
-        "context_recall": lambda e: run(recall, user_input=e["question"], reference=e["reference"], retrieved_contexts=contexts_of(e)),
+        "context_precision": lambda e: run(precision, user_input=e["question"], reference=e["reference"], retrieved_contexts=contexts_of(e, "context_precision")),
+        "context_recall": lambda e: run(recall, user_input=e["question"], reference=e["reference"], retrieved_contexts=contexts_of(e, "context_recall")),
     }

@@ -4,7 +4,7 @@ from datetime import date
 import httpx
 
 from eval.judge import Spend, import_ragas, metered_client
-from eval.run_ragas import METRICS, build_run, contexts_of, score_entry, summarize
+from eval.run_ragas import METRICS, build_run, compare, contexts_of, score_entry, summarize
 
 
 def entry(id="q01", contexts=("chunk",), tool_results=(), answer="An answer.", error=None) -> dict:
@@ -33,19 +33,60 @@ def test_an_entry_without_contexts_keeps_only_answer_relevancy():
     assert set(result.skipped.values()) == {"no contexts"}
 
 
-def test_tool_results_count_as_contexts_only_when_asked():
+def test_tool_results_count_as_contexts_only_for_the_metrics_that_take_them():
     tools = [{"name": "note_frequency", "args": {"note": "A4"}, "content": '{"hz": 440}'}]
-    only_tools = entry(contexts=(), tool_results=tools)
-    assert contexts_of(only_tools) == []
-    assert contexts_of(only_tools, tool_contexts=True) == ['note_frequency({"note": "A4"}) returned {"hz": 440}']
-    assert asyncio.run(score_entry(only_tools, fake_scorers(), tool_contexts=True)).scores["faithfulness"] == 0.5
+    both = entry(contexts=("chunk",), tool_results=tools)
+    tool_text = 'note_frequency({"note": "A4"}) returned {"hz": 440}'
+    assert contexts_of(both, "faithfulness", "none") == ["chunk"]
+    assert contexts_of(both, "faithfulness") == ["chunk", tool_text]  # the default
+    assert contexts_of(both, "context_recall") == ["chunk"]
+    assert contexts_of(both, "context_recall", "all") == ["chunk", tool_text]
+
+
+def test_a_tool_only_answer_is_scored_for_faithfulness_but_not_for_retrieval():
+    tools = [{"name": "scale_info", "args": {"tonic": "C"}, "content": "{}"}]
+    result = asyncio.run(score_entry(entry(contexts=(), tool_results=tools), fake_scorers()))
+    assert result.scores["faithfulness"] == 0.5 and result.scores["context_recall"] is None
+    assert result.skipped == {"context_precision": "no contexts", "context_recall": "no contexts"}
+
+
+def test_two_runs_are_compared_per_metric_and_question():
+    one = asyncio.run(score_entry(entry("q01"), fake_scorers()))
+    two = asyncio.run(score_entry(entry("q01"), fake_scorers(faithfulness=lambda e: _value(1.0))))
+    a, b = (build_run(x, {}, [r], {}, date(2026, 10, 28)) for x, r in (("a", one), ("b", two)))
+    result = compare(a, b)
+    assert result["summary"]["faithfulness"][0]["mean"] == 0.5 and result["summary"]["faithfulness"][1]["mean"] == 1.0
+    assert result["changed"] == [{"id": "q01", "moves": {"faithfulness": (0.5, 1.0)}}]
+
+
+async def _value(x):
+    return x
+
+
+def test_a_judge_call_that_fails_once_is_tried_again():
+    calls = []
+
+    async def flaky(e):
+        calls.append(1)
+        if len(calls) == 1:
+            raise RuntimeError("429")
+        return 0.9
+
+    async def no_sleep(seconds):
+        pass
+
+    result = asyncio.run(score_entry(entry(), fake_scorers(faithfulness=flaky), sleep=no_sleep))
+    assert result.scores["faithfulness"] == 0.9 and result.skipped == {} and len(calls) == 2
 
 
 def test_a_failed_judge_call_loses_one_score_not_the_run():
     async def broken(e):
         raise RuntimeError("judge down")
 
-    result = asyncio.run(score_entry(entry(), fake_scorers(faithfulness=broken)))
+    async def no_sleep(seconds):
+        pass
+
+    result = asyncio.run(score_entry(entry(), fake_scorers(faithfulness=broken), sleep=no_sleep))
     assert result.scores["faithfulness"] is None and result.scores["context_recall"] == 0.5
     assert "judge down" in result.skipped["faithfulness"]
 
