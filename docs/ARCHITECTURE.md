@@ -5,7 +5,7 @@
 Two projects in one repository. A React single-page app (`sound-companion.client/`) talks to a FastAPI backend (`sound-companion.server/`) over one streaming endpoint. The backend owns all LangChain logic, the music tools, ingestion and evaluation. Postgres (with pgvector) holds the knowledge base, conversation memory, usage and logs.
 
 ```
-Browser (React + Tailwind/DaisyUI, Vite dev server; runs in compose, or on the host with `npm run dev`)
+Browser (React + Tailwind/shadcn/ui, Vite dev server; runs in compose, or on the host with `npm run dev`)
    |  POST /api/chat  (fetch, body: thread_id + message)      /api/* proxied by Vite to the backend
    |  <- SSE stream of typed events
 FastAPI backend
@@ -84,7 +84,7 @@ Streaming operations:
 
 Chat on the left, collapsible inspector panel on the right.
 
-- Message list with DaisyUI `chat` bubbles, Citation chips under each answer, and attribution links (Wikipedia and OMT are CC BY-SA).
+- Message list with hand-written Tailwind chat bubbles (shadcn has no chat component), Citation chips under each answer, and attribution links (Wikipedia and OMT are CC BY-SA).
 - Inline tool-call cards (name, arguments, result, duration, status).
 - Inspector: rewritten queries, retrieved chunks with scores, tokens and cost, running spend against the caps.
 - Progress indicators: a skeleton while retrieving, a spinner on running tool cards, a typing indicator while tokens stream.
@@ -174,7 +174,7 @@ Rule: `sound-companion.server/app/rag`, `tools`, `agent` and `security` never im
 
 Backend spike versions (Python 3.12.3): `langchain-postgres` 0.0.19, `langchain` 1.4.6, `langchain-core` 1.6.12, `langgraph` 1.2.16, `langgraph-checkpoint-postgres` 3.2.0, `psycopg` 3.3.6, `fastapi` 0.149.0, `uvicorn` 0.54.0. Pin `langchain-postgres` to an exact version because 0.0.x APIs can change.
 
-Frontend: Tailwind 4.3.3 and DaisyUI 5.7.50 install with `@import "tailwindcss"; @plugin "daisyui";` plus the `@tailwindcss/vite` plugin (per the research of the official install pages, no build was run). React and Vite versions are not yet researched, check at setup. This machine has Node 24, Docker 29 and Python 3.12.
+Frontend: Tailwind 4.3.3 installs with `@import "tailwindcss";` plus the `@tailwindcss/vite` plugin (per the research of the official install pages, no build was run). React and Vite versions are not yet researched, check at setup. This machine has Node 24, Docker 29 and Python 3.12.
 
 Two database URL styles: `postgresql+psycopg://` for `PGEngine`, plain `postgresql://` for the checkpointer pool, which also needs `autocommit=True`, `prepare_threshold=0` and `dict_row`. Both are built from `app/config.py` (`database_url`, `database_url_async`).
 

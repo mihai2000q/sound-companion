@@ -22,7 +22,7 @@ History: the project first targeted metal artists ([docs/archive/metal/](docs/ar
 
 | Layer | Choice |
 |---|---|
-| Frontend | React (Vite, TypeScript), Tailwind + DaisyUI |
+| Frontend | React (Vite, TypeScript), Tailwind + shadcn/ui |
 | Backend | Python 3.12, FastAPI, LangChain (`create_agent`), `langchain-postgres` `PGVectorStore`, LangGraph Postgres checkpointer |
 | Music computation | `pychord` (chords), `music21` (scales, intervals, keys), small hand-written functions |
 | LLM and embeddings | OpenRouter (OpenAI-compatible) |

@@ -6,12 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>sound-companion</title>
     <script>
-      // set the theme before the first paint, so a reload does not flash the other one:
-      // `.dark` is for shadcn, `data-theme` for DaisyUI, the stored choice wins over the OS preference
+      // set the theme class before the first paint, so a reload does not flash the other one:
+      // the stored choice wins over the OS preference
       try {
         var theme = localStorage.getItem('theme')
-        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme
-        else theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        if (theme !== 'light' && theme !== 'dark') theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         document.documentElement.classList.toggle('dark', theme === 'dark')
       } catch (e) {}
     </script>
