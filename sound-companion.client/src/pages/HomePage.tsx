@@ -37,7 +37,7 @@ export function HomePage() {
   }
 
   return (
-    <main className="h-screen flex bg-base-200">
+    <main className="h-screen flex bg-muted/40">
       <Sidebar
         activeId={threadId}
         open={sidebarOpen}
@@ -68,14 +68,14 @@ function Chat(props: ChatProps) {
     return (
       <div className="flex-1 min-w-0 flex flex-col">
         <AppBar onOpenSidebar={props.onOpenSidebar} />
-        <div className="flex-1 grid place-items-center bg-base-100"><Spinner className="size-6" /></div>
+        <div className="flex-1 grid place-items-center bg-background"><Spinner className="size-6" /></div>
       </div>
     )
   if (error)
     return (
       <div className="flex-1 min-w-0 flex flex-col">
         <AppBar onOpenSidebar={props.onOpenSidebar} />
-        <div className="flex-1 grid place-items-center bg-base-100">
+        <div className="flex-1 grid place-items-center bg-background">
           <Alert variant="destructive" className="flex w-auto flex-col items-start gap-2">
             <span>This Conversation could not be loaded.</span>
             <Button type="button" variant="outline" size="sm" onClick={() => refetch()}>

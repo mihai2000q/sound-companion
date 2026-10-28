@@ -1,9 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { chipsFor, labelOf } from '../lib/citations'
 import type { ChatMessage, ToolCall } from '../types/chat'
 import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { cn } from '@/lib/utils'
 import { Spinner } from './Spinner'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
@@ -24,7 +27,7 @@ const SUGGESTIONS = [
 
 function RoleAvatar({ role }: { role: ChatMessage['role'] }) {
   return (
-    <Avatar className="chat-image" aria-hidden="true">
+    <Avatar className="size-8" aria-hidden="true">
       <AvatarFallback className={`text-xs ${role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
         {role === 'user' ? 'You' : 'SC'}
       </AvatarFallback>
@@ -37,7 +40,7 @@ function EmptyState({ onSuggest }: { onSuggest: Props['onSuggest'] }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center p-4">
       <h2 className="text-2xl font-bold">What would you like to learn?</h2>
-      <p className="opacity-70 max-w-md">Ask about music theory or an instrument. Answers cite Wikipedia and Open Music Theory.</p>
+      <p className="text-muted-foreground max-w-md">Ask about music theory or an instrument. Answers cite Wikipedia and Open Music Theory.</p>
       <ul className="flex flex-wrap justify-center gap-2 max-w-xl">
         {SUGGESTIONS.map((question) => (
           <li key={question}>
@@ -70,16 +73,23 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
         <div key={message.id} className="flex flex-col gap-1">
           <ToolCards calls={message.toolCalls} />
           {message.text !== '' && (
-            <div className={`chat ${message.role === 'user' ? 'chat-end' : 'chat-start'}`}>
+            <div className={cn('flex items-end gap-2', message.role === 'user' && 'flex-row-reverse')}>
               <RoleAvatar role={message.role} />
-              <div className="chat-header text-xs opacity-60 mb-1">{message.role === 'user' ? 'You' : 'Sound Companion'}</div>
-              <div className={`chat-bubble whitespace-pre-wrap ${message.role === 'user' ? 'chat-bubble-primary' : ''}`}>
-                {message.text}
+              <div className={cn('flex min-w-0 max-w-[85%] flex-col gap-1', message.role === 'user' && 'items-end')}>
+                <div className="text-xs text-muted-foreground">{message.role === 'user' ? 'You' : 'Sound Companion'}</div>
+                <div
+                  className={cn(
+                    'rounded-2xl px-4 py-2 whitespace-pre-wrap break-words',
+                    message.role === 'user' ? 'rounded-br-sm bg-primary text-primary-foreground' : 'rounded-bl-sm bg-muted text-foreground',
+                  )}
+                >
+                  {message.text}
+                </div>
               </div>
             </div>
           )}
           <SourceChips message={message} onOpenChunk={onOpenChunk} />
-          {message.stopped && <p className="text-sm opacity-60 px-2">Stopped</p>}
+          {message.stopped && <p className="text-sm text-muted-foreground px-2">Stopped</p>}
           {message.error && (
             <Alert variant="destructive" className="flex items-center justify-between gap-2">
               <span>{message.error}</span>
@@ -94,9 +104,9 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
         )
       })}
       {typing && (
-        <div className="chat chat-start" aria-label="The bot is typing">
+        <div className="flex items-end gap-2" aria-label="The bot is typing">
           <RoleAvatar role="bot" />
-          <div className="chat-bubble">
+          <div className="rounded-2xl rounded-bl-sm bg-muted px-4 py-3">
             <Spinner />
           </div>
         </div>
@@ -127,12 +137,12 @@ function SourceChips({ message, onOpenChunk }: { message: ChatMessage; onOpenChu
           </li>
         ))}
       </ul>
-      <p className="text-xs opacity-60">
+      <p className="text-xs text-muted-foreground">
         Sources:{' '}
         {SOURCES.map((source, i) => (
           <span key={source.name}>
             {i > 0 && ' and '}
-            <a className="link" href={source.url} target="_blank" rel="noreferrer">
+            <a className="underline underline-offset-2 hover:text-foreground" href={source.url} target="_blank" rel="noreferrer">
               {source.name}
             </a>
           </span>
@@ -161,32 +171,38 @@ function ToolCards({ calls }: { calls: ToolCall[] | undefined }) {
   )
 }
 
-/** A DaisyUI `collapse` on a native `<details>`: open while the call runs or failed, closed once it is done. */
+/** A `collapsible`: open while the call runs or failed, closed once it is done (a click still toggles it). */
 function ToolCard({ call }: { call: ToolCall }) {
   const status = STATUS[call.status]
+  const auto = call.status === 'running' || call.status === 'error'
+  const [open, setOpen] = useState(auto)
+  const [seen, setSeen] = useState(call.status)
+  if (seen !== call.status) {
+    // the status moved on: follow it again, whatever was clicked before
+    setSeen(call.status)
+    setOpen(auto)
+  }
   return (
     <li>
-      <details
-        className={`collapse collapse-arrow card-border bg-base-100 ${call.status === 'error' ? 'border-error' : 'border-base-300'}`}
-        open={call.status === 'running' || call.status === 'error'}
-      >
-        <summary className="collapse-title min-h-0 py-2 pr-10">
+      <Collapsible open={open} onOpenChange={setOpen} className={cn('rounded-lg border bg-card', call.status === 'error' && 'border-destructive')}>
+        <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 px-4 py-2 text-left">
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-sm font-medium break-all">{call.name}</span>
             <Badge variant="secondary" className={status.badge}>
               {call.status === 'running' && <Spinner className="size-3" />}
               {status.label}
             </Badge>
-            {call.durationMs !== undefined && <span className="text-xs opacity-60">{call.durationMs} ms</span>}
+            {call.durationMs !== undefined && <span className="text-xs text-muted-foreground">{call.durationMs} ms</span>}
           </span>
-        </summary>
-        <div className="collapse-content flex flex-col gap-1 min-w-0">
+          <ChevronDown className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" aria-hidden="true" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="flex min-w-0 flex-col gap-1 px-4 pb-3">
           <pre className="text-xs whitespace-pre-wrap break-all">{JSON.stringify(call.args)}</pre>
           {call.content !== undefined && (
             <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-y-auto">{call.content}</pre>
           )}
-        </div>
-      </details>
+        </CollapsibleContent>
+      </Collapsible>
     </li>
   )
 }

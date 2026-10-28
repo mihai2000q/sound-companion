@@ -34,7 +34,7 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
 
   return (
     <form
-      className="flex flex-col gap-2 p-4 border-t border-base-300"
+      className="flex flex-col gap-2 border-t p-4"
       onSubmit={(event: SubmitEvent) => {
         event.preventDefault()
         submit()
