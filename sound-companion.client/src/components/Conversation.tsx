@@ -8,6 +8,7 @@ import { Composer } from './Composer'
 import { Inspector, type ChunkFocus } from './Inspector'
 import { MessageList } from './MessageList'
 import { UsageBadge } from './UsageBadge'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   threadId: string
@@ -55,12 +56,12 @@ export function Conversation({ threadId, initialMessages, usage, setUsage, onStr
     <div className="flex-1 min-w-0 flex flex-col">
       <AppBar onOpenSidebar={onOpenSidebar}>
         {usage && <UsageBadge usage={usage} />}
-        <button type="button" className="btn btn-sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
+        <Button type="button" variant="outline" size="sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
           Inspector
-        </button>
-        <button type="button" className="btn btn-sm lg:hidden" disabled={streaming} onClick={onNew}>
+        </Button>
+        <Button type="button" variant="outline" size="sm" className="lg:hidden" disabled={streaming} onClick={onNew}>
           New Conversation
-        </button>
+        </Button>
       </AppBar>
       <div className="flex-1 min-h-0 flex">
         <div className="flex-1 min-w-0 max-w-3xl mx-auto flex flex-col bg-base-100">

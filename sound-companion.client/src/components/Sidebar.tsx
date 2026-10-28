@@ -4,6 +4,12 @@ import { groupThreads } from '../lib/threadGroups'
 import { deleteThread, exportThread, renameThread, threadKeys, threadQueries } from '../queries/threads'
 import type { ThreadSummary } from '../types/threads'
 import { ContextMenu } from './ContextMenu'
+import { Ellipsis } from 'lucide-react'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from './Spinner'
 
 const TOAST_MS = 5000
 const MAX_TITLE_LENGTH = 100 // the server refuses a longer one
@@ -66,19 +72,19 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
       <div className="flex items-center justify-between gap-2 p-4 border-b border-base-300">
         <h2 className="font-bold">Conversations</h2>
         <div className="flex gap-2">
-          <button type="button" className="btn btn-sm btn-primary" disabled={busy} onClick={onNew}>
+          <Button type="button" size="sm" disabled={busy} onClick={onNew}>
             New Conversation
-          </button>
-          <button type="button" className="btn btn-sm lg:hidden" onClick={onClose}>
+          </Button>
+          <Button type="button" variant="outline" size="sm" className="lg:hidden" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
       {data && data.length > 0 && (
         <div className="p-2 pb-0">
-          <input
+          <Input
             type="search"
-            className="input input-sm w-full"
+            className="h-8"
             placeholder="Search Conversations"
             aria-label="Search Conversations"
             value={filter}
@@ -90,17 +96,17 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
         {isPending && (
           <div className="flex flex-col gap-2 p-2" aria-label="Loading Conversations" role="status">
             {[0, 1, 2, 3, 4].map((i) => (
-              <div key={i} className="skeleton h-8 w-full" />
+              <Skeleton key={i} className="h-8 w-full" />
             ))}
           </div>
         )}
         {error && (
-          <div role="alert" className="alert alert-error alert-soft flex-col items-start">
+          <Alert variant="destructive" className="flex flex-col items-start gap-2">
             <span>The Conversations could not be loaded.</span>
-            <button type="button" className="btn btn-sm" onClick={() => refetch()}>
+            <Button type="button" variant="outline" size="sm" onClick={() => refetch()}>
               Retry
-            </button>
-          </div>
+            </Button>
+          </Alert>
         )}
         {data?.length === 0 && <p className="text-sm opacity-60 p-2">No Conversations yet. Ask a question to start one.</p>}
         {shown && data && data.length > 0 && shown.length === 0 && <p className="text-sm opacity-60 p-2">No Conversation matches “{filter.trim()}”.</p>}
@@ -137,9 +143,11 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
                       >
                         <span className="truncate">{thread.title || 'Untitled Conversation'}</span>
                       </button>
-                      <button
+                      <Button
                         type="button"
-                        className="btn btn-ghost btn-xs btn-square lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
                         aria-label={`Actions for ${thread.title || 'Untitled Conversation'}`}
                         aria-haspopup="menu"
                         aria-expanded={menu?.thread.thread_id === thread.thread_id}
@@ -148,10 +156,8 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
                           setMenu({ thread, x: box.left, y: box.bottom + 4, opener: event.currentTarget })
                         }}
                       >
-                        <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                          <path d="M5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
-                        </svg>
-                      </button>
+                        <Ellipsis />
+                      </Button>
                     </li>
                   )
                 ))}
@@ -164,9 +170,9 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
         <div className="toast toast-end toast-bottom z-50">
           <div role="alert" className="alert alert-error">
             <span>{failure}</span>
-            <button type="button" className="btn btn-xs btn-ghost" onClick={() => setFailure(null)}>
+            <Button type="button" variant="ghost" size="xs" onClick={() => setFailure(null)}>
               Dismiss
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -223,9 +229,9 @@ function RenameField({ initial, onSave, onCancel }: { initial: string; onSave: (
     else onSave(title.trim())
   }
   return (
-    <input
+    <Input
       type="text"
-      className="input input-sm w-full"
+      className="h-8"
       aria-label="Conversation title"
       defaultValue={initial}
       maxLength={MAX_TITLE_LENGTH}
@@ -252,13 +258,13 @@ function DeleteDialog({ thread, deleting, onConfirm, onCancel }: { thread: Threa
           “{thread.title || 'Untitled Conversation'}” and its messages will be removed. This cannot be undone.
         </p>
         <div className="modal-action">
-          <button type="button" className="btn" disabled={deleting} onClick={onCancel}>
+          <Button type="button" variant="outline" disabled={deleting} onClick={onCancel}>
             Cancel
-          </button>
-          <button type="button" className="btn btn-error" disabled={deleting} onClick={onConfirm}>
-            {deleting && <span className="loading loading-spinner loading-xs" />}
+          </Button>
+          <Button type="button" variant="destructive" disabled={deleting} onClick={onConfirm}>
+            {deleting && <Spinner />}
             Delete
-          </button>
+          </Button>
         </div>
       </div>
     </dialog>

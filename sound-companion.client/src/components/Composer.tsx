@@ -1,5 +1,8 @@
 import { useState, type KeyboardEvent, type SubmitEvent } from 'react'
 import type { FieldError } from '../hooks/useChatStream'
+import { Send, Square } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 
 interface Props {
   disabled: boolean
@@ -38,8 +41,8 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
       }}
     >
       <div className="flex gap-2">
-        <textarea
-          className="textarea textarea-bordered flex-1 resize-none"
+        <Textarea
+          className="flex-1 resize-none"
           rows={2}
           placeholder="Ask about music theory or an instrument"
           value={text}
@@ -51,24 +54,20 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
           onKeyDown={onKeyDown}
         />
         {disabled ? (
-          <button type="button" className="btn btn-neutral self-end" onClick={onStop}>
-            <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M6 6h12v12H6z" />
-            </svg>
+          <Button type="button" variant="secondary" size="lg" className="self-end" onClick={onStop}>
+            <Square className="fill-current" />
             Stop
-          </button>
+          </Button>
         ) : (
-          <button type="submit" className="btn btn-primary self-end" disabled={!text.trim()}>
+          <Button type="submit" size="lg" className="self-end" disabled={!text.trim()}>
             Send
-            <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M2 21 23 12 2 3v7l15 2-15 2v7Z" />
-            </svg>
-          </button>
+            <Send />
+          </Button>
         )}
       </div>
-      <p className="text-xs opacity-60">Enter sends, Shift+Enter starts a new line.</p>
+      <p className="text-xs text-muted-foreground">Enter sends, Shift+Enter starts a new line.</p>
       {error && (
-        <p role="alert" className="text-error text-sm">
+        <p role="alert" className="text-destructive text-sm">
           {error.field.charAt(0).toUpperCase() + error.field.slice(1)}: {error.message}
         </p>
       )}

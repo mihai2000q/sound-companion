@@ -7,6 +7,9 @@ import { Sidebar } from '../components/Sidebar'
 import { toChatMessages } from '../lib/conversation'
 import { threadQueries } from '../queries/threads'
 import type { Usage } from '../types/chat'
+import { Spinner } from '../components/Spinner'
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 
 /** What the chat route of the server accepts (a lowercase UUID). */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
@@ -65,7 +68,7 @@ function Chat(props: ChatProps) {
     return (
       <div className="flex-1 min-w-0 flex flex-col">
         <AppBar onOpenSidebar={props.onOpenSidebar} />
-        <div className="flex-1 grid place-items-center bg-base-100"><span className="loading loading-spinner" /></div>
+        <div className="flex-1 grid place-items-center bg-base-100"><Spinner className="size-6" /></div>
       </div>
     )
   if (error)
@@ -73,12 +76,12 @@ function Chat(props: ChatProps) {
       <div className="flex-1 min-w-0 flex flex-col">
         <AppBar onOpenSidebar={props.onOpenSidebar} />
         <div className="flex-1 grid place-items-center bg-base-100">
-          <div role="alert" className="alert alert-error alert-soft flex-col items-start">
+          <Alert variant="destructive" className="flex w-auto flex-col items-start gap-2">
             <span>This Conversation could not be loaded.</span>
-            <button type="button" className="btn btn-sm" onClick={() => refetch()}>
+            <Button type="button" variant="outline" size="sm" onClick={() => refetch()}>
               Retry
-            </button>
-          </div>
+            </Button>
+          </Alert>
         </div>
       </div>
     )

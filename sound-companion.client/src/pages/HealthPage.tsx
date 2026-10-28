@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { AppBar } from '../components/AppBar'
 import { healthQueries } from '../queries/health'
 import { HealthError } from '../types/health'
+import { Spinner } from '../components/Spinner'
+import { Button } from '@/components/ui/button'
 
 export function HealthPage() {
   const { data, error, isFetching, refetch } = useQuery(healthQueries.status())
@@ -18,7 +20,7 @@ export function HealthPage() {
 
             {isFetching && (
               <div className="flex items-center gap-2">
-                <span className="loading loading-spinner loading-sm" />
+                <Spinner />
                 <span>Checking...</span>
               </div>
             )}
@@ -46,9 +48,9 @@ export function HealthPage() {
             )}
 
             <div className="card-actions justify-end">
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => refetch()}>
+              <Button type="button" size="sm" onClick={() => refetch()}>
                 Check again
-              </button>
+              </Button>
             </div>
           </div>
         </div>

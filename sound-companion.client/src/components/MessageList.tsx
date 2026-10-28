@@ -1,6 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { chipsFor, labelOf } from '../lib/citations'
 import type { ChatMessage, ToolCall } from '../types/chat'
+import { Alert } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Spinner } from './Spinner'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 interface Props {
   messages: ChatMessage[]
@@ -17,13 +22,13 @@ const SUGGESTIONS = [
   'What does a B-flat clarinet sound like when it plays a written C?',
 ]
 
-function Avatar({ role }: { role: ChatMessage['role'] }) {
+function RoleAvatar({ role }: { role: ChatMessage['role'] }) {
   return (
-    <div className="chat-image avatar avatar-placeholder" aria-hidden="true">
-      <div className={`w-8 rounded-full ${role === 'user' ? 'bg-primary text-primary-content' : 'bg-neutral text-neutral-content'}`}>
-        <span className="text-xs">{role === 'user' ? 'You' : 'SC'}</span>
-      </div>
-    </div>
+    <Avatar className="chat-image" aria-hidden="true">
+      <AvatarFallback className={`text-xs ${role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'}`}>
+        {role === 'user' ? 'You' : 'SC'}
+      </AvatarFallback>
+    </Avatar>
   )
 }
 
@@ -36,9 +41,9 @@ function EmptyState({ onSuggest }: { onSuggest: Props['onSuggest'] }) {
       <ul className="flex flex-wrap justify-center gap-2 max-w-xl">
         {SUGGESTIONS.map((question) => (
           <li key={question}>
-            <button type="button" className="btn btn-sm btn-outline font-normal h-auto py-2 text-left" onClick={() => onSuggest(question)}>
+            <Button type="button" variant="outline" size="sm" className="h-auto py-2 text-left font-normal whitespace-normal" onClick={() => onSuggest(question)}>
               {question}
-            </button>
+            </Button>
           </li>
         ))}
       </ul>
@@ -66,7 +71,7 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
           <ToolCards calls={message.toolCalls} />
           {message.text !== '' && (
             <div className={`chat ${message.role === 'user' ? 'chat-end' : 'chat-start'}`}>
-              <Avatar role={message.role} />
+              <RoleAvatar role={message.role} />
               <div className="chat-header text-xs opacity-60 mb-1">{message.role === 'user' ? 'You' : 'Sound Companion'}</div>
               <div className={`chat-bubble whitespace-pre-wrap ${message.role === 'user' ? 'chat-bubble-primary' : ''}`}>
                 {message.text}
@@ -76,23 +81,23 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
           <SourceChips message={message} onOpenChunk={onOpenChunk} />
           {message.stopped && <p className="text-sm opacity-60 px-2">Stopped</p>}
           {message.error && (
-            <div role="alert" className="alert alert-error alert-soft">
+            <Alert variant="destructive" className="flex items-center justify-between gap-2">
               <span>{message.error}</span>
               {message === last && !streaming && message.errorCode !== 'budget_exceeded' && (
-                <button type="button" className="btn btn-sm" onClick={() => onRetry(message.id)}>
+                <Button type="button" variant="outline" size="sm" onClick={() => onRetry(message.id)}>
                   Retry
-                </button>
+                </Button>
               )}
-            </div>
+            </Alert>
           )}
         </div>
         )
       })}
       {typing && (
         <div className="chat chat-start" aria-label="The bot is typing">
-          <Avatar role="bot" />
+          <RoleAvatar role="bot" />
           <div className="chat-bubble">
-            <span className="loading loading-dots loading-sm" />
+            <Spinner />
           </div>
         </div>
       )}
@@ -114,9 +119,11 @@ function SourceChips({ message, onOpenChunk }: { message: ChatMessage; onOpenChu
       <ul className="flex flex-wrap gap-1">
         {chips.map((chip) => (
           <li key={labelOf(chip)}>
-            <button type="button" className="badge badge-outline badge-sm" onClick={() => onOpenChunk(message.id, chip.id)}>
-              {labelOf(chip)}
-            </button>
+            <Badge asChild variant="outline">
+              <button type="button" onClick={() => onOpenChunk(message.id, chip.id)}>
+                {labelOf(chip)}
+              </button>
+            </Badge>
           </li>
         ))}
       </ul>
@@ -137,10 +144,10 @@ function SourceChips({ message, onOpenChunk }: { message: ChatMessage; onOpenChu
 }
 
 const STATUS = {
-  running: { label: 'Running', badge: 'badge-info' },
-  done: { label: 'Done', badge: 'badge-success' },
-  error: { label: 'Error', badge: 'badge-error' },
-  stopped: { label: 'Stopped', badge: 'badge-warning' },
+  running: { label: 'Running', badge: 'text-sky-700 dark:text-sky-300' },
+  done: { label: 'Done', badge: 'text-green-700 dark:text-green-300' },
+  error: { label: 'Error', badge: 'text-destructive' },
+  stopped: { label: 'Stopped', badge: 'text-amber-700 dark:text-amber-300' },
 }
 
 function ToolCards({ calls }: { calls: ToolCall[] | undefined }) {
@@ -166,10 +173,10 @@ function ToolCard({ call }: { call: ToolCall }) {
         <summary className="collapse-title min-h-0 py-2 pr-10">
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-sm font-medium break-all">{call.name}</span>
-            <span className={`badge badge-sm badge-soft ${status.badge}`}>
-              {call.status === 'running' && <span className="loading loading-spinner loading-xs" />}
+            <Badge variant="secondary" className={status.badge}>
+              {call.status === 'running' && <Spinner className="size-3" />}
               {status.label}
-            </span>
+            </Badge>
             {call.durationMs !== undefined && <span className="text-xs opacity-60">{call.durationMs} ms</span>}
           </span>
         </summary>

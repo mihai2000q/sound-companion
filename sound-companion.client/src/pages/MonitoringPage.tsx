@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { AppBar } from '../components/AppBar'
 import { monitoringQueries } from '../queries/monitoring'
+import { Spinner } from '../components/Spinner'
+import { Button } from '@/components/ui/button'
 
 const ms = (value: number) => `${Math.round(value).toLocaleString()} ms`
 const percent = (rate: number) => `${(rate * 100).toFixed(1)}%`
@@ -11,9 +13,9 @@ export function MonitoringPage() {
   return (
     <main className="min-h-screen bg-base-200">
       <AppBar>
-        <button type="button" className="btn btn-sm" disabled={isFetching} onClick={() => refetch()}>
+        <Button type="button" variant="outline" size="sm" disabled={isFetching} onClick={() => refetch()}>
           Refresh
-        </button>
+        </Button>
       </AppBar>
       <div className="max-w-3xl mx-auto p-4 flex flex-col gap-4">
         <h1 className="text-2xl font-bold">Monitoring</h1>
@@ -22,7 +24,7 @@ export function MonitoringPage() {
             {error.message}
           </div>
         )}
-        {isFetching && !data && <span className="loading loading-spinner" />}
+        {isFetching && !data && <Spinner className="size-6" />}
         {data && (
           <>
             <section className="card bg-base-100 shadow">

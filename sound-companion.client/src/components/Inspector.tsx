@@ -1,6 +1,9 @@
 import { useEffect } from 'react'
 import { labelOf } from '../lib/citations'
 import type { ChatMessage } from '../types/chat'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 
 export interface ChunkFocus {
   messageId: string
@@ -30,9 +33,9 @@ export function Inspector({ message, open, focus, onClose }: Props) {
     >
       <div className="flex items-center justify-between p-4 border-b border-base-300">
         <h2 className="font-bold">Inspector</h2>
-        <button type="button" className="btn btn-sm" onClick={onClose}>
+        <Button type="button" variant="outline" size="sm" onClick={onClose}>
           Close
-        </button>
+        </Button>
       </div>
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
         {!message || (citations.length === 0 && queries.length === 0) ? (
@@ -50,24 +53,26 @@ export function Inspector({ message, open, focus, onClose }: Props) {
             <section className="flex flex-col gap-2">
               <h3 className="text-sm font-semibold">Retrieved chunks ({citations.length})</h3>
               {citations.map((chunk) => (
-                <article
+                <Card
                   key={chunk.id}
                   id={`chunk-${chunk.id}`}
-                  className={`card card-border card-sm bg-base-100 ${focus?.chunkId === chunk.id ? 'border-primary ring-2 ring-primary' : ''}`}
+                  className={`gap-0 py-0 shadow-none ${focus?.chunkId === chunk.id ? 'border-primary ring-2 ring-primary' : ''}`}
                 >
-                  <div className="card-body gap-2">
+                  <CardContent className="flex flex-col gap-2 p-4">
                     <div className="flex items-start justify-between gap-2">
                       <a className="link link-hover text-sm font-medium break-words min-w-0" href={chunk.url} target="_blank" rel="noreferrer">
                         {labelOf(chunk)}
                       </a>
-                      <span className="badge badge-sm badge-soft badge-primary shrink-0" title="Retrieval score">
+                      <Badge variant="secondary" className="shrink-0" title="Retrieval score">
                         {chunk.score.toFixed(3)}
-                      </span>
+                      </Badge>
                     </div>
                     <p className="text-xs whitespace-pre-wrap max-h-40 overflow-y-auto">{chunk.content}</p>
-                    <span className="badge badge-xs badge-ghost self-start">{chunk.license}</span>
-                  </div>
-                </article>
+                    <Badge variant="outline" className="self-start">
+                      {chunk.license}
+                    </Badge>
+                  </CardContent>
+                </Card>
               ))}
             </section>
           </>

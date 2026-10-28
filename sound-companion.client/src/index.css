@@ -6,8 +6,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* shadcn theme, neutral base colour. The names DaisyUI also defines (primary, secondary, accent) are not
-   mapped to utilities below, so `bg-primary` keeps meaning the DaisyUI colour until DaisyUI is removed. */
+/* shadcn theme, neutral base colour */
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -78,10 +77,13 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);

@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router'
 import { ThemeToggle } from './ThemeToggle'
+import { Menu } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 const PAGES = [
   { to: '/', label: 'Chat' },
@@ -21,11 +23,9 @@ export function AppBar({ onOpenSidebar, children }: Props) {
     <header className="navbar flex-wrap gap-y-1 bg-base-100 border-b border-base-300 px-2 sm:px-4">
       <div className="navbar-start w-auto flex-1 gap-1">
         {onOpenSidebar && (
-          <button type="button" className="btn btn-ghost btn-square btn-sm lg:hidden" aria-label="Open Conversations" onClick={onOpenSidebar}>
-            <svg className="size-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3 5h18v2H3V5Zm0 6h18v2H3v-2Zm0 6h18v2H3v-2Z" />
-            </svg>
-          </button>
+          <Button type="button" variant="ghost" size="icon-sm" className="lg:hidden" aria-label="Open Conversations" onClick={onOpenSidebar}>
+            <Menu className="size-5" />
+          </Button>
         )}
         <Link to="/" className="text-lg font-bold px-2 truncate">
           Sound Companion
@@ -45,9 +45,9 @@ export function AppBar({ onOpenSidebar, children }: Props) {
       <div className="navbar-end w-auto flex-wrap gap-2">
         {children}
         <div className="dropdown dropdown-end md:hidden">
-          <button type="button" tabIndex={0} className="btn btn-sm btn-ghost">
+          <Button type="button" variant="ghost" size="sm" tabIndex={0}>
             Pages
-          </button>
+          </Button>
           <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-40 mt-2 w-40 p-2 shadow">
             {PAGES.map((page) => (
               <li key={page.to}>
