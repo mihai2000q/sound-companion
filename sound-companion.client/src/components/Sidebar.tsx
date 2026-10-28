@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { groupThreads } from '../lib/threadGroups'
 import { deleteThread, exportThread, threadKeys, threadQueries } from '../queries/threads'
 import type { ThreadSummary } from '../types/threads'
 import { ContextMenu } from './ContextMenu'
@@ -20,6 +21,7 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
   const queryClient = useQueryClient()
   const [asking, setAsking] = useState<ThreadSummary | null>(null)
   const [failure, setFailure] = useState<string | null>(null)
+  const [filter, setFilter] = useState('')
   const [menu, setMenu] = useState<{ thread: ThreadSummary; x: number; y: number; opener: HTMLElement } | null>(null)
 
   const remove = useMutation({
@@ -38,6 +40,8 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
     mutationFn: exportThread,
     onError: () => setFailure('The Conversation could not be exported.'),
   })
+  const needle = filter.trim().toLowerCase()
+  const shown = data?.filter((thread) => (thread.title || 'Untitled Conversation').toLowerCase().includes(needle))
   const closeMenu = useCallback(() => setMenu(null), [])
   return (
     <aside
@@ -55,8 +59,26 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
           </button>
         </div>
       </div>
+      {data && data.length > 0 && (
+        <div className="p-2 pb-0">
+          <input
+            type="search"
+            className="input input-sm w-full"
+            placeholder="Search Conversations"
+            aria-label="Search Conversations"
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+          />
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto p-2">
-        {isPending && <span className="loading loading-spinner m-2" />}
+        {isPending && (
+          <div className="flex flex-col gap-2 p-2" aria-label="Loading Conversations" role="status">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <div key={i} className="skeleton h-8 w-full" />
+            ))}
+          </div>
+        )}
         {error && (
           <div role="alert" className="alert alert-error alert-soft flex-col items-start">
             <span>The Conversations could not be loaded.</span>
@@ -74,40 +96,46 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
           </div>
         )}
         {data?.length === 0 && <p className="text-sm opacity-60 p-2">No Conversations yet. Ask a question to start one.</p>}
-        {data && data.length > 0 && (
+        {shown && data && data.length > 0 && shown.length === 0 && <p className="text-sm opacity-60 p-2">No Conversation matches “{filter.trim()}”.</p>}
+        {shown && shown.length > 0 && (
           <ul className="menu w-full">
-            {data.map((thread) => (
-              <li key={thread.thread_id} className="group flex-row items-center">
-                <button
-                  type="button"
-                  className={`flex-1 min-w-0 ${thread.thread_id === activeId ? 'menu-active' : ''}`}
-                  aria-current={thread.thread_id === activeId ? 'true' : undefined}
-                  aria-haspopup="menu"
-                  disabled={busy && thread.thread_id !== activeId}
-                  onClick={() => onSelect(thread.thread_id)}
-                  onContextMenu={(event) => {
-                    event.preventDefault()
-                    setMenu({ thread, x: event.clientX, y: event.clientY, opener: event.currentTarget })
-                  }}
-                >
-                  <span className="truncate">{thread.title || 'Untitled Conversation'}</span>
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs btn-square lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
-                  aria-label={`Actions for ${thread.title || 'Untitled Conversation'}`}
-                  aria-haspopup="menu"
-                  aria-expanded={menu?.thread.thread_id === thread.thread_id}
-                  onClick={(event) => {
-                    const box = event.currentTarget.getBoundingClientRect()
-                    setMenu({ thread, x: box.left, y: box.bottom + 4, opener: event.currentTarget })
-                  }}
-                >
-                  <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
-                  </svg>
-                </button>
-              </li>
+            {groupThreads(shown).map((group) => (
+              <Fragment key={group.label}>
+                <li className="menu-title">{group.label}</li>
+                {group.threads.map((thread) => (
+                  <li key={thread.thread_id} className="group flex-row items-center">
+                    <button
+                      type="button"
+                      className={`flex-1 min-w-0 ${thread.thread_id === activeId ? 'menu-active' : ''}`}
+                      aria-current={thread.thread_id === activeId ? 'true' : undefined}
+                      aria-haspopup="menu"
+                      disabled={busy && thread.thread_id !== activeId}
+                      onClick={() => onSelect(thread.thread_id)}
+                      onContextMenu={(event) => {
+                        event.preventDefault()
+                        setMenu({ thread, x: event.clientX, y: event.clientY, opener: event.currentTarget })
+                      }}
+                    >
+                      <span className="truncate">{thread.title || 'Untitled Conversation'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-xs btn-square lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
+                      aria-label={`Actions for ${thread.title || 'Untitled Conversation'}`}
+                      aria-haspopup="menu"
+                      aria-expanded={menu?.thread.thread_id === thread.thread_id}
+                      onClick={(event) => {
+                        const box = event.currentTarget.getBoundingClientRect()
+                        setMenu({ thread, x: box.left, y: box.bottom + 4, opener: event.currentTarget })
+                      }}
+                    >
+                      <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                      </svg>
+                    </button>
+                  </li>
+                ))}
+              </Fragment>
             ))}
           </ul>
         )}
