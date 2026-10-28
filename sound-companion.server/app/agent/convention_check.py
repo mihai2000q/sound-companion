@@ -47,15 +47,14 @@ def check_answer(case: ConventionCase, answer: str) -> ConventionResult:
     )
 
 
-# Spellings and pages come from what the Corpus says (see decision 62): Scientific pitch notation and the
-# textbook give C4, the Musical note table gives c′ (Helmholtz) and German B / H.
+# Spellings and pages come from what the Corpus says (see decisions 62 and 73): Scientific pitch notation and the
+# textbook give C4, the Musical note page gives German B / H. q06 does not require Helmholtz c′ (decision 73).
 CASES = [
     ConventionCase(
         id="q06",
         question="What is middle C called, and what do Germans call B-flat and B natural?",
         conventions={
             "scientific C4": (r"\bC4\b",),
-            "Helmholtz c′": (r"c[′'’]", r"(?i)one-lined?"),
             "German B = B-flat": (r"B-flat|B♭|B flat",),
             "German H = B natural": (r"\bH\b",),
         },
