@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { AppBar } from '../components/AppBar'
 import { healthQueries } from '../queries/health'
 import { HealthError } from '../types/health'
 
@@ -7,9 +8,10 @@ export function HealthPage() {
   const errorHealth = error instanceof HealthError ? error.health : undefined
 
   return (
-    <main className="min-h-screen grid place-items-center bg-base-200 p-4">
-      <div className="flex flex-col items-center gap-6">
-        <h1 className="text-3xl font-bold">Sound Companion</h1>
+    <main className="min-h-screen flex flex-col bg-base-200">
+      <AppBar />
+      <div className="flex-1 grid place-items-center p-4">
+        <h1 className="sr-only">Server health</h1>
         <div className="card bg-base-100 shadow-xl w-96">
           <div className="card-body">
             <h2 className="card-title">Server health</h2>
