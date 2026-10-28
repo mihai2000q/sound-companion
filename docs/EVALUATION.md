@@ -153,3 +153,49 @@ Caveats to document in the reflection:
 ## Reporting
 
 `docs/EVALUATION.md` gets a results section after story 16: a table of metrics for vector-only vs hybrid, the worst five questions, and what was changed in response. This feeds the "reflection and improvement" part of the review.
+
+## Results: RAGAs (story 16)
+
+Run of 2026-10-28 on commit `9bf3863`: the 22 `answer` questions of `data/golden-set.json` (the plan said about 31, but 22 is what the golden set holds, and the three clarify questions q15 to q17 are left out of the export), answered by the chat model `openai/gpt-4o-mini` with the vector retriever and the rewrite on (decisions 63 and 71), scored by `google/gemini-2.5-flash-lite` with the default of decision 72. Files: export `data/runs/2026-10-28T09-14-47.json`, scores `eval/results/2026-10-28-ragas-final.json`. The hybrid retriever was not scored with RAGAs, since it is not the default (decision 71).
+
+| Metric | Mean | Questions | Target | |
+|---|---|---|---|---|
+| Faithfulness | 0.84 | 22 | 0.8 | met |
+| Context recall | 0.75 | 21 | 0.7 | met |
+| Context precision | 0.47 | 21 | 0.7 | **missed** |
+| Answer relevancy | 0.88 | 22 | none | |
+
+q08 answers from a tool alone, so it has no retrieved chunks and no context scores. Six questions have faithfulness under 0.8 (q03, q04, q07, q10, q18, q23), and nine have precision under 0.5 (q01, q03, q05, q06, q07, q09, q10, q12, q19).
+
+### Which low scores are the retrieval and which are the judge
+
+The worst five questions by the mean of the three target metrics were scored again by a second judge (`openai/gpt-4o-mini`, `eval/results/2026-10-28-ragas-worst5-gpt-4o-mini.json`). A score that stays low under both judges is a real problem, one that changes a lot is the judge.
+
+| Question | Gemini (faith / precision / recall) | GPT-4o-mini | Cause |
+|---|---|---|---|
+| q03 Hornbostel-Sachs classes, violin | 0.44 / 0.00 / 0.00 | 0.57 / 1.00 / 1.00 | Context scores: **judge**. All 6 chunks are from the right page, and one judge gives 0 for them. Faithfulness: **answer**. It lists five classes with examples (xylophones, synthesizers) that the chunks do not state, so both judges score it low. |
+| q12 concert pitch vs written pitch | 0.89 / 0.00 / 0.33 | 0.67 / 0.00 / 1.00 | Precision: **retrieval**. Only 4 of 10 chunks are from the expected pages, and the first is a table row of Scientific pitch notation (`B \| 15.43385`), which precision, weighted by rank, punishes most. Recall: the judges disagree. |
+| q10 trumpet vs cornet | 0.57 / 0.17 / 0.50 | 0.47 / 0.17 / 1.00 | Faithfulness: **answer**. "More compact and rounded", "trumpets are not used in brass bands" are not in the chunks. Precision: **retrieval**, 7 of 9 chunks are from Trumpet or Cornet but few are about the difference. |
+| q07 authentic, half and plagal cadence | 0.65 / 0.00 / 0.67 | 0.75 / 0.14 / 1.00 | Precision: **retrieval**. 11 of 13 chunks are from the right pages, but many are other parts of Cadence (half-step cadences, frequency ratios, deceptive cadence). The right page is not enough, the section has to be right. |
+| q19 mbira (alias) | 0.90 / 0.12 / 0.33 | 1.00 / 0.61 / 0.67 | **Both**. 4 of 8 chunks are not from Mbira, and the judges disagree by 0.5 on precision. |
+
+Reading across the set:
+
+- **Context precision is the real gap.** It is low under both judges for the questions where the chunks are noisy. The agent searches once per thing compared and the search tool merges the rewrites, so a question gets 5 to 16 chunks, and RAGAs counts every one, weighting the early ranks. Layer 1 (page-level precision@5, 0.87 for vector) hides this, since a chunk from the right page counts as relevant there.
+- **Faithfulness misses come from the answers.** The model adds examples and facts from its own knowledge (q03, q10), which the faithfulness caveat above predicts. The system prompt already says "only from retrieved context", and `gpt-4o-mini` does not always follow it.
+- **The judge is noisy.** `gemini-2.5-flash-lite` and `gpt-4o-mini` differ by up to 1.0 on a single question's precision or recall (q03). Means over 21 questions are usable, one question's score is not. Answer relevancy also moves a little on every run, because it generates and embeds questions.
+- **Convention-conflict answers.** q06 and q12 do not state a conflict between sources, so the check that the judge does not penalise "sources differ" is still open (see the caveats). q12 faithfulness is 0.89 and q06 is 1.00 with tool results.
+- **Tool results.** Decision 72.
+
+### What was changed in response
+
+Nothing in the bot yet. The evaluation was the story, and its findings are candidates for later stories, each to be measured with this runner against `ragas-final`:
+
+1. Return fewer or better ordered chunks per search (a lower `k` or a rerank), against the precision gap.
+2. Make the answer stay inside the chunks (a stricter prompt line, or a cheap check of the answer), against faithfulness misses like q03 and q10.
+3. A stronger or second judge, or the same judge at several repeats, so that one question's score can be trusted. Costs about 0.05 credits a scoring now.
+4. A golden question that makes the agent say sources differ, for the open Convention-conflict check.
+
+### Spend
+
+All spend is in `usage_log`. The evaluation cost about **0.23 credits**, against the 1 credit target: the 22 answers (export, 0.020), and the judge (purpose `eval`, 0.206: two 2-question trials, four full scorings of the 22 answers, one of them with 5 scores lost to rate limits and run again, and the 5-question second judge). One full scoring with `gemini-2.5-flash-lite` costs about 0.045 credits and takes about 10 minutes, because the metrics run one after another. The embedding calls report no cost on OpenRouter.

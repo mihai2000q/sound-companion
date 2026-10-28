@@ -1,0 +1,110 @@
+{
+  "kind": "ragas",
+  "label": "ragas-worst5-gpt-4o-mini",
+  "date": "2026-10-28",
+  "settings": {
+    "export": "2026-10-28T09-14-47.json",
+    "export_settings": {
+      "model": "openai/gpt-4o-mini",
+      "rewrite_model": "openai/gpt-4o-mini",
+      "retriever_mode": "vector",
+      "prompt_sha256": "c0c981a1c268",
+      "git": "c41bf7a (uncommitted changes)",
+      "golden_set": {
+        "file": "golden-set.json",
+        "sha256": "9d949fb50fde"
+      }
+    },
+    "judge_model": "openai/gpt-4o-mini",
+    "embedding_model": "openai/text-embedding-3-small",
+    "tool_contexts": "faithfulness",
+    "git": "9bf3863 (uncommitted changes)"
+  },
+  "summary": {
+    "faithfulness": {
+      "mean": 0.690952380952381,
+      "questions": 5
+    },
+    "answer_relevancy": {
+      "mean": 0.8895126763603235,
+      "questions": 5
+    },
+    "context_precision": {
+      "mean": 0.3833333333041071,
+      "questions": 5
+    },
+    "context_recall": {
+      "mean": 0.9333333333333333,
+      "questions": 5
+    }
+  },
+  "spend": {
+    "credits": 0.017474499999999997,
+    "models": {
+      "openai/gpt-4o-mini": [
+        76,
+        100136,
+        9584,
+        0.0174684
+      ],
+      "text-embedding-3-small": [
+        10,
+        305,
+        0,
+        6.1e-06
+      ]
+    }
+  },
+  "questions": [
+    {
+      "id": "q03",
+      "scores": {
+        "faithfulness": 0.5714285714285714,
+        "answer_relevancy": 0.7255148582150981,
+        "context_precision": 0.9999999999,
+        "context_recall": 1.0
+      },
+      "skipped": {}
+    },
+    {
+      "id": "q07",
+      "scores": {
+        "faithfulness": 0.75,
+        "answer_relevancy": 0.8905619265439958,
+        "context_precision": 0.14285714284285714,
+        "context_recall": 1.0
+      },
+      "skipped": {}
+    },
+    {
+      "id": "q10",
+      "scores": {
+        "faithfulness": 0.4666666666666667,
+        "answer_relevancy": 0.8428609953437026,
+        "context_precision": 0.16666666665,
+        "context_recall": 1.0
+      },
+      "skipped": {}
+    },
+    {
+      "id": "q12",
+      "scores": {
+        "faithfulness": 0.6666666666666666,
+        "answer_relevancy": 0.9999997614207251,
+        "context_precision": 0.0,
+        "context_recall": 1.0
+      },
+      "skipped": {}
+    },
+    {
+      "id": "q19",
+      "scores": {
+        "faithfulness": 1.0,
+        "answer_relevancy": 0.9886258402780962,
+        "context_precision": 0.6071428571276786,
+        "context_recall": 0.6666666666666666
+      },
+      "skipped": {}
+    }
+  ]
+}
