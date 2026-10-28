@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     openrouter_base_url: str
     openrouter_chat_model: str = "openai/gpt-4o-mini"
     openrouter_rewrite_model: str = "openai/gpt-4o-mini"  # cheap model for multi-query rewrite
+    openrouter_judge_model: str = "google/gemini-2.5-flash-lite"  # scores answers in the RAGAs evaluation (eval/run_ragas.py)
     openrouter_embedding_model: str = "openai/text-embedding-3-small"
 
     # Which Retriever the chat route and the retrieval metrics use (decision log, Story 15).

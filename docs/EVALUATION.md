@@ -128,7 +128,15 @@ Export format (`data/runs/<timestamp>.json`): the settings the run used (models,
 
 `contexts` are the chunks the searches returned (from the `citations` events), each once. `tool_results` are the music tool calls (not searches), kept apart so the runner can pass them to RAGAs as contexts or leave them out (the decision of story 16). A run that failed keeps its entry with `error` set.
 
-Runner: `sound-companion.server/eval/run_ragas.py` reads the JSON and prints per-metric scores (RAGAs dependencies in an optional extras group so they do not bloat the app image). It uses the same OpenRouter key, so keep the golden set at about 31 questions to protect the budget. Run it on demand, never in the request path. Tool-only questions have no retrieved contexts, so score them with layers 1 and 2 and exclude them from the context metrics.
+Runner: `cd sound-companion.server && uv sync --group ragas && uv run --group ragas python -m eval.run_ragas data/runs/<timestamp>.json [--only q01,q02] [--tool-contexts] [--label L]` reads an export and prints faithfulness, answer relevancy, context precision (with reference) and context recall per question and overall (the mean of the questions that have a score, with how many that is). It uses the RAGAs 0.4 `metrics.collections` API with an OpenAI client pointed at OpenRouter. The judge is `OPENROUTER_JUDGE_MODEL` (default `google/gemini-2.5-flash-lite`, a different model family from the chat model so it does not grade its own answers, and cheap; a stronger judge is one setting away) and answer relevancy embeds with `OPENROUTER_EMBEDDING_MODEL`. RAGAs is in the optional dependency group `ragas`, so the app image (`uv sync --no-dev`) does not install it. Run it on demand, never in the request path. The scores are saved to `eval/results/<date>-ragas-<label>.json` (`scripts.compare_runs` does not read this kind yet).
+
+- A question whose answer used no retrieved chunk (no `contexts`) gets answer relevancy only, and its faithfulness and context scores are `-` with the reason printed. Clarify questions never reach the runner, because the export leaves them out.
+- A failed judge call loses that one score, not the run, and a failed agent run is not scored.
+- `--tool-contexts` appends the music tool results to the contexts, to compare the two ways of the tool-output decision. Without it only retrieved chunks count.
+- Spend: the judge's HTTP responses are metered (`usage.cost`), the total is printed and one `usage_log` row per judge model is written with purpose `eval`.
+- Packaging: `ragas` 0.4.3 fails to import against `langchain-community` 0.4 (`chat_models.vertexai` is gone), so `eval/judge.py` registers an empty stand-in module before importing it. Its dependency `instructor` also caps `jiter`, which lowers `openai` from 3.36.1 to 3.3.0 in the shared `uv.lock`. Tests pass on it, and it is the version the app image gets too.
+
+Tool-only questions have no retrieved contexts, so score them with layers 1 and 2 and exclude them from the context metrics.
 
 Metrics: faithfulness, answer relevancy, context precision, context recall.
 
