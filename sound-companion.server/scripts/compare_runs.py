@@ -1,4 +1,4 @@
-"""Compare two saved runs, retrieval, tool-calling or injection. Run from the server folder:
+"""Compare two saved runs, retrieval, tool-calling, injection or RAGAs. Run from the server folder:
 `uv run python -m scripts.compare_runs eval/results/<baseline>.json eval/results/<new>.json`.
 
 Prints the change per question and overall (second run minus first) and the settings that differ,
@@ -9,6 +9,7 @@ import argparse
 from pathlib import Path
 
 from app.agent import injection_eval
+from eval import run_ragas
 from app.agent.tool_eval import KIND, compare as compare_tools
 from app.rag.eval_results import compare, differing_settings, group_means, load_run
 from app.rag.evaluation import load_golden_set
@@ -61,12 +62,31 @@ def main_injection(a: dict, b: dict) -> None:
     print_settings(differing_settings(a, b))
 
 
+def main_ragas(a: dict, b: dict) -> None:
+    result = run_ragas.compare(a, b)
+    print(f"A: {a['label']} ({a['date']})   B: {b['label']} ({b['date']})\n")
+    for metric, (sa, sb) in result["summary"].items():
+        mean_a, mean_b = sa["mean"], sb["mean"]
+        delta = "" if mean_a is None or mean_b is None else f" ({mean_b - mean_a:+.3f})"
+        print(f"{metric:18} {pct(mean_a):>5} (n={sa['questions']}) -> {pct(mean_b):>5} (n={sb['questions']}){delta}")
+    for row in result["changed"]:
+        print(f"{row['id']:5} " + ", ".join(f"{m} {pct(x)} -> {pct(y)}" for m, (x, y) in row["moves"].items()))
+    if not result["changed"]:
+        print("no score changed")
+    for side, ids in (("only in A", result["only_in_a"]), ("only in B", result["only_in_b"])):
+        if ids:
+            print(f"{side}: {', '.join(ids)}")
+    print_settings(differing_settings(a, b))
+
+
 def main(path_a: Path, path_b: Path) -> None:
     a, b = load_run(path_a), load_run(path_b)
     if a.get("kind") != b.get("kind"):
         raise SystemExit("These are not the same kind of run (retrieval and tool-calling cannot be compared).")
     if a.get("kind") == KIND:
         return main_tools(a, b)
+    if a.get("kind") == run_ragas.KIND:
+        return main_ragas(a, b)
     if a.get("kind") == injection_eval.KIND:
         return main_injection(a, b)
     result = compare(a, b)

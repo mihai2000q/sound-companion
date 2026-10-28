@@ -108,18 +108,36 @@ Also unit-test the tools directly with pytest (no LLM): the expected outputs fro
 
 RAGAs is a Python library, and the backend is Python, so it runs in the same project.
 
-Export format (`data/runs/<timestamp>.json`), one entry per question:
+Export: `cd sound-companion.server && uv run python -m scripts.export_run [--only q01,q02] [--mode vector|hybrid]` runs each `answer` question of `data/golden-set.json` through the real agent (the `agent_events` stream the UI reads, the configured retriever with the rewrite, one fresh thread per question) and saves `data/runs/<timestamp>.json`. Clarify and decline questions (q15 to q17) are left out and listed under `skipped`, because they have no contexts to score. Every model call goes to `usage_log`, and the run's cost is printed and saved.
+
+Export format (`data/runs/<timestamp>.json`): the settings the run used (models, retriever mode, prompt hash, commit, golden set hash), `skipped`, `cost` and one entry per question:
 
 ```json
 {
+  "id": "q01",
   "question": "...",
   "answer": "...",
   "contexts": ["chunk text 1", "chunk text 2"],
-  "reference": "reference answer"
+  "tool_results": [{"name": "note_frequency", "args": {"note": "A4"}, "content": "{...}"}],
+  "reference": "reference answer",
+  "queries": ["query searched", "a rewrite"],
+  "cost": 0.004,
+  "error": null
 }
 ```
 
-Runner: `sound-companion.server/eval/run_ragas.py` reads the JSON and prints per-metric scores (RAGAs dependencies in an optional extras group so they do not bloat the app image). It uses the same OpenRouter key, so keep the golden set at about 31 questions to protect the budget. Run it on demand, never in the request path. Tool-only questions have no retrieved contexts, so score them with layers 1 and 2 and exclude them from the context metrics.
+`contexts` are the chunks the searches returned (from the `citations` events), each once. `tool_results` are the music tool calls (not searches), kept apart so the runner can pass them to RAGAs as contexts or leave them out (the decision of story 16). A run that failed keeps its entry with `error` set.
+
+Runner: `cd sound-companion.server && uv sync --group ragas && uv run --group ragas python -m eval.run_ragas data/runs/<timestamp>.json [--only q01,q02] [--tool-contexts] [--label L]` reads an export and prints faithfulness, answer relevancy, context precision (with reference) and context recall per question and overall (the mean of the questions that have a score, with how many that is). It uses the RAGAs 0.4 `metrics.collections` API with an OpenAI client pointed at OpenRouter. The judge is `OPENROUTER_JUDGE_MODEL` (default `google/gemini-2.5-flash-lite`, a different model family from the chat model so it does not grade its own answers, and cheap; a stronger judge is one setting away) and answer relevancy embeds with `OPENROUTER_EMBEDDING_MODEL`. RAGAs is in the optional dependency group `ragas`, so the app image (`uv sync --no-dev`) does not install it. Run it on demand, never in the request path. The scores are saved to `eval/results/<date>-ragas-<label>.json`.
+
+- A question whose answer used no retrieved chunk (no `contexts`) gets answer relevancy only, and its faithfulness and context scores are `-` with the reason printed. Clarify questions never reach the runner, because the export leaves them out.
+- A failed judge call loses that one score, not the run, and a failed agent run is not scored.
+- `--tool-contexts none|faithfulness|all` says which metrics also count the music tool results (as text after the chunks). The default, `faithfulness`, is decision 72: tool results are grounding for faithfulness, but not retrieval for the context metrics. The targets below are checked against that default. `none` and `all` exist to compare.
+- `scripts.compare_runs A B` compares two ragas runs: the mean of each metric, the questions whose score moved (at two decimals) and the settings that differ.
+- Spend: the judge's HTTP responses are metered (`usage.cost`), the total is printed and one `usage_log` row per judge model is written with purpose `eval`.
+- Packaging: `ragas` 0.4.3 fails to import against `langchain-community` 0.4 (`chat_models.vertexai` is gone), so `eval/judge.py` registers an empty stand-in module before importing it. Its dependency `instructor` also caps `jiter`, which lowers `openai` from 3.36.1 to 3.3.0 in the shared `uv.lock`. Tests pass on it, and it is the version the app image gets too.
+
+Tool-only questions have no retrieved contexts, so score them with layers 1 and 2 and exclude them from the context metrics.
 
 Metrics: faithfulness, answer relevancy, context precision, context recall.
 
@@ -128,10 +146,56 @@ Targets (course guidance): faithfulness 0.8 or above, context metrics 0.7 or abo
 Caveats to document in the reflection:
 
 - Faithfulness is strict. A correct claim from the model's own knowledge still lowers the score, so the system prompt says "answer only from retrieved context and tool results".
-- Tool results are not retrieved context. Answers that rely on a tool result may score lower on faithfulness unless the tool output is included in the contexts passed to RAGAs. Decide this in story 16.
-- Convention-conflict answers list several Conventions. Check that the judge does not penalise correct "sources differ" statements.
+- Tool results are not retrieved context. Answers that rely on a tool result score lower on faithfulness unless the tool output is in the contexts passed to RAGAs. Decided in story 16 (decision 72): faithfulness gets chunks plus tool results, the context metrics get chunks only. First comparison on 22 questions: q06 faithfulness 0.67 to 1.00, q08 unscored to 0.69, means 0.83 (21 questions) and 0.84 (22). Only q06 and q08 used a tool, so the golden set cannot show a larger effect.
+- Convention-conflict answers list several Conventions. Check that the judge does not penalise correct "sources differ" statements. Not settled by the first run: the exported q06 and q12 answers state no conflict between sources (q06 names C4 and the German H without comparing Conventions, q12 does not mention one), so there was no "sources differ" statement to judge. A case that makes the agent say it is needed.
 - Low scores need a look at individual cases, not only the average.
 
 ## Reporting
 
 `docs/EVALUATION.md` gets a results section after story 16: a table of metrics for vector-only vs hybrid, the worst five questions, and what was changed in response. This feeds the "reflection and improvement" part of the review.
+
+## Results: RAGAs (story 16)
+
+Run of 2026-10-28 on commit `9bf3863`: the 22 `answer` questions of `data/golden-set.json` (the plan said about 31, but 22 is what the golden set holds, and the three clarify questions q15 to q17 are left out of the export), answered by the chat model `openai/gpt-4o-mini` with the vector retriever and the rewrite on (decisions 63 and 71), scored by `google/gemini-2.5-flash-lite` with the default of decision 72. Files: export `data/runs/2026-10-28T09-14-47.json`, scores `eval/results/2026-10-28-ragas-final.json`. The hybrid retriever was not scored with RAGAs, since it is not the default (decision 71).
+
+| Metric | Mean | Questions | Target | |
+|---|---|---|---|---|
+| Faithfulness | 0.84 | 22 | 0.8 | met |
+| Context recall | 0.75 | 21 | 0.7 | met |
+| Context precision | 0.47 | 21 | 0.7 | **missed** |
+| Answer relevancy | 0.88 | 22 | none | |
+
+q08 answers from a tool alone, so it has no retrieved chunks and no context scores. Six questions have faithfulness under 0.8 (q03, q04, q07, q10, q18, q23), and nine have precision under 0.5 (q01, q03, q05, q06, q07, q09, q10, q12, q19).
+
+### Which low scores are the retrieval and which are the judge
+
+The worst five questions by the mean of the three target metrics were scored again by a second judge (`openai/gpt-4o-mini`, `eval/results/2026-10-28-ragas-worst5-gpt-4o-mini.json`). A score that stays low under both judges is a real problem, one that changes a lot is the judge.
+
+| Question | Gemini (faith / precision / recall) | GPT-4o-mini | Cause |
+|---|---|---|---|
+| q03 Hornbostel-Sachs classes, violin | 0.44 / 0.00 / 0.00 | 0.57 / 1.00 / 1.00 | Context scores: **judge**. All 6 chunks are from the right page, and one judge gives 0 for them. Faithfulness: **answer**. It lists five classes with examples (xylophones, synthesizers) that the chunks do not state, so both judges score it low. |
+| q12 concert pitch vs written pitch | 0.89 / 0.00 / 0.33 | 0.67 / 0.00 / 1.00 | Precision: **retrieval**. Only 4 of 10 chunks are from the expected pages, and the first is a table row of Scientific pitch notation (`B \| 15.43385`), which precision, weighted by rank, punishes most. Recall: the judges disagree. |
+| q10 trumpet vs cornet | 0.57 / 0.17 / 0.50 | 0.47 / 0.17 / 1.00 | Faithfulness: **answer**. "More compact and rounded", "trumpets are not used in brass bands" are not in the chunks. Precision: **retrieval**, 7 of 9 chunks are from Trumpet or Cornet but few are about the difference. |
+| q07 authentic, half and plagal cadence | 0.65 / 0.00 / 0.67 | 0.75 / 0.14 / 1.00 | Precision: **retrieval**. 11 of 13 chunks are from the right pages, but many are other parts of Cadence (half-step cadences, frequency ratios, deceptive cadence). The right page is not enough, the section has to be right. |
+| q19 mbira (alias) | 0.90 / 0.12 / 0.33 | 1.00 / 0.61 / 0.67 | **Both**. 4 of 8 chunks are not from Mbira, and the judges disagree by 0.5 on precision. |
+
+Reading across the set:
+
+- **Context precision is the real gap.** It is low under both judges for the questions where the chunks are noisy. The agent searches once per thing compared and the search tool merges the rewrites, so a question gets 5 to 16 chunks, and RAGAs counts every one, weighting the early ranks. Layer 1 (page-level precision@5, 0.87 for vector) hides this, since a chunk from the right page counts as relevant there.
+- **Faithfulness misses come from the answers.** The model adds examples and facts from its own knowledge (q03, q10), which the faithfulness caveat above predicts. The system prompt already says "only from retrieved context", and `gpt-4o-mini` does not always follow it.
+- **The judge is noisy.** `gemini-2.5-flash-lite` and `gpt-4o-mini` differ by up to 1.0 on a single question's precision or recall (q03). Means over 21 questions are usable, one question's score is not. Answer relevancy also moves a little on every run, because it generates and embeds questions.
+- **Convention-conflict answers.** q06 and q12 do not state a conflict between sources, so the check that the judge does not penalise "sources differ" is still open (see the caveats). q12 faithfulness is 0.89 and q06 is 1.00 with tool results.
+- **Tool results.** Decision 72.
+
+### What was changed in response
+
+Nothing in the bot yet. The evaluation was the story, and its findings are candidates for later stories, each to be measured with this runner against `ragas-final`:
+
+1. Return fewer or better ordered chunks per search (a lower `k` or a rerank), against the precision gap.
+2. Make the answer stay inside the chunks (a stricter prompt line, or a cheap check of the answer), against faithfulness misses like q03 and q10.
+3. A stronger or second judge, or the same judge at several repeats, so that one question's score can be trusted. Costs about 0.05 credits a scoring now.
+4. A golden question that makes the agent say sources differ, for the open Convention-conflict check.
+
+### Spend
+
+All spend is in `usage_log`. The evaluation cost about **0.23 credits**, against the 1 credit target: the 22 answers (export, 0.020), and the judge (purpose `eval`, 0.206: two 2-question trials, four full scorings of the 22 answers, one of them with 5 scores lost to rate limits and run again, and the 5-question second judge). One full scoring with `gemini-2.5-flash-lite` costs about 0.045 credits and takes about 10 minutes, because the metrics run one after another. The embedding calls report no cost on OpenRouter.
