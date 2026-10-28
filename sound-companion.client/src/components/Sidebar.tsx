@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { deleteThread, exportThread, threadKeys, threadQueries } from '../queries/threads'
 import type { ThreadSummary } from '../types/threads'
+import { ContextMenu } from './ContextMenu'
 
 interface Props {
   activeId: string
@@ -19,6 +20,7 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
   const queryClient = useQueryClient()
   const [asking, setAsking] = useState<ThreadSummary | null>(null)
   const [failure, setFailure] = useState<string | null>(null)
+  const [menu, setMenu] = useState<{ thread: ThreadSummary; x: number; y: number; opener: HTMLElement } | null>(null)
 
   const remove = useMutation({
     mutationFn: (thread: ThreadSummary) => deleteThread(thread.thread_id),
@@ -36,6 +38,7 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
     mutationFn: exportThread,
     onError: () => setFailure('The Conversation could not be exported.'),
   })
+  const closeMenu = useCallback(() => setMenu(null), [])
   return (
     <aside
       aria-label="Conversations"
@@ -74,45 +77,68 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
         {data && data.length > 0 && (
           <ul className="menu w-full">
             {data.map((thread) => (
-              <li key={thread.thread_id} className="flex-row items-center">
+              <li key={thread.thread_id} className="group flex-row items-center">
                 <button
                   type="button"
                   className={`flex-1 min-w-0 ${thread.thread_id === activeId ? 'menu-active' : ''}`}
                   aria-current={thread.thread_id === activeId ? 'true' : undefined}
+                  aria-haspopup="menu"
                   disabled={busy && thread.thread_id !== activeId}
                   onClick={() => onSelect(thread.thread_id)}
+                  onContextMenu={(event) => {
+                    event.preventDefault()
+                    setMenu({ thread, x: event.clientX, y: event.clientY, opener: event.currentTarget })
+                  }}
                 >
                   <span className="truncate">{thread.title || 'Untitled Conversation'}</span>
                 </button>
                 <button
                   type="button"
-                  className="btn btn-ghost btn-xs"
-                  aria-label={`Export ${thread.title || 'Untitled Conversation'}`}
-                  disabled={download.isPending}
-                  onClick={() => {
-                    setFailure(null)
-                    download.mutate(thread)
+                  className="btn btn-ghost btn-xs btn-square lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100"
+                  aria-label={`Actions for ${thread.title || 'Untitled Conversation'}`}
+                  aria-haspopup="menu"
+                  aria-expanded={menu?.thread.thread_id === thread.thread_id}
+                  onClick={(event) => {
+                    const box = event.currentTarget.getBoundingClientRect()
+                    setMenu({ thread, x: box.left, y: box.bottom + 4, opener: event.currentTarget })
                   }}
                 >
-                  Export
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-xs text-error"
-                  aria-label={`Delete ${thread.title || 'Untitled Conversation'}`}
-                  disabled={busy && thread.thread_id === activeId}
-                  onClick={() => {
-                    setFailure(null)
-                    setAsking(thread)
-                  }}
-                >
-                  Delete
+                  <svg className="size-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                  </svg>
                 </button>
               </li>
             ))}
           </ul>
         )}
       </div>
+      {menu && (
+        <ContextMenu
+          x={menu.x}
+          y={menu.y}
+          opener={menu.opener}
+          onClose={closeMenu}
+          items={[
+            {
+              label: 'Export',
+              disabled: download.isPending,
+              onSelect: () => {
+                setFailure(null)
+                download.mutate(menu.thread)
+              },
+            },
+            {
+              label: 'Delete',
+              danger: true,
+              disabled: busy && menu.thread.thread_id === activeId,
+              onSelect: () => {
+                setFailure(null)
+                setAsking(menu.thread)
+              },
+            },
+          ]}
+        />
+      )}
       {asking && (
         <DeleteDialog
           thread={asking}
