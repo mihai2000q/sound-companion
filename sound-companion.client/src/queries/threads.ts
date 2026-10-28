@@ -40,6 +40,15 @@ export async function deleteThread(threadId: string): Promise<void> {
   if (!response.ok) throw new Error(`Server answered ${response.status}`)
 }
 
+export async function renameThread(threadId: string, title: string): Promise<void> {
+  const response = await fetch(`/api/threads/${threadId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title }),
+  })
+  if (!response.ok) throw new Error(`Server answered ${response.status}`)
+}
+
 /** The file name is the title (cut, with characters a file system dislikes replaced) and the day. */
 export function exportFileName(title: string | null, now = new Date()): string {
   const name = (title ?? '').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').slice(0, 50) || 'conversation'

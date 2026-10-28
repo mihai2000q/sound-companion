@@ -20,7 +20,7 @@ FastAPI backend
    |-- usage + log + thread writers -> Postgres
    |-- GET /api/monitoring -> the monitoring views (daily latency and errors, calls per tool)
    |-- GET /api/threads -> the Conversations, newest first ({ thread_id, title, created_at })
-   |-- GET /api/threads/{id} (messages), /export (JSON file), DELETE /api/threads/{id} (row + checkpoint, decision 69)
+   |-- GET /api/threads/{id} (messages), /export (JSON file), PATCH /api/threads/{id} (new title, decision 74), DELETE /api/threads/{id} (row + checkpoint, decision 69)
 OpenRouter  (chat model, query-rewrite model, embeddings)
 Eval scripts (pytest-style CLI, RAGAs) in the same Python project
 ```

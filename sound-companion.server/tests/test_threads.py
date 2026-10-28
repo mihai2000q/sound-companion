@@ -10,7 +10,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 
 from app.agent.agent import build_agent
 from app.api import chat, threads
-from app.db.threads import TITLE_LENGTH, Thread, make_title
+from app.db.threads import MAX_TITLE_LENGTH, TITLE_LENGTH, Thread, make_title
 from app.limits import RateLimiter
 from tests.test_chat_api import StreamingToolModel
 from tests.test_search_tool import FakeRetriever, chunk
@@ -33,6 +33,13 @@ class FakeStore:
 
     def get(self, thread_id):
         return self.rows.get(thread_id)
+
+    def rename(self, thread_id, title):
+        row = self.rows.get(thread_id)
+        if row is None:
+            return False
+        self.rows[thread_id] = Thread(thread_id, title, row.created_at)
+        return True
 
     def delete(self, thread_id):
         return self.rows.pop(thread_id, None) is not None
@@ -192,3 +199,43 @@ def test_unknown_thread_is_404_and_malformed_is_422_without_echo():
     assert client.delete("/api/threads/not-a-uuid").status_code == 422
     assert client.get(f"/api/threads/{UNKNOWN}").json() == {"detail": "Conversation not found."}
     assert "not-a-uuid" not in client.get("/api/threads/not-a-uuid").text
+
+
+# --- rename ---------------------------------------------------------------------------------------------------------
+
+
+def test_rename_changes_the_title_in_the_list_and_the_export():
+    client, store = conversation()
+    response = client.patch(f"/api/threads/{ID}", json={"title": "  Cmaj7   and the clarinet "})
+    assert response.status_code == 200
+    assert response.json() == {"thread_id": ID, "title": "Cmaj7 and the clarinet", "created_at": "2026-01-01T00:00:00+00:00"}
+    assert client.get("/api/threads").json()[0]["title"] == "Cmaj7 and the clarinet"
+    assert json.loads(client.get(f"/api/threads/{ID}/export").text)["title"] == "Cmaj7 and the clarinet"
+    assert store.rows[ID].created_at == datetime(2026, 1, 1, tzinfo=timezone.utc)
+
+
+def test_rename_refuses_an_empty_too_long_or_control_character_title_without_echo():
+    client, store = conversation()
+    for title in ("", "   ", "x" * (MAX_TITLE_LENGTH + 1), "bad\x00title", "bad\x1btitle"):
+        response = client.patch(f"/api/threads/{ID}", json={"title": title})
+        assert response.status_code == 422
+        assert "input" not in response.text
+    assert client.patch(f"/api/threads/{ID}", json={}).status_code == 422
+    assert client.patch(f"/api/threads/{ID}", json={"title": "x" * MAX_TITLE_LENGTH}).status_code == 200
+    assert store.rows[ID].title == "x" * MAX_TITLE_LENGTH
+
+
+def test_rename_of_an_unknown_thread_is_404_and_a_malformed_id_is_422():
+    client = make_client(FakeStore())
+    assert client.patch(f"/api/threads/{UNKNOWN}", json={"title": "New"}).status_code == 404
+    assert client.patch("/api/threads/not-a-uuid", json={"title": "New"}).status_code == 422
+
+
+def test_a_failing_store_makes_rename_a_503():
+    class Broken(FakeStore):
+        def rename(self, thread_id, title):
+            raise RuntimeError("db down")
+
+    store = Broken()
+    store.ensure(ID, "Old")
+    assert make_client(store).patch(f"/api/threads/{ID}", json={"title": "New"}).status_code == 503

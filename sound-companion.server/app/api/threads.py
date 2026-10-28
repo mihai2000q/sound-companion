@@ -1,18 +1,34 @@
 import asyncio
 import json
+import re
+import unicodedata
 from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Path, Request
 from fastapi.responses import Response
+from pydantic import AfterValidator, BaseModel, StringConstraints
 
 from app.agent.history import conversation_messages
+from app.db.threads import MAX_TITLE_LENGTH
 from app.limits import UUID_PATTERN
 
 router = APIRouter()
 
 EXPORT_VERSION = 1
 ThreadId = Annotated[str, Path(pattern=UUID_PATTERN)]  # a malformed id is a 422, as in the chat body
+
+
+def clean_title(text: str) -> str:
+    """Whitespace collapsed to single spaces; control characters are refused."""
+    text = re.sub(r"\s+", " ", text).strip()
+    if any(unicodedata.category(c) == "Cc" for c in text):
+        raise ValueError("title must not contain control characters")
+    return text
+
+
+class RenameRequest(BaseModel):
+    title: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=MAX_TITLE_LENGTH), AfterValidator(clean_title)]
 
 
 def thread_store(request: Request):
@@ -57,6 +73,19 @@ async def read_thread(thread_id: ThreadId, request: Request):
     """The messages of one Conversation, for the sidebar to restore."""
     found = await known_thread(request, thread_id)
     return {"thread_id": found.thread_id, "title": found.title, "messages": await stored_messages(request, thread_id)}
+
+
+@router.patch("/api/threads/{thread_id}")
+async def rename_thread(thread_id: ThreadId, body: RenameRequest, request: Request):
+    """Changes the title of a Conversation and answers with its list row."""
+    found = await known_thread(request, thread_id)
+    try:
+        renamed = await asyncio.to_thread(thread_store(request).rename, thread_id, body.title)
+    except Exception:
+        raise HTTPException(status_code=503, detail="The conversation could not be renamed.")
+    if not renamed:  # deleted between the read and the write
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+    return {"thread_id": thread_id, "title": body.title, "created_at": found.created_at.isoformat()}
 
 
 @router.get("/api/threads/{thread_id}/export")
