@@ -2,7 +2,9 @@
 
 Work story by story. Each story is a vertical slice that can be demonstrated and tested before the next starts. No day estimates. Stories 1 to 9 deliver the core requirements, the rest add the optional tasks and reflection.
 
-Each story states: goal, what to build, acceptance criteria, and facts to verify first. Terms follow [CONTEXT.md](../CONTEXT.md). Backend code lives in `sound-companion.server/`, frontend code in `sound-companion.client/` (see [ARCHITECTURE.md](ARCHITECTURE.md#folder-layout-proposed)).
+Status: stories 1 to 16 are done, story 17 (final pass) is in progress.
+
+Each story states: goal, what to build, acceptance criteria, and facts to verify first. Terms follow [CONTEXT.md](../CONTEXT.md). Backend code lives in `sound-companion.server/`, frontend code in `sound-companion.client/` (see [ARCHITECTURE.md](ARCHITECTURE.md#folder-layout)).
 
 ## Core requirement coverage
 

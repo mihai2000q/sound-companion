@@ -16,11 +16,20 @@ from app.db.migrate import run_migrations
 from app.db.threads import SqlThreadStore
 from app.db.usage import Ledger
 from app.rag.factory import make_retriever
+from app.rag.vector_store import create_chunk_table, ensure_keyword_index
+
+
+def ensure_empty_chunk_table() -> None:
+    """A fresh database has no `chunks` table until `scripts.setup_chunks`, and the retriever cannot open without it.
+    Create it (empty) so the server starts before the Corpus is indexed. Safe to repeat."""
+    if create_chunk_table():
+        ensure_keyword_index()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await asyncio.to_thread(run_migrations)
+    await asyncio.to_thread(ensure_empty_chunk_table)
     app.state.ledger = Ledger.from_settings()
     app.state.log_writer = SqlLogWriter.from_settings()
     app.state.thread_store = SqlThreadStore.from_settings()
