@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project state
 
-Sound Companion is a RAG chatbot that teaches music theory and instruments from a curated, cited corpus plus local calculation tools. Stories 1 (scaffold), 2 (Seed list and ingestion) and 3 (chunking, embeddings, indexing) are done, and story 4 (baseline retrieval, golden set, retrieval metrics) is next. Work proceeds story by story from `docs/IMPLEMENTATION-PLAN.md` (each story lists acceptance criteria and facts to verify first). There is no lint tooling yet, and tests are written only for the AI parts of the bot.
+Sound Companion is a RAG chatbot that teaches music theory and instruments from a curated, cited corpus plus local calculation tools. Stories 1 to 16 are done (scaffold, ingestion, indexing, retrieval metrics, agent, SSE chat and UI, Citations and inspector, music tools, tool-calling eval, query rewrite and Convention behaviour, usage and budget guard, logging and monitoring, injection protection, conversation history, hybrid search, RAGAs). Story 17 (final pass: docs, demo script, reflection, clean-clone check) is in progress. Work proceeds story by story from `docs/IMPLEMENTATION-PLAN.md` (each story lists acceptance criteria and facts to verify first). The client has ESLint (`npm run lint`), the server has no lint tooling, and tests are written only for the AI parts of the bot.
 
 ## Commands
 

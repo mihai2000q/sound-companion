@@ -1,6 +1,6 @@
 # Database schema
 
-PostgreSQL with the `pgvector` extension, one container, one database. Docker Hub has `pgvector/pgvector` tags pg13 to pg18 (per the research), so `pg16` is valid but not the newest. Pick one at setup.
+PostgreSQL with the `pgvector` extension, one container, one database. Docker Hub has `pgvector/pgvector` tags pg13 to pg18 (per the research), so `pg16` is valid but not the newest. The compose file uses `pg16`.
 
 Chunks live in a table created by `langchain-postgres`' own helper (`PGEngine.init_vectorstore_table`), with real metadata columns, so core retrieval needs no custom code (the course pattern: add documents, then use a retriever). Everything below was exercised in [research/python-stack-spike.md](research/python-stack-spike.md) with fake embeddings and 3,000 chunks. Not tested: real embeddings, concurrent writers, very large tables.
 
@@ -25,7 +25,7 @@ CREATE TABLE documents (
 );
 ```
 
-The chunk table is created from Python:
+The chunk table is created from Python (`scripts.setup_chunks`, which also adds the HNSW index and the keyword column):
 
 ```python
 engine = PGEngine.from_connection_string("postgresql+psycopg://...")
@@ -120,6 +120,7 @@ CREATE TABLE usage_log (
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX usage_log_thread_idx ON usage_log (thread_id);
+CREATE INDEX usage_log_request_idx ON usage_log (request_id);
 
 CREATE TABLE app_logs (
   id          BIGSERIAL PRIMARY KEY,
@@ -139,6 +140,8 @@ CREATE TABLE threads (
 ```
 
 `threads` has one row per Conversation, inserted by the chat route on the first request of a `thread_id` (`ON CONFLICT DO NOTHING`, migration 0007) and listed newest first by `GET /api/threads`. A delete removes the row and the checkpoint state, and keeps `usage_log` and `app_logs` rows (budget guard and monitoring). The export reads `usage_log` by `thread_id`.
+
+Two views over `app_logs` (migration `0006`) feed `GET /api/monitoring` and the `/monitoring` page: `monitoring_daily` (requests, errors, error rate, average and p95 duration per day, from `request_end` rows) and `monitoring_tools` (calls, errors and average duration per tool, from `tool_result` rows).
 
 Total spend for the budget guard: `SELECT COALESCE(SUM(cost_credits),0) FROM usage_log;`
 
@@ -163,4 +166,4 @@ Alembic revisions in `sound-companion.server/app/db/migrations/versions/`, appli
 - **By hand, without the server:** `docker compose run --rm --no-deps server python -m app.db.migrate` (the database must be up).
 - **On the host:** `cd sound-companion.server && uv run python -m app.db.migrate`, with the database up on `localhost:7001` (`POSTGRES_HOST` and `POSTGRES_PORT` from `.env`).
 
-**Adding one.** Change the model in `app/db/models.py`, then from `sound-companion.server` run `uv run alembic revision --autogenerate -m "short name"` and read the generated file in `versions/` before keeping it. Number the revision id and file with the next number (`0003`), as the existing ones. `uv run alembic check` fails when the models and the database differ, `uv run alembic downgrade -1` steps back one revision. Never edit a revision that has been applied, add a new one. `0001` enables the `vector` extension, `0002` creates `documents`.
+**Adding one.** Change the model in `app/db/models.py`, then from `sound-companion.server` run `uv run alembic revision --autogenerate -m "short name"` and read the generated file in `versions/` before keeping it. Number the revision id and file with the next number (`0009` today), as the existing ones. `uv run alembic check` fails when the models and the database differ, `uv run alembic downgrade -1` steps back one revision. Never edit a revision that has been applied, add a new one. Existing revisions: `0001` enables the `vector` extension, `0002` and `0003` create `documents` (and widen its id), `0004` `usage_log`, `0005` `app_logs`, `0006` the monitoring views, `0007` `threads`, `0008` the keyword column and GIN index on `chunks`.

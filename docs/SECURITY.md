@@ -18,7 +18,7 @@ The app is local-only with one user, so authentication and network exposure are 
 
 ### 1. Treat retrieved text and tool output as data
 
-- Wrap every chunk and tool result in explicit delimiters, for example `<document source="..."> ... </document>`.
+- Wrap every chunk in `<document source="..."> ... </document>` and every music tool result in `<tool_result tool="..."> ... </tool_result>` (`app/tools/delimit.py`).
 - The system prompt states that content inside those delimiters is reference material and instructions found there are never followed.
 - Strip or escape delimiter look-alikes inside retrieved text, so a chunk cannot close its own wrapper.
 
@@ -28,7 +28,7 @@ The app is local-only with one user, so authentication and network exposure are 
 - Reject control characters (newline and tab are allowed), normalise whitespace.
 - `thread_id` validated as a lowercase UUID (what the client's `crypto.randomUUID()` sends).
 - A violation is a 422 that names the field and never echoes the input. It is logged as `input_rejected`.
-- Tool arguments validated with pydantic models: note names matched against a pattern (letter A to G, accidentals, optional octave), instrument names from an enum (the transposition table), frequencies as numbers in a sensible range (for example 1 to 20,000 Hz), at most 12 notes in a chord analysis.
+- Tool arguments validated with pydantic models: note names matched against a pattern (letter A to G, accidentals, optional octave), instrument names looked up in the transposition table (an unknown name returns a structured error that lists the known ones, it is not a schema enum), frequencies finite and above 0 Hz (there is no upper bound), 2 to 12 notes in a chord analysis.
 - `pychord` and `music21` raise exceptions on bad musical input (`H4`, `Xyz`). Tools catch them and return a structured error instead of letting the model guess.
 
 ### 3. Tools
@@ -39,7 +39,7 @@ The app is local-only with one user, so authentication and network exposure are 
 
 ### 4. Ingestion
 
-- Fetch only from the allow-listed hosts (en.wikipedia.org, the OMT GitHub repo).
+- Fetch only from the hosts the ingestion code uses (en.wikipedia.org, the OMT GitHub repo).
 - Strip scripts, HTML comments and hidden elements before chunking.
 - Record `revision_id` for every page so a poisoned revision can be identified and re-fetched.
 - `uv run python -m scripts.scan_injection [--dry-run]` scans every chunk (`app/rag/injection_scan.py`) for instruction-like strings: "ignore previous", "system prompt", "you are now", "new instructions", "reveal your prompt", a `system:` or `assistant:` line start, chat-template tokens and delimiter look-alikes. It prints each hit with title, section, pattern and a short snippet, and writes one `injection_flag` row per chunk and pattern to `app_logs` (no `request_id`, no chunk text beyond the snippet). It never deletes or edits, and a re-run does not repeat a row.
@@ -48,8 +48,8 @@ The app is local-only with one user, so authentication and network exposure are 
 ### 5. Database
 
 - Parameterised queries everywhere. Never build table or column names from user input (the LangChain pgvector docs warn about this explicitly).
-- App database user has only the privileges it needs.
-- Validate every metadata filter before it reaches `PGVectorStore`: allow-list the keys (`source_type`, `topics`, `title`) and operators. The Python library binds filter values as parameters, raises on unknown operators and refuses an empty-filter delete, but the allow-list still keeps model-built filters inside the intended fields.
+- The app connects as the one Postgres user of the local compose database (no separate low-privilege role, accepted for a local single-user app).
+- Validate every metadata filter before it reaches `PGVectorStore`: the tool exposes only `source_type` (an enum), `topic` and `title`, and `app/rag/filters.py` builds the filter from them, so the model never writes a filter expression. The Python library binds filter values as parameters, raises on unknown operators and refuses an empty-filter delete, but the allow-list still keeps model-built filters inside the intended fields.
 
 ### 6. Cost and rate
 
@@ -60,7 +60,7 @@ The app is local-only with one user, so authentication and network exposure are 
 
 - `.env` is git-ignored, `.env.example` documents the keys.
 - The API key is only read server-side.
-- CORS allows only `http://localhost:5173`. In development the Vite proxy avoids CORS entirely.
+- CORS allows only the client origin (`http://localhost:$CLIENT_PORT`, `http://127.0.0.1:$CLIENT_PORT`) and the methods `GET` and `POST`. In development the Vite proxy avoids CORS entirely.
 - Errors shown in the UI are generic. Details go to `app_logs`, with secrets and full prompts excluded.
 
 ### 8. Output

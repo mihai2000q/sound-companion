@@ -10,7 +10,7 @@ Three layers, cheapest first.
 
 ## Golden set
 
-`data/golden-set.json`, about 31 questions when complete. Version 0 (Story 4) has 14 retrieval questions with expected sources and reference answers (descriptive, comparison, alias, exact-term, convention-conflict, textbook) and 3 that need a clarifying question. Story 15 (issue #88) adds 8 exact-term and Alias questions for the hybrid comparison (q18 to q25: Rhodes piano, kalimba, bari sax, 12-bar blues, Stuttgart pitch, Helmholtz pitch notation, viola da gamba, Eb clarinet), each an Alias of one Corpus page, so there are now 22 retrieval questions. Before them, 3 of the 14 were exact-term or Alias queries (q04, q05, q13), plus q06, which asks for German note names. No German-note-name question was added, because q06 covers it and no Corpus page was checked for it. The saved `vector-baseline` was made on the 14 questions, so the comparison uses `vector-baseline-25q` (same retriever, the 22-question set, golden-set hash in the file). The tool, no-tool and injection questions come with Story 5. Each entry:
+`data/golden-set.json`, 25 entries today (22 retrieval questions, 3 that need a clarifying question). Version 0 (Story 4) has 14 retrieval questions with expected sources and reference answers (descriptive, comparison, alias, exact-term, convention-conflict, textbook) and 3 that need a clarifying question. Story 15 (issue #88) adds 8 exact-term and Alias questions for the hybrid comparison (q18 to q25: Rhodes piano, kalimba, bari sax, 12-bar blues, Stuttgart pitch, Helmholtz pitch notation, viola da gamba, Eb clarinet), each an Alias of one Corpus page, so there are now 22 retrieval questions. Before them, 3 of the 14 were exact-term or Alias queries (q04, q05, q13), plus q06, which asks for German note names. No German-note-name question was added, because q06 covers it and no Corpus page was checked for it. The saved `vector-baseline` was made on the 14 questions, so the comparison uses `vector-baseline-25q` (same retriever, the 22-question set, golden-set hash in the file). The tool, no-tool and injection questions come with Story 5. Each entry:
 
 ```json
 {
@@ -152,7 +152,7 @@ Caveats to document in the reflection:
 
 ## Reporting
 
-`docs/EVALUATION.md` gets a results section after story 16: a table of metrics for vector-only vs hybrid, the worst five questions, and what was changed in response. This feeds the "reflection and improvement" part of the review.
+The results sections below hold the metrics for vector-only vs hybrid, the RAGAs scores, the worst five questions, and what was changed in response. They feed the reflection part of the final pass.
 
 ## Results: RAGAs (story 16)
 

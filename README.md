@@ -14,7 +14,7 @@ Example questions:
 
 ## Status
 
-Story 1 (scaffold) is done, story 2 (Seed list and ingestion) is in progress. Implementation proceeds story by story, see [docs/IMPLEMENTATION-PLAN.md](docs/IMPLEMENTATION-PLAN.md).
+Stories 1 to 16 are done: ingestion and indexing, retrieval (vector and hybrid), the agent with its music tools, the streaming UI with Citations and an inspector, the usage and budget guard, logging and monitoring, prompt-injection defences, conversation history, and the evaluation harness (retrieval metrics, tool-calling, injection tests, RAGAs). Story 17 (final pass) is in progress. See [docs/IMPLEMENTATION-PLAN.md](docs/IMPLEMENTATION-PLAN.md).
 
 History: the project first targeted metal artists ([docs/archive/metal/](docs/archive/metal/)), then music theory and instruments on a SvelteKit and TypeScript stack ([docs/archive/typescript-stack/](docs/archive/typescript-stack/)). Both were changed after research, see decisions 1 to 5 in [docs/DECISIONS.md](docs/DECISIONS.md).
 
@@ -37,8 +37,8 @@ History: the project first targeted metal artists ([docs/archive/metal/](docs/ar
 
 | Service | URL |
 |---|---|
-| Client | http://localhost:7003 (`/` home, `/health` server and database status) |
-| Server | http://localhost:7002 (`GET /api/health`) |
+| Client | http://localhost:7003 (`/` chat, `/monitoring` latency, errors and tool calls, `/health` server and database status) |
+| Server | http://localhost:7002 (`POST /api/chat`, `GET /api/health`, `/api/monitoring`, `/api/threads`) |
 | Postgres | `localhost:7001` |
 
 Ports come from `.env`. To run the migrations by hand, see [Migrations](docs/DATABASE-SCHEMA.md#migrations).
@@ -53,6 +53,15 @@ uv run python -m scripts.ingest --dry-run    # the same, but store nothing
 ```
 
 The script reads `data/seed-list.json`, fetches the Wikipedia pages at about 1 request per second and clones Open Music Theory v1 into `data/cache/` (not committed). Re-running uses the cache and makes no requests. It prints which entries were included, dropped below the 5,000-character floor or flagged, and which Open Music Theory files were excluded.
+
+Then create the chunk table, chunk and embed the documents (about 0.02 credits, 3 to 4 minutes), from the same folder:
+
+```
+uv run python -m scripts.setup_chunks        # chunks table and HNSW index (safe to repeat)
+uv run python -m scripts.index               # chunk, embed, upsert, delete stale chunks
+```
+
+The chat needs this index. `RETRIEVER_MODE=vector|hybrid` in `.env` picks the retriever (default `vector`). The evaluation commands are listed in [docs/EVALUATION.md](docs/EVALUATION.md) and `CLAUDE.md`.
 
 ## Documents
 
