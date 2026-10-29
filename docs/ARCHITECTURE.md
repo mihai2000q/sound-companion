@@ -160,7 +160,7 @@ sound-companion/
     vite.config.ts           dev proxy for /api
     src/
       App.tsx, providers.tsx, router.tsx   app shell, context providers, route table
-      pages/                 HomePage (/), MonitoringPage (/monitoring), HealthPage (/health)
+      pages/                 HomePage (/), MonitoringPage (/monitoring)
       components/            Conversation, Sidebar, MessageList, Inspector, Composer, UsageBadge
       hooks/                 useChatStream (fetch + stream reader)
       queries/               React Query keys and queryOptions per feature

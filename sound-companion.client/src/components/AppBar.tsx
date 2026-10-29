@@ -9,7 +9,6 @@ import { ThemeToggle } from './ThemeToggle'
 const PAGES = [
   { to: '/', label: 'Chat' },
   { to: '/monitoring', label: 'Monitoring' },
-  { to: '/health', label: 'Health' },
 ]
 
 interface Props {
