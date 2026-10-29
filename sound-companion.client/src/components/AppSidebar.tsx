@@ -126,14 +126,14 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
           <nav aria-label="Pages">
             <SidebarMenu className="gap-1">
               <SidebarMenuItem>
-                <SidebarMenuButton className="h-9 px-3" disabled={busy} onClick={startNew}>
+                <SidebarMenuButton className="h-9 px-3 font-medium" disabled={busy} onClick={startNew}>
                   <SquarePen />
                   New Conversation
                 </SidebarMenuButton>
               </SidebarMenuItem>
               {PAGES.map((page) => (
                 <SidebarMenuItem key={page.to}>
-                  <SidebarMenuButton asChild isActive={pathname === page.to} className="h-9 px-3">
+                  <SidebarMenuButton asChild isActive={pathname === page.to} className="h-9 px-3 font-medium">
                     <NavLink to={page.to} end onClick={() => isMobile && setOpenMobile(false)}>
                       <page.icon />
                       {page.label}
