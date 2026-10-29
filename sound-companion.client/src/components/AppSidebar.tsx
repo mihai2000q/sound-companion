@@ -112,7 +112,7 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar aria-label="Conversations">
-        <SidebarHeader className="gap-3 p-4">
+        <SidebarHeader className="gap-5 px-5 pt-5 pb-4">
           <Link to="/" className="flex items-center gap-2 font-serif text-xl font-medium tracking-tight">
             <span className="grid size-7 place-items-center rounded-full bg-brass text-brass-foreground" aria-hidden="true">
               <Music2 className="size-4" />
@@ -124,10 +124,10 @@ export function AppSidebar() {
             New Conversation
           </Button>
           <nav aria-label="Pages">
-            <SidebarMenu>
+            <SidebarMenu className="gap-2">
               {PAGES.map((page) => (
                 <SidebarMenuItem key={page.to}>
-                  <SidebarMenuButton asChild isActive={pathname === page.to}>
+                  <SidebarMenuButton asChild isActive={pathname === page.to} className="h-9 px-3">
                     <NavLink to={page.to} end onClick={() => isMobile && setOpenMobile(false)}>
                       {page.label}
                     </NavLink>
@@ -147,7 +147,7 @@ export function AppSidebar() {
             />
           )}
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="gap-2 px-3 pb-4">
           {isPending && (
             <SidebarGroup aria-label="Loading Conversations" role="status">
               <SidebarMenu>
@@ -178,7 +178,7 @@ export function AppSidebar() {
               <SidebarGroup key={group.label}>
                 <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="gap-1">
                     {group.threads.map((thread) => {
                       const active = thread.thread_id === activeId
                       const title = thread.title || 'Untitled Conversation'
@@ -201,6 +201,7 @@ export function AppSidebar() {
                                 <SidebarMenuItem className="select-none">
                                   <SidebarMenuButton
                                     isActive={active}
+                                    className="h-9 px-3"
                                     aria-current={active ? 'true' : undefined}
                                     disabled={busy && !active}
                                     onClick={() => select(thread.thread_id)}
