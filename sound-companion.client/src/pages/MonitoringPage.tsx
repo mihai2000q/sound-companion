@@ -28,6 +28,37 @@ export function MonitoringPage() {
           <>
             <Card>
               <CardHeader>
+                <CardTitle className="text-lg">Calls per tool</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {data.tools.length === 0 ? (
+                  <p>No tool calls logged yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tool</TableHead>
+                        <TableHead className="text-right">Calls</TableHead>
+                        <TableHead className="text-right">Errors</TableHead>
+                        <TableHead className="text-right">Average</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data.tools.map((row) => (
+                        <TableRow key={row.tool}>
+                          <TableCell>{row.tool}</TableCell>
+                          <TableCell className="text-right">{row.calls}</TableCell>
+                          <TableCell className="text-right">{row.errors}</TableCell>
+                          <TableCell className="text-right">{ms(row.avg_ms)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
                 <CardTitle className="text-lg">Requests per day</CardTitle>
               </CardHeader>
               <CardContent>
@@ -54,37 +85,6 @@ export function MonitoringPage() {
                           <TableCell className="text-right">{percent(row.error_rate)}</TableCell>
                           <TableCell className="text-right">{ms(row.avg_ms)}</TableCell>
                           <TableCell className="text-right">{ms(row.p95_ms)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Calls per tool</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {data.tools.length === 0 ? (
-                  <p>No tool calls logged yet.</p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Tool</TableHead>
-                        <TableHead className="text-right">Calls</TableHead>
-                        <TableHead className="text-right">Errors</TableHead>
-                        <TableHead className="text-right">Average</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {data.tools.map((row) => (
-                        <TableRow key={row.tool}>
-                          <TableCell>{row.tool}</TableCell>
-                          <TableCell className="text-right">{row.calls}</TableCell>
-                          <TableCell className="text-right">{row.errors}</TableCell>
-                          <TableCell className="text-right">{ms(row.avg_ms)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
