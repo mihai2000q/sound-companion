@@ -93,10 +93,10 @@ export function MonitoringPage() {
                           </TableRow>
                         ))}
                       </TableBody>
-                    <TableFooter>
+                    <TableFooter className="border-t-2 border-foreground/20 bg-transparent font-normal [&>tr:first-child>td]:pt-4">
                       {totals.models.map((row) => (
                         <TableRow key={row.model}>
-                          <TableCell className="font-medium">Total</TableCell>
+                          <TableCell className="text-muted-foreground">Total</TableCell>
                           <TableCell>{row.model}</TableCell>
                           <TableCell className="text-right">{count(row.calls)}</TableCell>
                           <TableCell className="text-right">{count(row.prompt_tokens)}</TableCell>
@@ -104,7 +104,7 @@ export function MonitoringPage() {
                           <TableCell className="text-right">{credits(row.cost_credits)}</TableCell>
                         </TableRow>
                       ))}
-                      <TableRow className="border-t-2 border-border font-semibold">
+                      <TableRow className="border-t border-border bg-primary/10 font-semibold hover:bg-primary/10 [&>td:first-child]:rounded-l-md [&>td:last-child]:rounded-r-md">
                         <TableCell colSpan={2}>Total of all models</TableCell>
                         <TableCell className="text-right">{count(totals.all.calls)}</TableCell>
                         <TableCell className="text-right">{count(totals.all.prompt_tokens)}</TableCell>
