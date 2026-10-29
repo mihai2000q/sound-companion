@@ -62,7 +62,18 @@ uv run python -m scripts.setup_chunks        # chunks table (if missing) and HNS
 uv run python -m scripts.index               # chunk, embed, upsert, delete stale chunks
 ```
 
-Then open the client and ask a question: it answers with Citations (a chat turn costs about 0.001 credits). `RETRIEVER_MODE=vector|hybrid` in `.env` picks the retriever (default `vector`). The evaluation commands are listed in [docs/EVALUATION.md](docs/EVALUATION.md) and `CLAUDE.md`.
+Then open the client and ask a question: it answers with Citations (a chat turn costs about 0.001 credits). `RETRIEVER_MODE=vector|hybrid` in `.env` picks the retriever (default `vector`), and `SEARCH_K`, `SEARCH_POOL`, `SEARCH_SCORE_RATIO` and `SEARCH_RERANK` tune what a knowledge-base search returns (see `.env.example` and decision 77). The evaluation commands are listed in [docs/EVALUATION.md](docs/EVALUATION.md) and `CLAUDE.md`.
+
+What is in the Corpus (276 documents, 7,329 chunks), its limits and how to add, remove or refresh a page: [docs/DOMAIN.md](docs/DOMAIN.md#corpus-facts).
+
+### Tests and lint
+
+```
+cd sound-companion.server && uv run pytest && uv run ruff check .
+cd sound-companion.client && npm run lint && npm run build
+```
+
+Tests cover the AI parts of the bot (agent, tools, retrieval, rewrite and rerank, limits, injection). The client has no tests, it is checked by eye in dark and light mode, at desktop and phone width.
 
 ## Documents
 

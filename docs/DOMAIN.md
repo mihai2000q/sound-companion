@@ -12,8 +12,8 @@ The audience is a learner, beginner to intermediate, who wants plain-language ex
 
 | Source | Use | Licence and notes |
 |---|---|---|
-| Wikipedia (REST HTML and `action=parse` APIs) | About 150 articles, about 60 theory and about 90 instruments | CC BY-SA 4.0 (and GFDL). Attribution by link. Section headings available from the API. One request per second with a descriptive User-Agent. |
-| Open Music Theory v1 (GitHub clone) | Textbook source, about 100 content pages of 129 Markdown files | CC BY-SA 4.0 declared in the page footer and about page. The repo has no LICENSE file. Last commit 2022, last push 2024. |
+| Wikipedia (REST HTML and `action=parse` APIs) | 162 articles: 65 theory and 97 instruments (counted by the `instruments` topic) | CC BY-SA 4.0 (and GFDL). Attribution by link. Section headings available from the API. One request per second with a descriptive User-Agent. |
+| Open Music Theory v1 (GitHub clone) | Textbook source, 114 content pages of 129 Markdown files | CC BY-SA 4.0 declared in the page footer and about page. The repo has no LICENSE file. Last commit 2022, last push 2024. |
 
 Considered and not used (from the research):
 
@@ -32,7 +32,7 @@ Each Seed entry: `{ title, source_type: "encyclopedia" | "textbook", topics: [..
 
 Rules:
 
-1. About 60 theory articles, spread across the topics in the scope, and about 90 instrument articles balanced across families (strings, woodwinds, brass, percussion, keyboards, electronic, folk and world). Seed instruments from the Hornbostel-Sachs page plus a hand-picked orchestral and popular list.
+1. About 60 theory articles (65 in the list), spread across the topics in the scope, and about 90 instrument articles (97 in the list) balanced across families (strings, woodwinds, brass, percussion, keyboards, electronic, folk and world). Seed instruments from the Hornbostel-Sachs page plus a hand-picked orchestral and popular list.
 2. Supporting pages are required: Transposing instrument, List of transposing instruments (the source of the transposition table), Concert pitch, Harmonic series (music), Musical tuning (not "Tuning", which is a disambiguation page), Scientific pitch notation, Musical note, Organology, Musical acoustics.
 3. Every Wikipedia article needs at least 5,000 characters. Entries below the floor are dropped, except the required pages (kept and flagged) and the nine short pages the author chose to keep (`KEEP_BELOW_FLOOR` in `app/rag/corpus.py`: Minor scale, Blues scale, Relative key, Dominant (music), Twelve-bar blues, A440 (pitch standard), Glockenspiel, Tubular bells, Electric piano). Soprano clarinet (1,434 characters) was dropped and its Aliases moved to Clarinet. The ingestion report lists every dropped and flagged title.
 4. Redirects are resolved to the canonical title, and the pre-redirect names are stored as Aliases (English horn to Cor anglais, Bb clarinet to Clarinet, Pianoforte to Piano).
@@ -49,11 +49,57 @@ The list is drafted in story 2 and reviewed by the author before ingestion.
 | `title` | Canonical page title |
 | `aliases[]` | Alternative names (also prepended to the chunk text as a title line) |
 | `source_type` | `encyclopedia` or `textbook` |
-| `topics[]` | From the Seed entry |
+| `topics[]` | From the Seed entry. Textbook pages get theirs from the `TOPICS` table in `app/rag/omt.py` |
 | `section` | Heading path, for example "Mode > Dorian" |
 | `url` | Page URL, used for the Citation |
 | `license` | `CC BY-SA 4.0` |
 | `revision_id` | Wikipedia revision id or git commit, for Provenance |
+
+The Seed list also has an `instrument_family` field on 91 entries (strings, woodwinds, ...). It is an authoring note only: nothing reads it and it is not stored. The family is searchable as a topic (`strings`, `woodwinds`, `brass`, `percussion`, `keyboards`, `electronic`, `folk-and-world`), because the same word is in the entry's `topics`.
+
+## Corpus facts
+
+Measured on 2026-10-29 from the live database and `data/seed-list.json`. The documents were fetched on 2026-10-21 and 2026-10-22 and have not been refreshed since.
+
+| Fact | Value |
+|---|---|
+| Documents | 276: 162 Wikipedia articles (`encyclopedia`) and 114 Open Music Theory pages (`textbook`) |
+| Chunks | 7,329: 6,407 from Wikipedia and 922 from the textbook. Every document has at least one chunk |
+| Chunk size | Median 593 characters, mean 560, longest 875 (the title and alias line included) |
+| Topics on Wikipedia entries | instruments 97, chords-and-harmony 18, strings 17, transposition 16, percussion 16, scales-and-modes 15, woodwinds 15, folk-and-world 14, notes-and-intervals 11, brass 11, notation 10, keyboards 10, electronic 8, form 7, tuning-and-temperament 7, acoustics 7, rhythm-and-meter 6, classification 2 (an entry can have several) |
+| Dropped below the floor | 0 Wikipedia entries. The nine short pages in `KEEP_BELOW_FLOOR` and the required pages are kept |
+| Excluded textbook files | 15 of 129, all site plumbing or stubs (404, README, index, contents, about, and video-only pages) |
+| Licence | `CC BY-SA 4.0` on every chunk, with `url` and `revision_id` |
+| Embedding model | `openai/text-embedding-3-small`, 1536 dimensions |
+
+To re-measure: `uv run python -m scripts.chunk` prints the document and chunk counts and the size spread, and `uv run python -m scripts.ingest --dry-run` prints the full report (included, dropped, flagged, excluded) from the cache without storing anything.
+
+## Changing the Corpus
+
+Run these from `sound-companion.server`. The stack and Postgres must be up.
+
+**Add a Wikipedia page.**
+1. Add an entry to `data/seed-list.json`: `{ "title": "...", "source_type": "encyclopedia", "topics": [...], "aliases": [...] }`. Use the canonical title, and put the pre-redirect names in `aliases`.
+2. `uv run python -m scripts.ingest` fetches only the new page (about 1 request per second) and stores it. The report shows whether it passed the 5,000-character floor.
+3. `uv run python -m scripts.index --title "Canonical title"` chunks and embeds just that document.
+4. Check it: `uv run python -m scripts.search "a question the page answers" --title "Canonical title"`, then `uv run python -m scripts.scan_injection` for instruction-like strings.
+
+**Remove a page.** Delete its entry from `data/seed-list.json`, run `scripts.ingest` (the stale document row is removed in the same transaction), then a full `scripts.index` (a full run also deletes the chunks no document produces any more).
+
+**Refresh a Wikipedia page.** Delete its two files under `data/cache/wikipedia/` (the HTML and the JSON with the revision id), then run `scripts.ingest` and `scripts.index --title "..."`. The new `revision_id` is stored. Chunk ids come from the URL, the section index and the chunk index, so the re-index replaces the rows in place and deletes any that the new text no longer produces.
+
+**Add or change textbook pages.** Open Music Theory is cloned whole into `data/cache/omt/`. Pages are excluded by name in `app/rag/omt.py`, and topics come from its `TOPICS` table. Delete the clone to pull it again.
+
+**After any change** run the retrieval metrics to see that nothing regressed (`scripts.eval_retrieval --label ...`, see [EVALUATION.md](EVALUATION.md)). If the page matters for a golden-set question, add or update the question.
+
+## Limits and known gaps
+
+- **Not covered:** audio, sheet-music images, recordings, and anything that is not on a Seed-list page or in Open Music Theory v1. The bot says the knowledge base has nothing on it instead of answering from model memory.
+- **The Corpus is a snapshot** fetched on 2026-10-21 and 2026-10-22. Wikipedia pages can change after that, and the `revision_id` shows which version a Citation came from.
+- **Open Music Theory is v1** (last commit 2022). Version 2 was not fetchable (HTTP 403 from its host).
+- **Section quality varies.** Tables become text rows that retrieve badly (the Scientific pitch notation table is one example), and a search can return the right page with the wrong section. Context precision of the answers is 0.58 against a 0.7 target (see [REFLECTION.md](REFLECTION.md)).
+- **No audit beyond samples.** The Corpus was spot-checked and scanned for instruction-like strings (0 hits in 7,329 chunks), not read in full ([SECURITY.md](SECURITY.md)).
+- **Only English.** Other languages are out of scope.
 
 ## Bot behaviour
 

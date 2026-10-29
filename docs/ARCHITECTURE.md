@@ -31,7 +31,7 @@ Eval scripts (pytest-style CLI, RAGAs) in the same Python project
 2. The backend validates input (length, characters), checks the rate limit, writes the `threads` row on the first request of a `thread_id` (title cut from the message, decision 68), and checks cumulative spend against the caps.
 3. The agent receives the message with the system prompt (see [DOMAIN.md](DOMAIN.md#bot-behaviour)).
 4. The model decides whether to call tools. For explanations it calls `search_knowledge_base`. For calculations it calls a music tool.
-5. `search_knowledge_base` rewrites the query into several variants (cheap model), retrieves for each variant, merges and de-duplicates, and returns chunks wrapped as data (see [SECURITY.md](SECURITY.md)). It also emits `citations` and `queries` events through the agent's custom stream.
+5. `search_knowledge_base` rewrites the query into several variants (cheap model), retrieves 10 candidates for each variant (`SEARCH_POOL`), merges and de-duplicates, drops candidates scoring under 85% of the best (`SEARCH_SCORE_RATIO`), lets the cheap model keep the chunks that help answer the question (`SEARCH_RERANK`, decision 77) and returns at most 5 (`SEARCH_K`), wrapped as data (see [SECURITY.md](SECURITY.md)). It also emits `citations` and `queries` events through the agent's custom stream.
 6. For comparisons the model may call tools several times (this is decomposition).
 7. Tool results state their Convention (scientific pitch notation). If a retrieved Citation uses another Convention, the answer shows both.
 8. The final answer streams as tokens, with Citations that reference retrieved chunks or tool results.
@@ -42,6 +42,7 @@ Eval scripts (pytest-style CLI, RAGAs) in the same Python project
 | Technique | Where it lives |
 |---|---|
 | Multi-query rewrite | Inside `search_knowledge_base`, using the cheap model |
+| Score cut and rerank | Inside `search_knowledge_base` after the merge (`app/rag/rerank.py`): a free cut by score, then the cheap model keeps the chunks that help answer the question. Both are settings, see decision 77 |
 | Decomposition | Agent loop: the model calls tools several times, guided by the system prompt |
 | Structured retrieval | Typed arguments of `search_knowledge_base` (`source_type`, `topic`, `title`) turned into metadata filters (`PGVectorStore` filters support `$and`, `$or`, `$not`, `$in` and `$like`) |
 | Not used | HyDE and step-back (low value for factual questions, extra cost) |
@@ -81,13 +82,15 @@ Streaming operations:
 
 ## UI layout
 
-Chat on the left, collapsible inspector panel on the right.
+A shadcn/ui sidebar on the left of every page, the page in the middle, and on the chat page a collapsible inspector on the right.
 
-- Message list with hand-written Tailwind chat bubbles (shadcn has no chat component), Citation chips under each answer, and attribution links (Wikipedia and OMT are CC BY-SA).
-- Inline tool-call cards (name, arguments, result, duration, status).
-- Inspector: rewritten queries, retrieved chunks with scores, tokens and cost, running spend against the caps.
+- **Sidebar** (`AppSidebar`, `AppShell`): the brand, New Conversation (selected while the open chat has no messages yet), the Monitoring page, a search box and the Conversations grouped by day. Right-click a Conversation for Export, Rename and Delete (delete asks first, failures show a toast). The width is draggable (224 to 480 px, remembered in `localStorage`, arrow keys and double-click work on the handle), and the toggle in the app bar or Cmd/Ctrl+B collapses it. On a phone it is a sheet. It waits while an answer streams.
+- Message list with hand-written Tailwind chat bubbles (`Message`, shadcn has no chat component), Citation chips under each answer, and attribution links (Wikipedia and OMT are CC BY-SA). The user's message is a primary bubble, the bot's answer is serif text beside a brass rule.
+- Inline tool-call cards (name, arguments, result, duration, status), collapsible with a height transition: open while running or failed, closed once done.
+- Inspector: rewritten queries and retrieved chunks with scores. It slides open and closed beside the chat (a sheet on a phone) and stays open when you switch Conversation or page. The usage badge in the app bar shows the credits spent by this turn and in total, in US dollars.
 - Progress indicators: a stage label with a spinner while the answer is not flowing ("Thinking", "Searching: <queries>", "Calling <tool>", "Writing the answer"), worked out in the client from `queries`, `tool_call` and `tool_result` (`src/lib/stage.ts`), and a spinner on running tool cards. There is no `progress` event.
-- History sidebar with JSON export, and a `/monitoring` page.
+- `/monitoring`: calls per tool, usage per model (calls, tokens in and out, cost, with a total per model and a total of all models) and requests per day (latency, errors, tokens, cost).
+- Theme: light and dark through the `.dark` class (script in `index.html`, `ThemeToggle`), indigo and brass tokens in `src/index.css`.
 
 ## Cost guard
 
@@ -100,6 +103,7 @@ Chat on the left, collapsible inspector panel on the right.
 | Embeddings | `openai/text-embedding-3-small` | 1536 dimensions, about $0.02 per 1M tokens (per the research) |
 | Answers | `openai/gpt-4o-mini` (`OPENROUTER_CHAT_MODEL`) | Tested end to end with tools and streaming. Cheaper tool-calling models were compared with the tool-calling eval, see [EVALUATION.md](EVALUATION.md). |
 | Query rewriting | `openai/gpt-4o-mini` (`OPENROUTER_REWRITE_MODEL`) | Cheap model, separate setting |
+| Reranking | the rewrite model | One short call per search with the candidate chunks, written to `usage_log` as purpose `rerank` (about 0.0005 credits). Off with `SEARCH_RERANK=false` |
 | RAGAs judge | `google/gemini-2.5-flash-lite` (`OPENROUTER_JUDGE_MODEL`) | Scores exports, spend logged as `eval` |
 
 Use `ChatOpenAI` and `OpenAIEmbeddings` from `langchain-openai` with `base_url="https://openrouter.ai/api/v1"`.
@@ -146,7 +150,7 @@ sound-companion/
       agent/                 create_agent setup, prompt, checkpointer (memory.py), streaming adapter, request log,
                              history, Convention check, run export, tool and injection eval runners
       rag/                   Wikipedia fetch and cleaning, OMT parser, corpus build, document store, chunking,
-                             embeddings, vector store, Retriever, hybrid SQL, rewrite, injection scan, eval metrics
+                             embeddings, vector store, Retriever, hybrid SQL, rewrite, rerank, injection scan, eval metrics
       tools/                 one module per music tool, search tool, registry, delimit (data wrappers), instruments table
       security/              redact (secret masking for app_logs)
       db/                    SQLAlchemy models, Alembic migrations and runner, usage, log and thread writers
@@ -160,10 +164,13 @@ sound-companion/
     src/
       App.tsx, providers.tsx, router.tsx   app shell, context providers, route table
       pages/                 HomePage (/), MonitoringPage (/monitoring)
-      components/            Conversation, Sidebar, MessageList, Inspector, Composer, UsageBadge
-      hooks/                 useChatStream (fetch + stream reader)
+      components/            AppShell, AppSidebar (+ SidebarResizeHandle), AppBar, Conversation, MessageList, Message,
+                             Composer, Inspector, UsageBadge, ThemeToggle
+      components/ui/         shadcn/ui components (copied in, not edited by hand)
+      hooks/                 useChatStream (fetch + stream reader), useTheme, useMediaQuery
+      state/                 chatActivity (streaming flag and Inspector state kept by the shell)
       queries/               React Query keys and queryOptions per feature
-      lib/                   citations, conversation and tool-result helpers
+      lib/                   citations, conversation, tool-result, stage, credits, usage totals, thread groups, `cn`
       types/                 event and API types shared with the backend contract
 ```
 
@@ -173,7 +180,7 @@ Rule: `sound-companion.server/app/rag`, `tools`, `agent` and `security` never im
 
 Backend spike versions (Python 3.12.3): `langchain-postgres` 0.0.19, `langchain` 1.4.6, `langchain-core` 1.6.12, `langgraph` 1.2.16, `langgraph-checkpoint-postgres` 3.2.0, `psycopg` 3.3.6, `fastapi` 0.149.0, `uvicorn` 0.54.0. Pin `langchain-postgres` to an exact version because 0.0.x APIs can change.
 
-Frontend: Tailwind 4.3.3 installs with `@import "tailwindcss";` plus the `@tailwindcss/vite` plugin (per the research of the official install pages, no build was run). React and Vite versions are not yet researched, check at setup. This machine has Node 24, Docker 29 and Python 3.12.
+Frontend (`package.json`): React 19.3, Vite 8.3, TypeScript 6.0, Tailwind 4.3.3 (`@import "tailwindcss";` plus the `@tailwindcss/vite` plugin), shadcn/ui on `radix-ui` 1.8.1 with `lucide-react`, React Router 8.5 and TanStack Query 5.104. This machine has Node 24, Docker 29 and Python 3.12.
 
 Two database URL styles: `postgresql+psycopg://` for `PGEngine`, plain `postgresql://` for the checkpointer pool, which also needs `autocommit=True`, `prepare_threshold=0` and `dict_row`. Both are built from `app/config.py` (`database_url`, `database_url_async`).
 
