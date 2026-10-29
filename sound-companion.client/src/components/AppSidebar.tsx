@@ -18,6 +18,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarSeparator,
   SidebarMenuSkeleton,
   useSidebar,
 } from '@/components/ui/sidebar'
@@ -115,13 +116,14 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
   return (
     <>
       <Sidebar aria-label="Conversations">
-        <SidebarHeader className="gap-5 px-5 pt-5 pb-4">
-          <Link to="/" className="flex items-center gap-2 font-serif text-xl font-medium tracking-tight">
+        <SidebarHeader className="gap-3 px-3 pt-4 pb-3">
+          <Link to="/" className="flex items-center gap-2 px-3 py-1 font-serif text-xl font-medium tracking-tight">
             <span className="grid size-7 place-items-center rounded-full bg-brass text-brass-foreground" aria-hidden="true">
               <Music2 className="size-4" />
             </span>
             Sound Companion
           </Link>
+          <SidebarSeparator className="mx-0" />
           <nav aria-label="Pages">
             <SidebarMenu className="gap-1">
               <SidebarMenuItem>
@@ -142,12 +144,13 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
               ))}
             </SidebarMenu>
           </nav>
+          <SidebarSeparator className="mx-0" />
           {data && data.length > 0 && (
             <div className="relative">
-              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
               <Input
                 type="search"
-                className="h-8 pl-8"
+                className="h-9 border-transparent bg-sidebar-accent/60 pl-9 shadow-none dark:bg-sidebar-accent/60"
                 placeholder="Search Conversations"
                 aria-label="Search Conversations"
                 value={filter}
@@ -184,8 +187,8 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
           )}
           {shown &&
             groupThreads(shown).map((group) => (
-              <SidebarGroup key={group.label}>
-                <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+              <SidebarGroup key={group.label} className="p-0">
+                <SidebarGroupLabel className="px-3">{group.label}</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu className="gap-1">
                     {group.threads.map((thread) => {
