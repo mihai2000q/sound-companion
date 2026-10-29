@@ -44,7 +44,7 @@ app.add_exception_handler(RequestValidationError, chat.invalid_request)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.client_origins,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Content-Type"],
 )
 app.include_router(health.router)

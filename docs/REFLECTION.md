@@ -45,7 +45,6 @@ The evaluation as a whole cost about 0.23 credits against the 1 credit target, a
 
 **Smaller limits**
 - The tool answers carry their source as text, not as citation chips, because chips come only from retrieved chunks.
-- CORS allows only `GET` and `POST`, so `DELETE` and `PATCH /api/threads/{id}` work only through the Vite proxy.
 - Not done, by design (SECURITY.md): no classifier-based injection detection, no authentication, no audit of the Corpus beyond samples and the instruction-string scan (0 hits in 7,329 chunks), no analysis of share-alike questions for generated answers.
 - Retrieval choice: hybrid search alone equals vector on exact-term and alias questions, and hybrid with rewrite has the best recall (0.932) but the worst precision (0.773). Vector with rewrite stayed the default (decision 71).
 
