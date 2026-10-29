@@ -120,7 +120,7 @@ export function AppSidebar() {
             Sound Companion
           </Link>
           <nav aria-label="Pages">
-            <SidebarMenu className="gap-2">
+            <SidebarMenu className="gap-1">
               <SidebarMenuItem>
                 <SidebarMenuButton className="h-9 px-3" disabled={busy} onClick={startNew}>
                   <SquarePen />
