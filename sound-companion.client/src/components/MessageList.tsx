@@ -27,8 +27,8 @@ const SUGGESTIONS = [
 
 function RoleAvatar({ role }: { role: ChatMessage['role'] }) {
   return (
-    <Avatar className={cn('size-8 border', role === 'user' ? 'border-primary' : 'border-brass')} aria-hidden="true">
-      <AvatarFallback className={cn('text-xs font-medium text-foreground', role === 'user' ? 'bg-primary/20' : 'bg-transparent')}>
+    <Avatar className={cn('size-8', role === 'user' && 'border border-primary')} aria-hidden="true">
+      <AvatarFallback className={cn('text-xs font-medium', role === 'user' && 'bg-primary/20 text-foreground')}>
         {role === 'user' ? 'Me' : <Music2 className="size-4" />}
       </AvatarFallback>
     </Avatar>
