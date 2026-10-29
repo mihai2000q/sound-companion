@@ -5,6 +5,9 @@ export interface DailyRow {
   error_rate: number
   avg_ms: number
   p95_ms: number
+  prompt_tokens: number
+  completion_tokens: number
+  cost_credits: number
 }
 
 export interface ToolRow {
@@ -14,7 +17,17 @@ export interface ToolRow {
   avg_ms: number
 }
 
+export interface ModelRow {
+  purpose: string
+  model: string
+  calls: number
+  prompt_tokens: number
+  completion_tokens: number
+  cost_credits: number
+}
+
 export interface Monitoring {
   daily: DailyRow[]
   tools: ToolRow[]
+  models: ModelRow[]
 }

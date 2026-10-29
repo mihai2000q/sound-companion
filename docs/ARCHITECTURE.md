@@ -18,7 +18,7 @@ FastAPI backend
    |      |-- tool: note_frequency           -> hand-written maths
    |-- AsyncPostgresSaver checkpointer (memory per thread_id)
    |-- usage + log + thread writers -> Postgres
-   |-- GET /api/monitoring -> the monitoring views (daily latency and errors, calls per tool)
+   |-- GET /api/monitoring -> the monitoring views (daily latency and errors, calls per tool) plus tokens and credits from `usage_log` (per day and per model)
    |-- GET /api/threads -> the Conversations, newest first ({ thread_id, title, created_at })
    |-- GET /api/threads/{id} (messages), /export (JSON file), PATCH /api/threads/{id} (new title, decision 74), DELETE /api/threads/{id} (row + checkpoint, decision 69)
 OpenRouter  (chat model, query-rewrite model, embeddings)

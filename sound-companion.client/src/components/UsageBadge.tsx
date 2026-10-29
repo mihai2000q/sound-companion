@@ -1,10 +1,6 @@
+import { credits } from '../lib/credits'
 import type { Usage } from '../types/chat'
 import { Badge } from '@/components/ui/badge'
-
-/** Credits are tiny per call, so show enough digits for a turn to be visible. */
-function credits(value: number): string {
-  return value === 0 ? '0' : value < 0.0001 ? value.toExponential(1) : value.toFixed(4)
-}
 
 export function UsageBadge({ usage }: { usage: Usage }) {
   return (
