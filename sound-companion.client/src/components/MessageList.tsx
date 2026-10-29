@@ -113,7 +113,7 @@ function SourceChips({ message, onOpenChunk }: { message: ChatMessage; onOpenChu
       <ul className="flex flex-wrap gap-1">
         {chips.map((chip) => (
           <li key={labelOf(chip)}>
-            <Badge asChild variant="outline" className="border-brass/60 bg-accent text-accent-foreground hover:bg-brass/30">
+            <Badge asChild variant="outline" className="cursor-pointer border-brass/60 bg-accent text-accent-foreground hover:bg-brass/30">
               <button type="button" onClick={() => onOpenChunk(message.id, chip.id)}>
                 {labelOf(chip)}
               </button>
@@ -169,7 +169,7 @@ function ToolCard({ call }: { call: ToolCall }) {
   return (
     <li>
       <Collapsible open={open} onOpenChange={setOpen} className={cn('rounded-lg border bg-card', call.status === 'error' && 'border-destructive')}>
-        <CollapsibleTrigger className="group flex w-full items-center justify-between gap-2 px-4 py-2 text-left">
+        <CollapsibleTrigger className="group flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-2 text-left">
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-sm font-medium break-all">{call.name}</span>
             <Badge variant="secondary" className={status.badge}>
