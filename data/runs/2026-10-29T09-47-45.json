@@ -1,0 +1,520 @@
+{
+  "timestamp": "2026-10-29T09-47-45",
+  "settings": {
+    "model": "openai/gpt-4o-mini",
+    "rewrite_model": "openai/gpt-4o-mini",
+    "retriever_mode": "vector",
+    "prompt_sha256": "c0c981a1c268",
+    "git": "8d403df (uncommitted changes)",
+    "golden_set": {
+      "file": "golden-set.json",
+      "sha256": "9d949fb50fde"
+    }
+  },
+  "skipped": [
+    "q15",
+    "q16",
+    "q17"
+  ],
+  "cost": 0.01712431,
+  "entries": [
+    {
+      "id": "q01",
+      "question": "What is the circle of fifths and how does it relate to key signatures?",
+      "answer": "The **circle of fifths** is a visual representation of the relationships between the twelve tones of the chromatic scale, their corresponding key signatures, and the associated major and minor keys. It is arranged in a circular format where each note is a perfect fifth apart from the next. For example, starting from C, the sequence goes C, G, D, A, E, B, F♯, C♯, G♯, D♯, A♯, and F (Circle of fifths > Related concepts > Relation with chromatic scale).\n\nIn terms of **key signatures**, the circle of fifths helps to determine how many sharps or flats are in each key. As you move clockwise around the circle, each step adds one sharp to the key signature. Conversely, moving counterclockwise adds one flat. For instance:\n- C major has no sharps or flats.\n- G major has 1 sharp (F♯).\n- D major has 2 sharps (F♯, C♯).\n- F major has 1 flat (B♭).\n- B♭ major has 2 flats (B♭, E♭).\n\nEach major and minor key corresponds to a specific key signature, which indicates the notes used in its scale (Key signature > History).\n\nFor more details, you can check the following links:\n- [Circle of fifths](https://en.wikipedia.org/wiki/Circle_of_fifths) (CC BY-SA)\n- [Key signature](https://en.wikipedia.org/wiki/Key_signature) (CC BY-SA)",
+      "contexts": [
+        "Circle of fifths\n- (0, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10, 5)\n\nwhich is equivalent to\n\n- (C, G, D, A, E, B, F ♯ , C ♯ , G ♯ , D ♯ , A ♯ , F)\n\nwhich is the circle of fifths. This is enharmonically equivalent to:\n\n- (C, G, D, A, E, B, G ♭ , D ♭ , A ♭ , E ♭ , B ♭ , F).",
+        "Circle of fifths\nThe diatonic circle of fifths is the circle of fifths encompassing only members of the diatonic scale. Therefore, it contains a diminished fifth, in C major between B and F. See structure implies multiplicity. The circle progression is commonly a circle of fifths through the diatonic chords, including one diminished chord. A circle progression in C minor with chords i–iv–♭VII–♭III–♭VI– ii^o–V–i is shown below.\n\n- Musical scores are temporarily disabled.",
+        "Harmonic syntax - the idealized phrase\nIn Western classical music, harmonies generally group into three *harmonic functions* — tonic (T), subdominant (S), and dominant (D) — and these functions group together chords that progress to and from other chords in similar ways. For example, since **II** and **IV** are both subdominant chords, they will participate in many of the same kinds of chord progressions, and at times can be substituted for each other with only a minimal change to the musical effect.\n\nOn a local level (chord-to-chord progressions), we can summarize the tendencies of these functions with the cycle **T–S–D–T**. That is, harmonies tend to progress through a cyclical progression of those three functions:\n\n> **T → S → D → T →** and so on . . .",
+        "Key signature\nThe use of a one-flat signature developed in the Medieval period, but signatures with more than one flat did not appear until the 16th century, and signatures with sharps not until the mid-17th century.",
+        "Key signature\nMost of this article addresses key signatures that represent the diatonic keys of Western music. These contain either flats or sharps, but not both, and the different key signatures add flats or sharps according to the order shown in the circle of fifths.\n\nEach major and minor key has an associated key signature, showing up to seven flats or seven sharps, that indicates the notes used in its scale. Music was sometimes notated with a key signature that did not match its key in this way—this can be seen in some Baroque pieces, or transcriptions of traditional modal folk tunes.",
+        "Tonality\nIn the 20th century, music that no longer conformed to the strict definition of common-practice tonality could nevertheless still involve musical phenomena (harmonies, cadential formulae, harmonic progressions, melodic gestures, formal categories) arranged or understood in relation to a referential tonic. For example, the closing bars of the first movement of Béla Bartók's Music for Strings, Percussion and Celesta do not involve a composed-out triad, but rather a diverging-converging pair of chromatic lines moving from a unison A to an octave E♭ and back to a unison A again, providing a framing \"deep structure\" based on a tritone relationship that nevertheless is not analogous to a tonic-dominant axis, but rather remains within the single functional domain of the tonic, A. To distinguish"
+      ],
+      "tool_results": [],
+      "reference": "The circle of fifths arranges pitches in a sequence of perfect fifths, usually drawn as a circle with the pitches and their keys in clockwise order; read counterclockwise it is a circle of fourths. C major sits at the top with no sharps or flats. Going clockwise each step up a fifth adds a sharp (G has one sharp, D has two); going counterclockwise adds flats (F has one flat, B-flat has two). Adjacent keys are the ones harmonic progressions commonly move between.",
+      "queries": [
+        "circle of fifths",
+        "fifth circle",
+        "harmonic progression in music theory",
+        "key signatures",
+        "musical key signatures",
+        "tonalities in music theory"
+      ],
+      "cost": 0.0008852,
+      "error": null
+    },
+    {
+      "id": "q02",
+      "question": "How does a clarinet produce sound, and what are its registers?",
+      "answer": "The clarinet produces sound through a process involving its mouthpiece and reed. Here's how it works:\n\n1. **Airflow**: The player blows air into the mouthpiece, where the reed is located. The player's lips create a seal around the mouthpiece.\n2. **Vibration**: As air flows past the reed, it causes the reed to vibrate. This is similar to how wind causes a flag to flap. The reed opens and closes rapidly, creating sound waves.\n3. **Sound Waves**: The vibrations travel down the cylindrical body of the clarinet, producing sound. The shape of the clarinet's bore contributes to its unique timbre (Clarinet > Acoustics).\n\n### Registers of the Clarinet\nThe clarinet has three main registers, each with distinct characteristics:\n\n1. **Chalumeau Register**: This is the lowest register, extending from the notated E3 to B♭4. It has a full and dark sound.\n2. **Clarion Register**: This middle register covers from B4 to C6 and has a brighter, sweeter tone, reminiscent of a high trumpet.\n3. **Altissimo Register**: This is the highest register, consisting of notes above C6. It can produce piercing and sometimes shrill sounds (Clarinet > Clarinet family and ranges).\n\nFor more details, you can check the sources:\n- [Clarinet > Acoustics](https://en.wikipedia.org/wiki/Clarinet)\n- [Clarinet > Clarinet family and ranges](https://en.wikipedia.org/wiki/Clarinet)\n- [Hornbostel–Sachs > Aerophones](https://en.wikipedia.org/wiki/Hornbostel%E2%80%93Sachs)\n\nThese sources are licensed under CC BY-SA 4.0.",
+      "contexts": [
+        "Clarinet (also: Soprano clarinet, B-flat clarinet, Bb clarinet, A clarinet)\nThe clarinet's cylindrical bore is the main reason for its distinctive timbre, which varies between the three main registers (the chalumeau, clarion, and altissimo). The A and B♭ clarinets have nearly the same bore and nearly identical tonal quality, although the A typically has a slightly warmer sound. The tone of the E♭ clarinet is brighter and can be heard through loud orchestral textures. The bass clarinet has a characteristically deep, mellow sound, and the alto clarinet sounds similar to the bass, though not as dark.\n\nThe production of sound by a clarinet follows these steps:",
+        "Hornbostel–Sachs (also: Hornbostel-Sachs)\nThe vibrating air is contained within the instrument. This group includes most of the instruments called wind instruments in the west, such as the flute or French horn, as well as many other kinds of instruments such as conch shells.\n\nEdge-blown aerophones or flutes (421)\n\nThe player makes a ribbon-shaped flow of air with their lips (421.1), or their breath is directed through a duct against an edge (421.2).",
+        "Clarinet (also: Soprano clarinet, B-flat clarinet, Bb clarinet, A clarinet)\n- The mouthpiece and reed are surrounded by the player's lips, which put light, even pressure on the reed and form an airtight seal. Air is blown past the reed and down the instrument. The air rushing past the reed causes it to vibrate, in the same way wind causes a flag to flap. As air pressure increases, the reed bends farther until it hits the mouthpiece. The reed stays pressed against the mouthpiece until either the springiness of the reed forces it to open or a returning pressure wave hits the reed and opens it. When the reed opens, a puff of air goes through the gap and the reed swings shut again. When played loudly, the reed can spend up to 50% of the time shut. The 'puff of air' or compression wave (at around 3% greater pressure than the surrounding air ) travels down the",
+        "Clarinet (also: Soprano clarinet, B-flat clarinet, Bb clarinet, A clarinet)\nto a higher register. This second register did not begin an octave above the first, as with other woodwind instruments, but started an octave and a perfect fifth higher than the first. A second key, at the top, extended the range of the first register to A4 and, together with the register key, to B♭4. Later, Denner lengthened the bell and provided it with a third key to extend the pitch range down to E3.",
+        "Clarinet (also: Soprano clarinet, B-flat clarinet, Bb clarinet, A clarinet)\nClarinets have the largest pitch range of common woodwinds. The range of a clarinet is usually divided into three registers. The low chalumeau register extends from the notated E3 (C3 if available) to the notated B♭4. The middle clarion register covers a little more than an octave (from the written B4 to C6). The high altissimo register consists of the notes above it. The three registers have characteristically different sounds: the chalumeau is full and dark, the clarion register is brighter and sweet, like a high trumpet from a distance, and the altissimo can be piercing and sometimes shrill.",
+        "Hornbostel–Sachs (also: Hornbostel-Sachs)\nMixed sets of wind instruments (424)"
+      ],
+      "tool_results": [],
+      "reference": "The clarinet is a single-reed woodwind with a nearly cylindrical bore and a flared bell. The player's lips seal around the mouthpiece and reed and blow air past the reed, which vibrates against the mouthpiece; the resulting pressure waves travel down the tube and are reflected back to keep the reed vibrating. The cylindrical bore gives it its distinctive timbre, which varies across three main registers: chalumeau, clarion and altissimo.",
+      "queries": [
+        "How does a clarinet produce sound?",
+        "What is the sound production mechanism of a clarinet?",
+        "Sound generation in woodwind instruments",
+        "clarinet registers",
+        "clarinet range",
+        "registers of woodwind instruments"
+      ],
+      "cost": 0.00092562,
+      "error": null
+    },
+    {
+      "id": "q03",
+      "question": "What are the top-level classes of the Hornbostel-Sachs system, and where does a violin fit?",
+      "answer": "The Hornbostel-Sachs system classifies musical instruments into five top-level categories based on how they produce sound. These categories are:\n\n1. **Idiophones**: Instruments that produce sound through the vibration of the material itself (e.g., xylophones).\n2. **Membranophones**: Instruments that produce sound by vibrating a membrane (e.g., drums).\n3. **Chordophones**: Instruments that produce sound by vibrating strings (e.g., violins).\n4. **Aerophones**: Instruments that produce sound by vibrating air (e.g., flutes).\n5. **Electrophones**: Instruments that produce sound electronically (e.g., synthesizers) (Hornbostel–Sachs > Application of the system).\n\nThe violin fits into the **Chordophones** category, as it produces sound through the vibration of its strings (Hornbostel–Sachs > Application of the system).\n\nFor more details, you can check the full article on the Hornbostel-Sachs system [here](https://en.wikipedia.org/wiki/Hornbostel%E2%80%93Sachs) (license: CC BY-SA 4.0).",
+      "contexts": [
+        "Hornbostel–Sachs (also: Hornbostel-Sachs)\nHornbostel and Sachs based their ideas on a system devised in the late 19th century by Victor-Charles Mahillon, the curator of musical instruments at Brussels Conservatory. Mahillon divided instruments into four broad categories according to the nature of the sound-producing material: an air column; string; membrane; and body of the instrument. From this basis, Hornbostel and Sachs expanded Mahillon's system to make it possible to classify any instrument from any culture.\n\nFormally, the Hornbostel–Sachs is modeled on the Dewey Decimal Classification for libraries. It has five top-level classifications, with several levels below those, adding up to over 300 basic categories in total.",
+        "Hornbostel–Sachs (also: Hornbostel-Sachs)\nThere are ways to classify instruments with this system even if they have elements from more than one group. Such instruments may have particularly long classification numbers with colons and hyphens used as well as numbers. Hornbostel and Sachs themselves cite the case of various bagpipes where some of the pipes are single reed (like a clarinet) and others are double reed (like the oboe). A number of similar composite instruments exist.",
+        "Hornbostel–Sachs (also: Hornbostel-Sachs)\nBeyond the top three groups are several further levels of classification, so that the xylophone, for example, is in the group labeled 111.212 (periods are usually added after every third digit to make long numbers easier to read). A long classification number does not necessarily indicate the instrument is a complicated one. The valveless bugle, for instance, has the classification number 423.121.22, even though it is generally regarded as a relatively simple instrument. The numbers in the bugle's classification indicate the following:",
+        "Hornbostel–Sachs (also: Hornbostel-Sachs)\nHornbostel–Sachs or Sachs–Hornbostel is a system of musical instrument classification devised by Erich Moritz von Hornbostel and Curt Sachs. This system was first published in the Zeitschrift für Ethnologie in 1914. An English translation was published in the Galpin Society Journal in 1961, which is the most widely used system for classifying musical instruments by ethnomusicologists and organologists (people who study musical instruments). The system was updated in 2011 as part of the work of the Musical Instrument Museums Online (MIMO) Project."
+      ],
+      "tool_results": [],
+      "reference": "Hornbostel-Sachs has five top-level classes: idiophones (1), membranophones (2), chordophones (3), aerophones (4) and electrophones (5). A violin is a chordophone, specifically a composite chordophone (a lute-type instrument, where the resonator is an integral part of the instrument).",
+      "queries": [
+        "violin Hornbostel-Sachs classification",
+        "violin classification in Hornbostel-Sachs",
+        "string instruments Hornbostel-Sachs system",
+        "Hornbostel-Sachs system classes",
+        "Hornbostel-Sachs classification of musical instruments",
+        "instrument classification systems"
+      ],
+      "cost": 0.00087852,
+      "error": null
+    },
+    {
+      "id": "q04",
+      "question": "What is a Neapolitan sixth?",
+      "answer": "A Neapolitan sixth is a specific type of chord, often used in classical music. It is typically a major triad built on the flattened second scale degree (the supertonic) and is usually found in first inversion. This means that the lowest note of the chord is the third of the triad.\n\nFor example, in the key of C major, the Neapolitan sixth chord would be built on D♭ (the flattened second degree). The notes would be D♭, F, and A♭, with F being the lowest note, making it a first inversion chord.\n\nThe Neapolitan sixth often serves a harmonic function to prepare the dominant chord, acting as a substitute for the IV or ii chord. It creates a strong emotional effect and is frequently used before an authentic cadence (a progression that resolves to the tonic) (Neapolitan chord > Harmonic function).\n\nYou can read more about it here: [Neapolitan chord](https://en.wikipedia.org/wiki/Neapolitan_chord) (CC BY-SA 4.0).",
+      "contexts": [
+        "Neapolitan chord (also: Neapolitan sixth)\nEspecially in its most common occurrence (as a triad in first inversion), the chord is known as the Neapolitan sixth:",
+        "Neapolitan chord (also: Neapolitan sixth)\nFrom the early 17th century onwards, composers became aware of the expressive power of the Neapolitan chord, especially to convey moments of intense feeling.",
+        "Neapolitan chord (also: Neapolitan sixth)\nIn tonal harmony, the function of the Neapolitan chord is to prepare the dominant, substituting for the IV or ii (particularly ii^6) chord. For example, it often precedes an authentic cadence, where it functions as a type of subdominant (IV). In such circumstances, the Neapolitan sixth is a chromatic alteration of the subdominant, and it has an immediately recognizable and poignant sound.\n\nFor example, in B major, the IV (subdominant) triad in root position contains the notes E, G♯, and B. By lowering the G♯ by a semitone to G and raising the B to C, the Neapolitan sixth chord E–G–C is formed."
+      ],
+      "tool_results": [],
+      "reference": "A Neapolitan chord is a major chord built on the lowered (flat) second degree of the scale, written bII. In classical music it most commonly appears in first inversion, notated bII6 or N6, and is then called a Neapolitan sixth chord. It occurs far more often in minor keys than in major keys. It is a chromatic alteration, not mixture or tonicization, like the augmented sixth chords.",
+      "queries": [
+        "Neapolitan sixth",
+        "Neapolitan chord",
+        "chromatic harmony Neapolitan sixth"
+      ],
+      "cost": 0.0006501,
+      "error": null
+    },
+    {
+      "id": "q05",
+      "question": "Is a cor anglais the same as an English horn, and what key is it in?",
+      "answer": "Yes, the cor anglais is the same as the English horn. The name \"cor anglais\" translates to \"English horn,\" and it is a type of curved, bulb-belled tenor oboe (Cor anglais > History and etymology).\n\nThe English horn is a transposing instrument in the key of F. This means that when you play a written C on the English horn, it sounds as an F in concert pitch (Cor anglais > History and etymology).\n\nFor more information, you can check the following links:\n- [Cor anglais](https://en.wikipedia.org/wiki/Cor_anglais) (CC BY-SA 4.0)\n- [Reed (mouthpiece)](https://en.wikipedia.org/wiki/Reed_(mouthpiece)) (CC BY-SA 4.0)",
+      "contexts": [
+        "Cor anglais (also: English horn)\nHorn, meaning angelic horn. Because engellisch also meant English in the vernacular of the time, the \"angelic horn\" became the \"English horn\". In the absence of any better alternative, the curved, bulb-belled tenor oboe then retained the name even after the oboe da caccia fell into disuse around 1760. The name first appeared regularly in Italian, German, and Austrian scores from 1749 on, usually in the Italian form corno inglese.",
+        "Cor anglais (also: English horn)\nDue to the earlier bowed or angular forms it took, the suggestion has been made that anglais might be a corruption of Middle French anglé (angular, or bent at an angle, angulaire in modern French), but this has been rejected on grounds that there is no evidence of the term cor anglé before it was offered as a possible origin of anglais in the late 19th century.",
+        "Reed (mouthpiece) (also: Reed)\nQuadruple reed instruments have four reeds, two on top and two on bottom. Examples of this include an archetypal instrument from India, the shehnai, as well as the pi from Thailand, and the Cambodian sralai. Having four reeds instead of two produces a very different tone and set of harmonics.",
+        "Reed (mouthpiece) (also: Reed)\nDouble reeds are used on many instruments, such as the oboe, oboe d'amore, English horn, bass oboe, heckelphone, bassoon, contrabassoon, sarrusophone, shawm, bagpipes, nadaswaram and shehnai and others. The two reeds vibrate against each other and not against a mouthpiece. In the case of the crumhorn, bagpipes, and Rauschpfeife, a reed cap encloses the reeds, and the reeds do not contact the player's mouth."
+      ],
+      "tool_results": [],
+      "reference": "Yes. The cor anglais, or English horn (the name used mainly in North America), is a double-reed woodwind in the oboe family, about one and a half times the length of an oboe, essentially an alto oboe in F. It is a transposing instrument pitched in F, a perfect fifth lower than the oboe, so its music is written a perfect fifth higher than it sounds.",
+      "queries": [
+        "English horn",
+        "cor anglais",
+        "double reed instruments",
+        "double-reed woodwind instrument"
+      ],
+      "cost": 0.00075471,
+      "error": null
+    },
+    {
+      "id": "q06",
+      "question": "What is middle C called, and what do Germans call B-flat and B natural?",
+      "answer": "Middle C is called C4 in scientific pitch notation (Scientific pitch notation > Nomenclature).\n\nIn German music terminology:\n- B-flat is referred to as B.\n- B natural is referred to as H (Musical note > Distinguishing pitch > Pitch names and their history).\n\nSo, to summarize:\n- Middle C: C4\n- B-flat: B (in German)\n- B natural: H (in German)\n\nYou can read more about these topics here:\n- [Scientific pitch notation](https://en.wikipedia.org/wiki/Scientific_pitch_notation) (CC BY-SA 4.0)\n- [Musical note](https://en.wikipedia.org/wiki/Musical_note) (CC BY-SA 4.0)",
+      "contexts": [
+        "Accidental (music) (also: Sharp, Flat)\nThe different kinds of B were eventually written differently, so as to distinguish them in music theory treatises and in notation. The flat sign ♭ derives from a round b that signified the soft hexachord, hexachordum molle, particularly the presence of B♭. The name of the flat sign in French is bémol from medieval French bé mol, which in modern French is bé mou (\"soft b\"). The natural sign ♮ and the sharp sign ♯ derive from variations of a square b that signified the hard hexachord, hexachordum durum, where the note in question is B♮. The name of the natural sign in French is bécarre from medieval French bé quarre, which in modern French is bé carré (\"square b\"). In German music notation, the letter B or b always designates B♭ while the letter H or h – a deformation of a square b –",
+        "Musical note (also: Note (music))\nB♭, B and H\n\nIn parts of Europe, including Germany, Czechia, Slovakia, Poland, Hungary, Norway, Denmark, Serbia, Croatia, Slovenia, Finland, and Iceland (as well as Sweden before the 1990s), the Gothic 𝔟 transformed into the letter h. Therefore, in current German music terminology, H is used instead of B♮ (B natural), and B instead of B♭ (B flat).\n\nSystem \"do–re–mi–fa–sol–la–si\"",
+        "Musical note (also: Note (music))\nChromatic scale note naming conventions of various languages and countries\nEnglish | C | C sharp (C♯) | D | D sharp (D♯) | E | F | F sharp (F♯) | G | G sharp (G♯) | A | A sharp (A♯) | B\nEnglish | C | D flat (D♭) | D | E flat (E♭) | E | F | G flat (G♭) | G | A flat (A♭) | A | B flat (B♭) | B\nGerman | C | Cis (C♯) | D | Dis (D♯) | E | F | Fis (F♯) | G | Gis (G♯) | A | Ais (A♯) | H\nGerman | C | Des (D♭) | D | Es (E♭) | E | F | Ges (G♭) | G | As (A♭) | A | B | H\nSwedish compromise | C | Ciss (C♯) | D | Diss (D♯) | E | F | Fiss (F♯) | G | Giss (G♯) | A | Aiss (A♯) | H\nSwedish compromise | C | Dess (D♭) | D | Ess (E♭) | E | F | Gess (G♭) | G | Ass (A♭) | A | Bess (B♭) | H\nDutch | C | Cis (C♯) | D | Dis (D♯) | E | F | Fis (F♯) | G | Gis (G♯) | A | Ais (A♯) | B"
+      ],
+      "tool_results": [
+        {
+          "name": "note_frequency",
+          "args": {
+            "note": "C4"
+          },
+          "content": "{\"note\": \"C4\", \"frequency_hz\": 261.63, \"convention\": \"Scientific pitch notation, C4 = middle C. Flats are written with b and sharps with #.\"}"
+        }
+      ],
+      "reference": "In scientific pitch notation (the ISO register system) middle C is C4, and C4 is never any other note. Older and other systems name it differently: it is c' (the one-line octave) in Helmholtz notation, whereas a plain \"C\" means middle C in ABC notation but the C two octaves below middle C in Helmholtz's original notation. In German note names, what English calls B-flat is written B and B natural is written H.",
+      "queries": [
+        "B-flat and B natural in German",
+        "B dur und B mol in Deutsch",
+        "German note names for B flat and B natural"
+      ],
+      "cost": 0.00072811,
+      "error": null
+    },
+    {
+      "id": "q07",
+      "question": "Compare the perfect authentic cadence with the half cadence and the plagal cadence.",
+      "answer": "Here's a comparison of the perfect authentic cadence, half cadence, and plagal cadence:\n\n1. **Perfect Authentic Cadence**:\n   - This cadence typically moves from the dominant chord (V) to the tonic chord (I). It is considered the strongest type of cadence, providing a sense of resolution. For example, in the key of C major, a perfect authentic cadence would be G (V) to C (I).\n   - It can also involve a seventh chord, such as G7 to C (I) (Cadence > Common classifications > Authentic cadence).\n\n2. **Half Cadence**:\n   - A half cadence ends on the dominant chord (V), creating a feeling of suspension or incompleteness. It often leads to further musical development. For example, in C major, a half cadence could be F (IV) to G (V).\n   - This type of cadence is considered weak because it does not resolve to the tonic (Cadence > Common classifications > Half cadence).\n\n3. **Plagal Cadence**:\n   - The plagal cadence moves from the subdominant chord (IV) to the tonic chord (I). It is often referred to as the \"Amen cadence\" because of its frequent use in hymns. For example, in C major, a plagal cadence would be F (IV) to C (I).\n   - This cadence provides a softer resolution compared to the perfect authentic cadence (Cadence > Common classifications).\n\nIn summary:\n- **Perfect Authentic Cadence**: V to I (strong resolution).\n- **Half Cadence**: Any chord to V (incomplete feeling).\n- **Plagal Cadence**: IV to I (soft resolution).\n\nFor more details, you can check the following links:\n- [Cadence - Wikipedia](https://en.wikipedia.org/wiki/Cadence) (CC BY-SA 4.0)",
+      "contexts": [
+        "Cadence\nor imperfect. The phrase perfect cadence is sometimes used as a synonym for authentic cadence but can also have a more precise meaning depending on the chord voicing.",
+        "Tonality\nDavid Cope considers key, consonance and dissonance (relaxation and tension, respectively), and hierarchical relationships the three most basic concepts in tonality.\n\nCarl Dahlhaus lists the characteristic schemata of tonal harmony, \"typified in the compositional formulas of the 16th and early 17th centuries,\" as the \"complete cadence\" I–ii–V–I, I–IV–V–I, I–IV–I–V–I; the circle of fifths progression I–IV–vii°–iii–vi–ii–V–I; and the major–minor parallelism: minor v–i–VII–III equals major iii–vi–V–I; or minor III–VII–i–v equals major I–V–vi–iii. The last of these progressions is characterized by \"retrograde\" harmonic motion.",
+        "Cadence\nAn authentic cadence is a cadence from a dominant-functioning chord (commonly V) to the tonic chord (I). During the dominant chord, a seventh above the dominant may be added to create a dominant seventh chord (V^7); other dominant-functioning chords such as a leading tone triad or seventh chord can also take its place. The dominant chord may also be preceded by a cadential ^6 4 chord. The Harvard Concise Dictionary of Music and Musicians says, \"This cadence is a microcosm of the tonal system, and is the most direct means of establishing a pitch as tonic. It is virtually obligatory as the final structural cadence of a tonal work.\" Authentic cadences are generally classified as either perfect or imperfect. The phrase perfect cadence is sometimes used as a synonym for authentic cadence but",
+        "Cadence\nPlagal half cadence\n\nThe rare plagal half cadence involves a I–IV progression. Like an authentic cadence (V–I), the plagal half cadence involves an ascending fourth (or, by inversion, a descending fifth). The plagal half cadence is a weak cadence, ordinarily at the ending of an antecedent phrase, after which a consequent phrase commences. One example of this use is in \"Auld Lang Syne\". But in one very unusual occurrence – the end of the exposition of the first movement of Johannes Brahms's Clarinet Trio, Op. 114—it is used to complete not just a musical phrase but an entire section of a movement.",
+        "Cadence\nSeveral types of half cadences are described below.\n\nPhrygian half cadence\n\nA Phrygian half cadence is a half cadence iv^6–V in minor, so named because the semitonal motion in the bass (sixth degree to fifth degree) resembles the half-step heard in the ii–I of the 15th-century cadence in the Phrygian mode. Due to its being a survival from modal Renaissance harmony this cadence gives an archaic sound, especially when preceded by v (v–iv^6–V). A characteristic gesture in Baroque music, the Phrygian cadence often concluded a slow movement immediately followed (\"attacca\") by a faster one.\n\nLydian cadence",
+        "Cadence\n- {\\frac {\\frac {4}{3}}{\\left({\\frac {9}{8}}\\right)^{2}}}={\\frac {256}{243}}\n\nIn a melodic half step, listeners of the time perceived no tendency of the lower tone toward the upper, or the upper toward the lower. The second tone was not the 'goal' of the first. Instead, musicians avoided the half step in clausulas because, to their ears, it lacked clarity as an interval. Beginning in the 13th century, cadences begin to require motion in one voice by half step and the other a whole step in contrary motion.",
+        "Cadence\nA half cadence (also called an imperfect cadence or semicadence) is any cadence ending on V, whether preceded by II (V of V), ii, vi, IV, or I—or any other chord. Because it sounds incomplete or suspended, the half cadence is considered a weak cadence that calls for continuation.\n\nSeveral types of half cadences are described below.\n\nPhrygian half cadence",
+        "Cadence\nCadences are divided into four main types, according to their harmonic progression: authentic (typically perfect authentic or imperfect authentic), half, plagal, and deceptive. Typically, phrases end on authentic or half cadences, and the terms plagal and deceptive refer to motion that avoids or follows a phrase-ending cadence. Each cadence can be described using the Roman numeral system of naming chords."
+      ],
+      "tool_results": [],
+      "reference": "A perfect authentic cadence ends a unit with V (or V7) going to I, with the melody arriving on the tonic. A half cadence ends the phrase on V without going to I, typically approached from I, II, IV or VI, and with V a root-position triad. A plagal cadence is IV going to I, also called the Amen cadence; some theorists, such as Caplin, dispute that it exists in classical-era music, though it appears in the nineteenth century.",
+      "queries": [
+        "perfect authentic cadence",
+        "authentic cadence",
+        "cadences in tonal harmony",
+        "plagal cadence",
+        "hypophrygian cadence",
+        "cadences in music theory",
+        "half cadence",
+        "imperfect cadence",
+        "cadence types in music theory"
+      ],
+      "cost": 0.00102716,
+      "error": null
+    },
+    {
+      "id": "q08",
+      "question": "Compare the Dorian and Mixolydian modes: which scale degrees differ from the major scale?",
+      "answer": "To compare the Dorian and Mixolydian modes, let's look at their notes and how they differ from the major scale (Ionian mode).\n\n1. **Dorian Mode** (C Dorian):\n   - Notes: C, D, Eb, F, G, A, Bb\n   - Differences from the C Major scale (C, D, E, F, G, A, B):\n     - The 3rd degree is lowered: E becomes Eb.\n     - The 7th degree is lowered: B becomes Bb.\n\n2. **Mixolydian Mode** (C Mixolydian):\n   - Notes: C, D, E, F, G, A, Bb\n   - Differences from the C Major scale:\n     - The 7th degree is lowered: B becomes Bb.\n\nIn summary:\n- The Dorian mode differs from the major scale by lowering the 3rd (Eb) and the 7th (Bb).\n- The Mixolydian mode differs from the major scale only by lowering the 7th (Bb).\n\nThese differences highlight the unique sound and character of each mode. \n\nSources:\n- Dorian Mode (Open Music Theory > Modes)\n- Mixolydian Mode (Open Music Theory > Modes)\n\nLinks:\n- [Open Music Theory - Modes](https://openmusictheory.com) (CC BY-SA)",
+      "contexts": [],
+      "tool_results": [
+        {
+          "name": "scale_info",
+          "args": {
+            "tonic": "C",
+            "scale": "dorian"
+          },
+          "content": "{\"tonic\": \"C\", \"scale\": \"dorian\", \"notes\": [\"C\", \"D\", \"Eb\", \"F\", \"G\", \"A\", \"Bb\"], \"key_signature\": null, \"convention\": \"Scientific pitch notation, C4 = middle C. Flats are written with b and sharps with #.\"}"
+        },
+        {
+          "name": "scale_info",
+          "args": {
+            "tonic": "C",
+            "scale": "mixolydian"
+          },
+          "content": "{\"tonic\": \"C\", \"scale\": \"mixolydian\", \"notes\": [\"C\", \"D\", \"E\", \"F\", \"G\", \"A\", \"Bb\"], \"key_signature\": null, \"convention\": \"Scientific pitch notation, C4 = middle C. Flats are written with b and sharps with #.\"}"
+        }
+      ],
+      "reference": "Modern Dorian is the scale on the white keys from D to D. Compared with the major scale it has a minor third and a minor seventh (its second, fourth, fifth and sixth are the major scale's). Modern Mixolydian is the fifth mode of the major scale, built on the dominant; it has the same pattern of tones and semitones as the major scale but with a minor seventh, so its seventh degree is a subtonic, not a leading tone.",
+      "queries": [],
+      "cost": 0.0006504,
+      "error": null
+    },
+    {
+      "id": "q09",
+      "question": "How do the viola and the violin differ in size, tuning and role?",
+      "answer": "The viola and the violin differ in several key aspects:\n\n1. **Size**: The viola is slightly larger than the violin. While the exact dimensions can vary, a typical viola is about 16 inches (40 cm) long, whereas a violin is usually around 14 inches (36 cm) long (Viola > Introduction).\n\n2. **Tuning**: The tuning of the viola is different from that of the violin. The viola's strings are tuned to C3, G3, D4, and A4, which means it has a lower pitch compared to the violin, which is tuned to G3, D4, A4, and E5 (Viola > Introduction).\n\n3. **Role**: In an orchestra or ensemble, the viola typically plays the middle or alto voice, filling in harmonies between the higher-pitched violin and the lower-pitched cello. The violin often carries the melody due to its higher range (Viola > Introduction).\n\nFor more details, you can check the following links:\n- [Viola](https://en.wikipedia.org/wiki/Viola) (CC BY-SA 4.0) \n- [Viol](https://en.wikipedia.org/wiki/Viol) (CC BY-SA 4.0)",
+      "contexts": [
+        "Viola\nThe viola (/viˈoʊlə/ vee-OH-lə, (^ⓘ) Italian: [ˈvjɔːla, viˈɔːla]) is a string instrument of the violin family, and is usually bowed when played. The viola is slightly larger than the violin and has a lower sound. Since the 18th century, it has been the middle or alto voice of the violin family, between the violin (which is tuned a perfect fifth higher) and the cello (which is tuned an octave lower). The strings from low to high are typically tuned to C3, G3, D4, and A4.",
+        "Viol (also: Viola da gamba)\nof a contemporary literature for this remarkable early instrument and thus continue its tradition in modern society.",
+        "Viol (also: Viola da gamba)\nViols are distinguished from instruments of the violin family by features including their frets, tuning, generally flat backs and sloping shoulders, and the use of an underhand bow grip. The family developed in several sizes, most commonly treble, tenor and bass, and became widely used during the Renaissance and Baroque periods as solo, consort and continuo instruments.\n\nThe early development of the viol was closely connected with the vihuela, a family of Spanish string instruments that could be played with the fingers, a plectrum or a bow. Bowed vihuelas were established in the Crown of Aragon by the late 15th century and contributed to the emergence of the viol family, which underwent further development in Italy during the 16th century.",
+        "Zither\nString | String | Melody | Melody | Melody | Melody | Melody | Accompaniment | Accompaniment | Accompaniment | Accompaniment | Accompaniment | Accompaniment | Accompaniment | Accompaniment | Accompaniment | Accompaniment | Accompaniment | Accompaniment | Basses | Basses | Basses | Basses | Basses | Basses | Basses | Basses | Basses | Basses | Basses | Basses | Contrabasses | Contrabasses | Contrabasses | Contrabasses | Contrabasses | Contrabasses | Contrabasses | Contrabasses | Contrabasses | Contrabasses | Contrabasses | Contrabasses | Contrabasses\nString | String | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42",
+        "Erhu\n- Its characteristic sound is produced through the vibration of the python skin by bowing.\n- There is no fingerboard; the player stops the strings by pressing their fingertips onto the strings without the strings touching the neck.\n- The horse hair bow is never separated from the strings (which were formerly of twisted silk but which today are usually made of metal); it passes between them as opposed to over them (the latter being the case with western bowed stringed instruments )."
+      ],
+      "tool_results": [],
+      "reference": "The viola is slightly larger than the violin and sounds lower. The violin is the smallest, highest-pitched (soprano) instrument of the violin family, usually tuned in perfect fifths to G3, D4, A4, E5. The viola is the middle (alto) voice of the family, between the violin, which is tuned a perfect fifth higher, and the cello, an octave lower; its strings are usually tuned to C3, G3, D4, A4.",
+      "queries": [
+        "viola",
+        "viola instrument",
+        "string instruments: viola",
+        "violin",
+        "string instrument",
+        "bowed string instrument"
+      ],
+      "cost": 0.00084966,
+      "error": null
+    },
+    {
+      "id": "q10",
+      "question": "What separates a trumpet from a cornet?",
+      "answer": "The trumpet and cornet are both brass instruments, but they have some key differences:\n\n1. **Bore Shape**: The trumpet typically has a cylindrical bore, while the cornet has a conical bore. This difference in shape affects the sound quality, with the cornet producing a mellower tone compared to the brighter sound of the trumpet (Cornet > Construction).\n\n2. **Size and Shape**: The cornet is generally more compact and has a more rounded shape than the trumpet (Cornet > Construction).\n\n3. **Sound and Tone**: Due to its conical bore, the cornet has a warmer and softer sound, making it suitable for melodic lines in brass bands, whereas the trumpet's sound is more piercing and bright (Cornet > Construction).\n\n4. **Usage in Ensembles**: In British brass bands, the cornet is the leading melodic instrument, while trumpets are not typically used in these ensembles (Cornet > Ensembles with cornets > Brass band).\n\nThese differences make each instrument unique in its application and sound.\n\nFor more details, you can check the following links:\n- [Trumpet](https://en.wikipedia.org/wiki/Trumpet) (CC BY-SA 4.0)\n- [Cornet](https://en.wikipedia.org/wiki/Cornet) (CC BY-SA 4.0)",
+      "contexts": [
+        "Trumpet (also: B-flat trumpet, Bb trumpet)\nThe English word trumpet was first used in the late 14th century. The word came from Old French trompette, which is a diminutive of trompe. The word trump, meaning trumpet, was first used in English in 1300. The word comes from Old French trompe 'long, tube-like musical wind instrument' (c. 1100s), cognate with Provençal tromba, Italian tromba, all probably from a Germanic source (compare Old High German trumpa, Old Norse trumba 'trumpet'), of imitative origin.\"",
+        "Tuba\nbrass band. The modern E♭ and B♭ band tubas with top-action piston valves are little-changed from their 19th-century contrabass saxhorn ancestors, aside from a wider bore and the addition of a fourth compensating valve.",
+        "Trumpet (also: B-flat trumpet, Bb trumpet)\nModern trumpets have three (or, infrequently, four) valves, each of which increases the length of tubing when engaged, thereby lowering the pitch. Most trumpets use piston valves but some use rotary valves. The first valve lowers the instrument's pitch by a whole step (two semitones), the second valve by a half step (one semitone), and the third valve by one and a half steps (three semitones). These three valves provide eight possible valve combinations (including \"none\"), but only seven different tubing lengths, because the third valve alone gives the same tubing length as the 1–2 combination (there is often a deliberate difference between \"1–2\" and \"3\", allowing the player to select whichever gives the best tuning for any particular note). Used singly and in combination these valves",
+        "Cornet\nThe cornet (/ˈkɔːrnɪt/, US: /kɔːrˈnɛt/) is a brass instrument similar to the trumpet but distinguished from it by its conical bore, more compact shape, and mellower tone. The most common cornet is a transposing instrument in B♭. There is also a soprano cornet in E♭ and cornets in A and C. All are unrelated to the Renaissance and early Baroque cornett.",
+        "Cornet\nThe cornet was derived from the posthorn by applying valves to it in the 1820s. Initially using Stölzel valves, by the 1830s, Parisian makers were using the improved Périnet piston valves. Cornets first appeared as separate instrumental parts in 19th-century French compositions.",
+        "Cornet\nBritish brass bands consist only of brass instruments and a percussion section. The cornet is the leading melodic instrument in this ensemble; trumpets are never used. The ensemble consists of about thirty musicians, including nine B♭ cornets and one E♭ cornet (soprano cornet). In the UK, companies such as Besson and Boosey & Hawkes specialized in instruments for brass bands. In America, 19th-century manufacturers such as Graves and Company, Hall and Quinby, E. G. Wright, and the Boston Musical Instrument Manufactury made instruments for this ensemble."
+      ],
+      "tool_results": [],
+      "reference": "Both are brass instruments and the most common type of each is a transposing instrument in B-flat. The cornet has a conical bore, a more compact shape and a mellower tone; the trumpet has a cylindrical bore, and its tubing is generally wound differently.",
+      "queries": [
+        "trumpet",
+        "brass instrument",
+        "trumpet in music theory",
+        "cornet",
+        "cornet instrument",
+        "brass instruments cornet"
+      ],
+      "cost": 0.00083609,
+      "error": null
+    },
+    {
+      "id": "q11",
+      "question": "How does the white-key method help calculate intervals?",
+      "answer": "The white-key method is a helpful technique for calculating musical intervals, especially when using a piano keyboard. Here's how it works:\n\n1. **Understanding Intervals**: An interval is the distance between two pitches. The white-key method simplifies this by focusing on the white keys of the piano.\n\n2. **Identifying Intervals**: You can easily identify the quality of intervals (like major, minor, perfect, etc.) by knowing which pairs of white keys form specific intervals. For example:\n   - The interval between C and E is a major third.\n   - The interval between C and D is a major second, except for the pairs E-F and B-C, which are minor seconds.\n\n3. **Counting Steps**: To find the distance in semitones, you can count the half-steps between the two notes. For instance, from C to E, you would count C, C#, D, D#, E, which totals four semitones (C4–E4 is notated as **i4** for four semitones) (Intervals and dyads > Chromatic intervals).\n\n4. **Inversion Concept**: Once you know the intervals formed by the white keys, you can also understand their inversions. For example, if you know that all seconds are major except for E-F and B-C, then you can deduce that all sevenths are minor except for F-E and C-B, which are major (Calculating Intervals: The White-Key Method > White-Key Method).\n\nBy mastering the intervals on the white keys, you can calculate any other interval by adjusting the size accordingly.\n\nFor more details, you can check the sources:\n- [Calculating Intervals: The White-Key Method](https://openmusictheory.github.io/whiteKeyMethod.html) (Open Music Theory)\n- [Intervals and dyads > Chromatic intervals](https://openmusictheory.github.io/intervals.html) (Open Music Theory)\n\nThese pages are licensed under CC BY-SA 4.0.",
+      "contexts": [
+        "Calculating Intervals: The White-Key Method\nUltimately, [intervals](intervals.html) need to be committed to memory, both aurally and visually. There are, however, a few tricks to learning this quickly. One such trick is the so-called *white-key method*.",
+        "Intervals and dyads\nThe simplest way to measure intervals, particularly at the keyboard, is to count the number of half-steps, or *semitones*, between two pitches. To determine the chromatic interval between C4 and E4, for example, start at C4 and ascend the chromatic scale to E4, counting steps along the way: C#4, D4, D#4, E4. E4 is four semitones higher than C4. Chromatic intervals are notated with a lower-case **i** followed by an Arabic numeral for the number of semitones. C4–E4 is four semitones, or **i4**.\n\n![Chromatic steps from C4 to E4.][c4e4]",
+        "Calculating Intervals: The White-Key Method\n<img src=\"Graphics/intervals/wnm-seconds.png\">\n\nAll of the thirds are *minor* except for three: C-E, F-A, and G-B, which are *major*.\n\n<img src=\"Graphics/intervals/wnm-thirds.png\">\n\nAll of the fourths are *perfect* except for one: F-B, which is *augmented*.\n\n<img src=\"Graphics/intervals/wnm-fourths.png\">\n\nBelieve it or not, you now know *all* of the white-key intervals, as long as you understand the concept of *interval inversion*. For example, if you know that all seconds are major except for E-F and B-C (which are minor), then you know that all *sevenths* are minor except for F-E and C-B (which are major).\n\n<img src=\"Graphics/intervals/wnm-sevenths.png\">\n\nOnce you've mastered the white-key intervals, you can figure out any other interval by adjusting the size accordingly."
+      ],
+      "tool_results": [],
+      "reference": "You memorise the intervals between the white keys of the piano (the intervals in C major), then work out any other interval as an alteration of a white-key interval. For example D4-F#4 is a major third because D4-F4 is a minor third made one semitone larger. The white-key seconds are all major except E-F and B-C; the thirds are all minor except C-E, F-A and G-B; the fourths are all perfect except F-B (augmented); sevenths follow by inversion.",
+      "queries": [
+        "white-key method intervals",
+        "intervals using the white-key method",
+        "diatonic intervals in keyboard theory"
+      ],
+      "cost": 0.00080121,
+      "error": null
+    },
+    {
+      "id": "q12",
+      "question": "What is the difference between concert pitch and written pitch?",
+      "answer": "**Concert Pitch** refers to a standard tuning reference where the note A above middle C is set at 440 Hz. This is the pitch that orchestras and ensembles tune to, ensuring that all instruments are in harmony (Concert pitch > Modern standard concert pitch).\n\n**Written Pitch**, on the other hand, is the notation that musicians read from their sheet music. For transposing instruments, the written pitch may differ from the concert pitch. For example, a B-flat clarinet reads a written C, but it sounds a B-flat in concert pitch (Transposing instrument > Conductor's score).\n\nIn summary, concert pitch is the actual sound frequency used for tuning, while written pitch is how notes are represented in music notation, which can vary for different instruments.\n\nFor more details, you can check the following links:\n- [Concert Pitch](https://en.wikipedia.org/wiki/Concert_pitch) (CC BY-SA 4.0)\n- [Transposing Instruments](https://en.wikipedia.org/wiki/Transposing_instrument) (CC BY-SA 4.0)",
+      "contexts": [
+        "Concert pitch\nThe A above middle C is often set at the international standard of 440 Hz. Historically, this A has been tuned to a variety of different pitches.",
+        "Transposing instrument\nIn full scores, music for transposing instruments is generally written in transposed form, just as in the players' parts. Since the beginning of the 20th century, some composers have written orchestral scores entirely in concert pitch, e.g. the score of Sergei Prokofiev's Piano Concerto No. 1 in D♭.",
+        "Concert pitch\ntune with A = 439 in a heated hall) caused the Royal Philharmonic Society and others (including the Bach Choir, and the Felix Mottl and Arthur Nikisch concerts) to adopt the continental pitch.",
+        "Scientific pitch notation (also: Scientific pitch, Helmholtz pitch notation)\nB | 15.43385 (11) | 30.86771 (23) | 61.73541 (35) | 123.4708 (47) | 246.9417 (59) | 493.8833 (71) | 987.7666 (83) | 1975.533 (95) | 3951.066 (107) | 7902.133 (119) | 15804.27 | 31608.53",
+        "Pitch (music)\nIn atonal, twelve tone, or musical set theory, a \"pitch\" is a specific frequency while a pitch class is all the octaves of a frequency. In many analytic discussions of atonal and post-tonal music, pitches are named with integers because of octave and enharmonic equivalency (for example, in a serial system, C♯ and D♭ are considered the same pitch, while C4 and C5 are functionally the same, one octave apart).\n\nDiscrete pitches, rather than continuously variable pitches, are virtually universal, with exceptions including \"tumbling strains\" and \"indeterminate-pitch chants\". Gliding pitches are used in most cultures, but are related to the discrete pitches they reference or embellish.",
+        "Transposing instrument\nMost authorities include this type of notation in the definition of \"transposing instruments\", although it is a special case in the sense that these instruments remain in the same key as non-transposing instruments."
+      ],
+      "tool_results": [],
+      "reference": "Concert pitch is the pitch as sounded on a non-transposing instrument such as the piano; the written pitch of a transposing instrument can differ from it. For example a written C on a B-flat clarinet or trumpet sounds a concert B-flat. The ISO standard reference is A440, the A above middle C at 440 Hz.",
+      "queries": [
+        "concert pitch",
+        "standard pitch",
+        "written pitch in transposing instruments",
+        "written pitch",
+        "notated pitch",
+        "transposing instruments terminology"
+      ],
+      "cost": 0.00078066,
+      "error": null
+    },
+    {
+      "id": "q13",
+      "question": "How does an acoustic guitar produce its sound?",
+      "answer": "An acoustic guitar produces sound primarily through the vibration of its strings, which is then transferred to its body. Here's how it works:\n\n1. **String Vibration**: When you pluck or strum the strings, they vibrate. This vibration creates sound waves.\n\n2. **Soundboard**: The vibrations from the strings are transmitted to the guitar's top, or soundboard. The soundboard is usually made of tonewoods like spruce or cedar and is designed to resonate. This is a crucial part of the guitar because it amplifies the sound produced by the strings (Guitar > Construction > Components).\n\n3. **Body Resonance**: The body of the guitar, which is hollow, also plays a significant role. The air inside the body vibrates along with the soundboard, further enhancing the sound. The sound hole, typically located on the top of the guitar, allows the sound to project outwards (Guitar > Construction > Components).\n\nIn summary, the combination of string vibration, the resonance of the soundboard, and the hollow body of the guitar work together to produce the rich sound characteristic of acoustic guitars.\n\nFor more details, you can check the sources:\n- [Guitar > Construction > Components](https://en.wikipedia.org/wiki/Guitar)\n- [Electric guitar > Construction > Pickups](https://en.wikipedia.org/wiki/Electric_guitar) \n\nThese pages are licensed under CC BY-SA 4.0.",
+      "contexts": [
+        "Electric guitar\nCompared to an acoustic guitar, which has a hollow body, electric guitars make much less audible sound when their strings are plucked, so electric guitars are normally plugged into a guitar amplifier and speaker. When an electric guitar is played, string movement produces a signal by generating (i.e., inducing) a small electric current in the magnetic pickups, which are magnets wound with coils of very fine wire. The signal passes through the tone and volume circuits to the output jack, and through a cable to an amplifier. The current induced is proportional to such factors as string density and the amount of movement over the pickups.",
+        "Guitar (also: Acoustic guitar)\nIn an acoustic instrument, the body of the guitar is a major determinant of the overall sound quality. The guitar top, or soundboard, is a finely crafted and engineered element made of tonewoods such as spruce and red cedar. This thin piece of wood, often only 2 or 3 mm thick, is strengthened by differing types of internal bracing. Many luthiers consider the top the dominant factor in determining the sound quality. The majority of the instrument's sound is heard through the vibration of the guitar top as the energy of the vibrating strings is transferred to it. The body of an acoustic guitar has a sound hole through which sound projects. The sound hole is usually a round hole in the top of the guitar under the strings. The air inside the body vibrates as the guitar top and body is",
+        "Electric guitar\nSome steel-string acoustic guitars include a built-in system to electrically amplify their output without altering their tone as an alternative to using a separate microphone. The system may consist of piezoelectric pickups mounted under the bridge, or a low-mass microphone (usually a condenser mic) inside the body of the guitar that converts the vibrations in the body into electronic signals. Combinations of these types of pickups may be used, with an integral mixer/preamp/graphic equalizer. Such instruments are called electric acoustic guitars. They are regarded as acoustic guitars rather than electric guitars because the pickups do not produce a signal directly from the vibration of the strings, but rather from the vibration of the guitar top or body, and the amplification of the sound"
+      ],
+      "tool_results": [],
+      "reference": "A guitar is a chordophone: sound comes from a vibrating string stretched between two fixed points. On an acoustic guitar the strings' vibration is amplified by the hollow body, which acts as a resonating chamber (flat-top guitars typically have a large sound hole), so no electronics are needed. The strings are plucked or strummed with the dominant hand while the other hand presses them against frets, and the usual six strings are tuned E A D G B E from low to high.",
+      "queries": [
+        "How does an acoustic guitar produce its sound?",
+        "What is the sound production mechanism of an acoustic guitar?",
+        "Acoustic guitar sound generation in string instruments"
+      ],
+      "cost": 0.00073166,
+      "error": null
+    },
+    {
+      "id": "q14",
+      "question": "How does an electric guitar work, and why does it need an amplifier?",
+      "answer": "An electric guitar works by converting the vibrations of its strings into electrical signals. Here's how it happens:\n\n1. **Pickups**: The guitar has magnetic pickups, which are magnets wrapped in coils of fine wire. When you pluck or strum the strings, they vibrate within the magnetic field created by the pickups. This movement generates a small electric current in the coils (Electric guitar > Construction > Pickups).\n\n2. **Signal Processing**: The electric signal produced by the pickups passes through tone and volume controls before reaching the output jack. From there, it travels through a cable to an amplifier (Electric guitar > Construction).\n\nNow, regarding why an electric guitar needs an amplifier:\n\n- **Sound Amplification**: Unlike acoustic guitars, which have a hollow body that naturally amplifies sound, electric guitars produce very little sound on their own. They require an external amplifier to boost the electrical signal to a level that can be heard by an audience (Electric guitar > History).\n\n- **Sound Shaping**: The amplifier not only makes the sound louder but also allows for various effects and tonal adjustments. Musicians can use different settings on the amplifier to shape the sound, adding effects like reverb or distortion, which are essential in many music genres (Guitar > Accessories > Amplifiers, effects and speakers).\n\nFor more details, you can check the following links:\n- [Electric guitar - Wikipedia](https://en.wikipedia.org/wiki/Electric_guitar) (CC BY-SA 4.0)\n- [Guitar - Wikipedia](https://en.wikipedia.org/wiki/Guitar) (CC BY-SA 4.0)",
+      "contexts": [
+        "Electric guitar\nAn electric guitar is a guitar that, unlike a standard acoustic guitar, requires external electric sound amplification to be heard at typical performance volumes. It uses one or more pickups to convert the vibration of its strings into electrical signals, which ultimately are reproduced as sound by loudspeakers. The sound is sometimes shaped or electronically altered to achieve different timbres or tonal qualities via amplifier settings or knobs on the guitar. Often, this is done through the use of effects such as reverb, distortion and overdrive; the latter is considered to be a key element of electric blues guitar music, rock and heavy metal guitar playing. Designs also exist combining attributes of electric and acoustic guitars: the semi-acoustic and acoustic-electric guitars.",
+        "Guitar (also: Acoustic guitar)\nElectric guitars and bass guitars have to be used with a guitar amplifier and loudspeaker or a bass amplifier and speaker, respectively, in order to make enough sound to be heard by the performer and audience. Electric guitars and bass guitars almost always use magnetic pickups, which generate an electric signal when the musician plucks, strums or otherwise plays the instrument. The amplifier and speaker strengthen this signal using a power amplifier and a loudspeaker. Acoustic guitars that are equipped with a piezoelectric pickup or microphone can also be plugged into an instrument amplifier, acoustic guitar amp or PA system to make them louder. With electric guitar and bass, the amplifier and speaker are not just used to make the instrument louder; by adjusting the equalizer controls,",
+        "Electric guitar\nMany experiments with electrically amplifying the vibrations of a string instrument were made dating back to the early part of the 20th century. Patents from the 1910s show telephone transmitters were adapted and placed inside violins and banjos to amplify the sound. Hobbyists in the 1920s used carbon button microphones attached to the bridge; however, these detected vibrations from the bridge on top of the instrument, resulting in a weak signal.",
+        "Electric guitar\nCompared to an acoustic guitar, which has a hollow body, electric guitars make much less audible sound when their strings are plucked, so electric guitars are normally plugged into a guitar amplifier and speaker. When an electric guitar is played, string movement produces a signal by generating (i.e., inducing) a small electric current in the magnetic pickups, which are magnets wound with coils of very fine wire. The signal passes through the tone and volume circuits to the output jack, and through a cable to an amplifier. The current induced is proportional to such factors as string density and the amount of movement over the pickups.",
+        "Electric guitar\nThe neck and fretboard (2.1) extend from the body. At the neck joint (2.4), the neck is either glued or bolted to the body. The body (3) is typically made of wood with a hard, polymerized finish. Strings vibrating in the magnetic field of the pickups (3.1, 3.2) produce an electric current in the pickup winding that passes through the tone and volume controls (3.8) to the output jack. Some guitars have piezo pickups, in addition to or instead of magnetic pickups.",
+        "Electric guitar\nSome guitars have a fixed bridge (3.4). Others have a spring-loaded hinged bridge called a vibrato bar, tremolo bar, or whammy bar, which lets players bend notes or chords up or down in pitch or perform a vibrato embellishment. A plastic pickguard on some guitars protects the body from scratches or covers the control cavity, which holds most of the wiring. The degree to which the choice of woods and other materials in the solid-guitar body (3) affects the sonic character of the amplified signal is disputed. Many believe it is highly significant, while others think the difference between woods is subtle. In acoustic and archtop guitars, wood choices more clearly affect tone."
+      ],
+      "tool_results": [],
+      "reference": "Unlike an acoustic guitar, an electric guitar needs external amplification to be heard at normal performance volumes. Its magnetic pickups, which are magnets wound with coils of very fine wire, turn string movement into a small induced electric current; the signal passes through the tone and volume circuits to the output jack and a cable to an amplifier and loudspeaker. A solid-body electric has no vibrating soundboard, so the amplified sound reproduces the string vibration alone and avoids the feedback of amplified acoustic guitars. Single-coil pickups pick up mains hum, which double-coil humbucker pickups cancel.",
+      "queries": [
+        "Why does an electric guitar need an amplifier?",
+        "Function of amplifier for electric guitar",
+        "Electric guitar amplification in music technology",
+        "How does an electric guitar work?",
+        "Functioning of electric guitars",
+        "Electric guitar mechanics in music instruments"
+      ],
+      "cost": 0.0008903,
+      "error": null
+    },
+    {
+      "id": "q18",
+      "question": "What is a Rhodes piano?",
+      "answer": "A Rhodes piano is a type of electric piano. It produces sound by using mechanical hammers that strike metal tines, which then create vibrations. These vibrations are converted into electrical signals by pickups, allowing the sound to be amplified through speakers (Electric piano > Types).\n\nThe Rhodes piano is known for its distinctive sound and is often used in various music genres, particularly jazz, rock, and pop. It has a piano-style keyboard, making it familiar to pianists (Electric piano).\n\nFor more information, you can check the following links:\n- [Electric piano](https://en.wikipedia.org/wiki/Electric_piano) (CC BY-SA 4.0)",
+      "contexts": [
+        "Electric piano (also: Rhodes piano)\nAn electric piano is a musical instrument that has a piano-style musical keyboard, where sound is produced by means of mechanical hammers striking metal strings or reeds or wire tines, which leads to vibrations which are then converted into electrical signals by pickups (either magnetic, electrostatic, or piezoelectric). The pickups are connected to an instrument amplifier and loudspeaker to reinforce the sound sufficiently for the performer and audience to hear.",
+        "Pipe organ (also: Organ (music))\nKeyboards\n\nKeyboards played by the hands are known as manuals (from the Latin mănus, meaning \"hand\"). The keyboard played by the feet is a pedalboard (from the Latin pēs, pĕdis, meaning \"foot\"). Every organ has at least one manual (most have two or more), and most have a pedalboard. Each keyboard is named for a particular division of the organ (a group of ranks) and generally controls only the stops from that division. The range of the keyboards has varied widely across time and between countries. Most current specifications call for two or more manuals with sixty-one notes (five octaves, from C to c⁗) and a pedalboard with thirty or thirty-two notes (two and a half octaves, from C to f′ or g′).\n\nCouplers",
+        "Electric piano (also: Rhodes piano)\nThe term \"electric piano\" can refer to several different instruments which vary in their sound-producing mechanisms and consequent timbral characters."
+      ],
+      "tool_results": [],
+      "reference": "A Rhodes piano is an electric piano. An electric piano has a piano-style keyboard whose mechanical hammers strike metal strings, reeds or wire tines. Pickups (magnetic, electrostatic or piezoelectric) convert the vibrations into electrical signals, and an instrument amplifier and loudspeaker make the sound loud enough for the performer and audience.",
+      "queries": [
+        "Rhodes piano",
+        "Electric piano",
+        "Keyboard instruments"
+      ],
+      "cost": 0.00059699,
+      "error": null
+    },
+    {
+      "id": "q19",
+      "question": "What is a kalimba and how do you play it?",
+      "answer": "A kalimba, also known as a thumb piano, is a musical instrument originating from Africa. It consists of a wooden board with metal tines (or keys) of varying lengths attached to it. When you pluck these tines with your thumbs, they produce musical notes. The kalimba is often tuned to a diatonic scale, such as C major, which makes it easy to play melodies (Mbira > Variants > Outside Africa).\n\nTo play the kalimba, you typically hold it in your hands and use your thumbs to pluck the tines. The arrangement of the tines usually follows a pattern where adjacent tines can form chords. For example, if you play the first three tines from the left, you create a C major chord (C, E, G). You can also play melodies in the upper octave while accompanying them with chords in the lower octave, as the same notes appear on opposite sides of the instrument (Mbira > Variants > Outside Africa).\n\nFor more information, you can check the following links:\n- [Mbira - Wikipedia](https://en.wikipedia.org/wiki/Mbira) (CC BY-SA 4.0)",
+      "contexts": [
+        "Mbira (also: Thumb piano, Kalimba)\nAlternative tunings are possible, as the tines of most kalimbas are easily pushed in and out to sharpen or flatten their pitch. Some alternative tunings simply change the key of the kalimba, without changing the note layout scheme. C major is a popular tuning, sold by multiple manufacturers. Other alternative tunings move the kalimba to non-modal scales (such as Middle-Eastern scales). Each note of the kalimba can be tuned independently (unlike a guitar), so any scale, western or non-western, is possible, and traditional African scales are still accessible to this modern African instrument. Composer Georg Hajdu has tuned the Hugh Tracey alto kalimba to the chromatic steps of the Bohlen–Pierce scale in a piece called Just Her – Jester – Gesture. The Bohlen–Pierce scale subdivides the just",
+        "Fortepiano\npiano, and the descent of the key only about half as much. Thus playing the Viennese fortepiano involved nothing like the athleticism exercised by modern piano virtuosos, but did require exquisite sensitivity of touch.",
+        "Banjo\nVarious instruments in Africa, chief among them the kora, feature a skin drumhead and gourd (or similar shell) body. These instruments differ from early American banjos in that the necks do not possess a Western-style fingerboard and tuning pegs; instead they have stick necks, with strings attached to the neck with loops for tuning.",
+        "Mbira (also: Thumb piano, Kalimba)\nThe diatonic western kalimba tuning which Tracey used was practical for a worldwide instrument—with hundreds of African kalimba tunings, the chosen Western standard would maximise the number of people who would immediately connect with the kalimba. The practicality of this note arrangement, with notes going up the scale in a right-left-right-left progression, is that modal 1-3-5 or 1-3-5-7 chords are made by playing adjacent tines. If chords are played in the lower octave, the same notes will appear on the opposite side of the kalimba in the upper octave, which makes it very easy to simultaneously play a melody in the upper octave and an accompanying harmony in the lower octave. So, the arrangement of notes on the Hugh Tracey kalimba (and on virtually any kalimba that copies the",
+        "Mbira (also: Thumb piano, Kalimba)\nIn the mid 1950s mbira instruments were the basis for the development of the kalimba, a westernised version designed and marketed by the ethnomusicologist Hugh Tracey, leading to a great expansion of its distribution outside Africa."
+      ],
+      "tool_results": [],
+      "reference": "A kalimba is another name for the mbira, a family of instruments traditional to the Shona people of Zimbabwe. It is a wooden board, often fitted with a resonator, with staggered metal tines, played by holding it in the hands and plucking the tines with the thumbs and/or fingers. Musicologists classify it as a lamellaphone, part of the plucked idiophone family.",
+      "queries": [
+        "kalimba",
+        "thumb piano",
+        "African musical instruments",
+        "how to play kalimba",
+        "kalimba playing techniques",
+        "kalimba performance methods"
+      ],
+      "cost": 0.00102575,
+      "error": null
+    },
+    {
+      "id": "q20",
+      "question": "What is a bari sax and what key is it in?",
+      "answer": "The baritone saxophone, often called the \"bari sax,\" is a member of the saxophone family. It is larger and lower-pitched than the tenor saxophone but smaller and higher-pitched than the bass saxophone. The baritone saxophone is the lowest-pitched saxophone commonly used, and it features a single reed mouthpiece similar to that of a clarinet (Baritone saxophone > Description).\n\nIn terms of key, the baritone saxophone is a transposing instrument in the key of E♭. This means that when you play a written C on the baritone saxophone, it sounds as an E♭ in concert pitch, which is an octave plus a major sixth lower than written (Baritone saxophone > Transposition).\n\nFor more information, you can visit the following links:\n- [Baritone saxophone - Wikipedia](https://en.wikipedia.org/wiki/Baritone_saxophone) (CC BY-SA 4.0)\n- [Saxophone - Wikipedia](https://en.wikipedia.org/wiki/Saxophone) (CC BY-SA 4.0)",
+      "contexts": [
+        "Baritone saxophone (also: Bari sax)\nThe baritone saxophone, like other saxophones, is a conical tube of thin brass. It has a wider end, flared to form a bell, and a smaller end connected to a mouthpiece. The baritone saxophone uses a single reed mouthpiece like that of a clarinet. There is a loop in the top of the body (sometimes also known as the 'pigtail') in two U-shaped pieces of tube called the upper bow and spit bow, to reduce it to a practical height.",
+        "Saxophone (also: Sax)\nThe modern saxophone family consists entirely of B♭ and E♭ instruments. The saxophones in widest use are the B♭ soprano, E♭ alto, B♭ tenor, and E♭ baritone. The E♭ sopranino and B♭ bass saxophone are typically used in larger saxophone choir settings, when available.\n\nIn the table below, consecutive members of each family are pitched an octave apart.\n\n# | B♭ family | E♭ family\n1 (highest) | Soprillo (piccolo) | —\n2 | — | Sopranino\n3 | Soprano | —\n4 | — | Alto\n5 | Tenor | —\n6 | — | Baritone\n7 | Bass | —\n8 | — | Contrabass\n9 (lowest) | Subcontrabass | —",
+        "Baritone saxophone (also: Bari sax)\nThe baritone saxophone, commonly abbreviated to \"bari sax\", is a member of the saxophone family of instruments, larger (and lower-pitched) than the tenor saxophone, but smaller (and higher-pitched) than the bass. It is the lowest-pitched saxophone in common use – the bass, contrabass and subcontrabass saxophones are relatively uncommon. Like all saxophones, it is a single-reed instrument. It is commonly used in concert bands, chamber music, military bands, big bands, and jazz combos. It can also be found in other ensembles such as rock bands and marching bands. Modern baritone saxophones are pitched in E♭.",
+        "Baritone saxophone (also: Bari sax)\nIt is a transposing instrument in the key of E♭, pitched an octave plus a major sixth lower than written. It is one octave lower than the alto saxophone. Modern baritones with a low A key and high F♯ key have a range from C2 to A4.\n\nAs with all saxophones, its music is written in treble clef. By coincidence, it is possible to use a trick known as clef substitution to read music written in bass clef at concert pitch (for example most tuba or bassoon parts), by reading as if it were a transposing part in treble clef and pretending there were three more sharps (or three fewer flats) in the key signature. A similar trick allows instruments in B♭ like the tenor saxophone to read concert pitch tenor clef.",
+        "Saxophone (also: Sax)\nSax's original keywork, which was based on the Triébert-system oboe for the left hand and the Boehm-system clarinet for the right, was simplistic and made certain legato passages and wide intervals extremely difficult to finger; that system was later improved with extra keys, linkage mechanisms, and alternate fingerings.",
+        "Baritone saxophone (also: Bari sax)\nIn its original form, the baritone saxophone's highest keyed note was high E♭, but instruments keyed to high F became standard during the 1920s. High F♯ became a rare option starting in the 1950s and slowly became more common, but as with other modern saxophones, most baritones are now manufactured with a high F♯ key."
+      ],
+      "tool_results": [],
+      "reference": "\"Bari sax\" is the common abbreviation of the baritone saxophone. It is larger and lower-pitched than the tenor saxophone and smaller and higher-pitched than the bass, and it is the lowest-pitched saxophone in common use. It is a single-reed instrument, and modern baritone saxophones are pitched in E-flat.",
+      "queries": [
+        "baritone saxophone",
+        "baritone sax",
+        "saxophone family",
+        "baritone saxophone key",
+        "baritone saxophone transposition",
+        "saxophone family key signature"
+      ],
+      "cost": 0.00082646,
+      "error": null
+    },
+    {
+      "id": "q21",
+      "question": "How does a 12-bar blues go?",
+      "answer": "The 12-bar blues is a musical structure that consists of three phrases, each typically four bars long. Here's how it generally goes:\n\n1. **First Phrase (Tonic)**: Four bars of the tonic chord (I).\n2. **Second Phrase (Subdominant)**: Two bars of the subdominant chord (IV) followed by two bars of the tonic chord (I).\n3. **Third Phrase (Dominant)**: One bar of the dominant chord (V), one bar of the subdominant chord (IV), and two bars of the tonic chord (I).\n\nIn chord symbols, this can be represented as:\n- **I / / / | IV / I / | V IV I /**\n\nFor example, in the key of C, the chords would be:\n- **C / / / | F / C / | G F C /**\n\nThis structure is foundational in blues music and has influenced many other genres (The blues progression > The blues progression). \n\nYou can read more about it here: [Twelve-bar blues](https://en.wikipedia.org/wiki/Twelve-bar_blues) and [The blues progression](https://openmusictheory.github.io/popRockHarmony-blues.html). Both are licensed under CC BY-SA.",
+      "contexts": [
+        "Twelve-bar blues (also: 12-bar blues)\nIn the original form, the dominant chord was repeated on the twelfth bar; later on, the V–IV–I–I \"shuffle blues\" pattern became standard in the third set of four bars:\n\n- I I I I IV IV I I V IV I I",
+        "The blues progression\nA *12-bar blues progression* is composed of three (typically) four-bar phrases. The first phrase is entirely tonic harmony (I). The second phrase contains two bars of subdominant (IV) and two bars of tonic (I). The final phrase begins with one bar of dominant (V) followed by one bar of subdominant (IV) and two bars of tonic (I). The third phrase may or may not end with a *turnaround*.\n\n> I / / / | IV / I / | V IV I /\n\nBecause the first phrase starts with I, the second with IV, and the last with V, we can call these phrases the *tonic*, *subdominant*, and *dominant* phrases.\n\nA *16-bar blues progression* is composed of four (typically) four-bar phrases, usually two iterations of tonic, followed by subdominant and dominant. The final phrase may or may not end with a *turnaround*.",
+        "Chord progression\nThe 12-bar blues and its many variants use an elongated, three-line form of the I–IV–V progression that has also generated countless hit records, including the most significant output of rock and rollers such as Chuck Berry and Little Richard. In its most elementary form (and there are many variants), the chord progression is\n\n- I I I I IV IV I I V IV I I\n\nBlues progressions have also been subjected to densely chromatic elaboration, as in the Bird blues.\n\nSteedman (1984) proposed that a set of recursive rewrite rules generate all well-formed transformations of jazz, both basic blues chord changes and slightly modified sequences (such as the \"rhythm changes\"). Important transformations include:"
+      ],
+      "tool_results": [],
+      "reference": "The twelve-bar blues (or blues changes) is one of the most prominent chord progressions in popular music. It has a distinctive form in lyrics, phrase, chord structure and duration, and in its basic form it is predominantly based on the I, IV and V chords of a key.",
+      "queries": [
+        "12-bar blues",
+        "12-bar blues progression",
+        "blues music structure"
+      ],
+      "cost": 0.00069652,
+      "error": null
+    },
+    {
+      "id": "q22",
+      "question": "What is Stuttgart pitch?",
+      "answer": "Stuttgart pitch refers to the standard pitch of A440 Hz, which was recommended at the Stuttgart Conference in 1834. This pitch standard is based on the studies of a scientist named Scheibler, who used a device called a Tonometer. Because of this historical context, A440 is sometimes called Stuttgart pitch or Scheibler pitch (Concert pitch > History of pitch standards in Western music > 19th- and 20th-century standards).\n\nFor more information, you can check the following links:\n- [Concert pitch](https://en.wikipedia.org/wiki/Concert_pitch) (CC BY-SA 4.0)\n- [Scientific pitch notation](https://en.wikipedia.org/wiki/Scientific_pitch_notation) (CC BY-SA 4.0)\n- [Pitch (music)](https://en.wikipedia.org/wiki/Pitch_(music)) (CC BY-SA 4.0)",
+      "contexts": [
+        "Concert pitch\nIn 1834 the Stuttgart Conference of the Society of German Natural Scientists and Physicians recommended C264 (A440) as the standard pitch based on Scheibler's studies with his Tonometer. For this reason A440 has been referred to as Stuttgart pitch or Scheibler pitch.",
+        "Scientific pitch notation (also: Scientific pitch, Helmholtz pitch notation)\nB | 15.43385 (11) | 30.86771 (23) | 61.73541 (35) | 123.4708 (47) | 246.9417 (59) | 493.8833 (71) | 987.7666 (83) | 1975.533 (95) | 3951.066 (107) | 7902.133 (119) | 15804.27 | 31608.53",
+        "Pitch (music)\nThe relative pitches of individual notes in a scale may be determined by one of a number of tuning systems. In the west, the twelve-note chromatic scale is the most common method of organization, with equal temperament now the most widely used method of tuning that scale. In it, the pitch ratio between any two successive notes of the scale is exactly the twelfth root of two (or about 1.05946). In well-tempered systems (as used in the time of Johann Sebastian Bach, for example), different methods of musical tuning were used.\n\nIn almost all of these systems interval of the octave doubles the frequency of a note; for example, an octave above A440 is 880 Hz. If however the first overtone is sharp due to inharmonicity, as in the extremes of the piano, tuners resort to octave stretching."
+      ],
+      "tool_results": [],
+      "reference": "Stuttgart pitch is another name for A440, the musical pitch corresponding to an audio frequency of 440 Hz. It is the tuning standard for the note A above middle C (A4 in scientific pitch notation), standardized by the International Organization for Standardization as ISO 16, and the reference frequency for calibrating acoustic equipment and tuning instruments.",
+      "queries": [
+        "Stuttgart pitch",
+        "German pitch notation",
+        "pitch standards in music theory"
+      ],
+      "cost": 0.00064387,
+      "error": null
+    },
+    {
+      "id": "q23",
+      "question": "What is Helmholtz pitch notation?",
+      "answer": "Helmholtz pitch notation is a system used to specify musical pitches, particularly in relation to their octave. In this notation, pitches are represented using letters (A through G) along with symbols to indicate their octave. \n\nFor example:\n- The note \"c\" represents middle C, while \"c′\" (c prime) indicates the C one octave above middle C.\n- The notation uses single quotes (′) for higher octaves and double quotes (″) for even higher ones. \n\nThis system helps musicians easily identify and communicate pitches across different octaves (Scientific pitch notation > Use). \n\nYou can read more about it here: [Scientific pitch notation](https://en.wikipedia.org/wiki/Scientific_pitch_notation) and [Musical notation](https://en.wikipedia.org/wiki/Musical_notation). Both are licensed under CC BY-SA.",
+      "contexts": [
+        "Scientific pitch notation (also: Scientific pitch, Helmholtz pitch notation)\nB | 15.43385 (11) | 30.86771 (23) | 61.73541 (35) | 123.4708 (47) | 246.9417 (59) | 493.8833 (71) | 987.7666 (83) | 1975.533 (95) | 3951.066 (107) | 7902.133 (119) | 15804.27 | 31608.53",
+        "Musical notation\nOver the past three centuries, hundreds of music notation systems have been proposed as alternatives to traditional Western music notation. Many of these systems seek to improve upon traditional notation by using a \"chromatic staff\" in which each of the 12 pitch classes has its own unique place on the staff. An example is Jacques-Daniel Rochat's Dodeka music notation. These notation systems do not require the use of standard key signatures, accidentals, or clef signs. They also represent interval relationships more consistently and accurately than traditional notation, e.g. major 3rds appear wider than minor 3rds. Many of these systems are described and illustrated in Gardner Read's Source Book of Proposed Music Notation Reforms.",
+        "Scientific pitch notation (also: Scientific pitch, Helmholtz pitch notation)\nc′′′′ from c′′′′′, and the use of simple integers (e.g. C7 and C8) makes subscripts unnecessary altogether."
+      ],
+      "tool_results": [],
+      "reference": "In this Corpus, Helmholtz pitch notation is an Alias of the page on scientific pitch notation (SPN, also known as American standard pitch notation and international pitch notation). That page describes a method of specifying musical pitch by combining a note name (with an accidental if needed) and a number identifying the pitch's octave.",
+      "queries": [
+        "Helmholtz pitch notation",
+        "Helmholtz system of pitch notation",
+        "pitch notation systems in music theory"
+      ],
+      "cost": 0.00063884,
+      "error": null
+    },
+    {
+      "id": "q24",
+      "question": "What is a viola da gamba?",
+      "answer": "The viola da gamba, often simply called \"gamba,\" is a family of bowed, fretted string instruments that originated in Spain during the late 15th century. The name \"viola da gamba\" translates to \"leg viol,\" which reflects how the instrument is played—upright and held on or between the legs (Viol > Viol).\n\nMost viols typically have six strings that are tuned primarily in fourths, with a third in the middle. They were widely used in European art music throughout the 17th and 18th centuries, but their popularity declined over time. However, there has been a revival of interest in these instruments in the 20th century, particularly in historically informed performances (Viol > Viol).\n\nFor more information, you can visit the following link: [Viol](https://en.wikipedia.org/wiki/Viol) (CC BY-SA 4.0).",
+      "contexts": [
+        "Viol (also: Viola da gamba)\nThe term viola da gamba may refer to the viol family as a whole, although without qualification it commonly refers to the bass viol. Viols remained prominent in European art music through the 17th and 18th centuries before declining in use, and were revived in the 20th century as part of the historically informed performance movement.",
+        "Viol (also: Viola da gamba)\nThe viol (also viola da gamba, Italian: [ˈvjɔːla da (ɡ)ˈɡamba, viˈɔːla -], or informally gamba) is a family of bowed, fretted string instruments that developed in Spain in the late 15th century, particularly in Valencia within the Crown of Aragon, and subsequently spread to Italy and other parts of Europe. Most viols have six strings tuned primarily in fourths, with a third in the middle, and are played upright, with the instrument held on or between the legs—hence the Italian name viola da gamba, meaning \"leg viol\".",
+        "Violin (also: Fiddle)\nThe violin proved very popular, both among street musicians and the nobility; the French king Charles IX ordered Andrea Amati to construct 24 violins for him in 1560. One of these \"noble\" instruments, the Charles IX, is the oldest surviving violin. It is now located in the Ashmolean Museum of Oxford. The finest Renaissance carved and decorated violin in the world is the Gasparo da Salò (c.1574) owned by Ferdinand II, Archduke of Austria and later, from 1841, by the Norwegian virtuoso Ole Bull, who used it for forty years and thousands of concerts, for its very powerful and beautiful tone, similar to that of a Guarneri. \"The Messiah\" or \"Le Messie\" (also known as the \"Salabue\") made by Antonio Stradivari in 1716 remains pristine. It is also located in the Ashmolean Museum."
+      ],
+      "tool_results": [],
+      "reference": "The term viola da gamba may refer to the viol family as a whole, although without qualification it commonly refers to the bass viol. Viols remained prominent in European art music through the 17th and 18th centuries before declining in use, and were revived in the 20th century as part of the historically informed performance movement.",
+      "queries": [
+        "viola da gamba",
+        "viola da gamba instrument",
+        "string instruments of the Renaissance"
+      ],
+      "cost": 0.00064847,
+      "error": null
+    },
+    {
+      "id": "q25",
+      "question": "What is an Eb clarinet used for?",
+      "answer": "The E♭ clarinet, also known as the sopranino or piccolo clarinet, is used in various musical settings such as orchestras, concert bands, and marching bands. It has a characteristic \"hard and biting\" tone, making it suitable for passages that require a brighter or more comical sound. \n\nIn orchestras, it often carries melodies that would be too high for the more common B♭ clarinet. Although its solo repertoire is limited, notable composers like Berlioz and Mahler have utilized it as a solo instrument in orchestral works (E-flat clarinet > Overview).\n\nFor more details, you can check the sources:\n- [E-flat clarinet](https://en.wikipedia.org/wiki/E-flat_clarinet) (CC BY-SA 4.0)\n- [Clarinet family and ranges](https://en.wikipedia.org/wiki/Clarinet) (CC BY-SA 4.0)",
+      "contexts": [
+        "Clarinet (also: Soprano clarinet, B-flat clarinet, Bb clarinet, A clarinet)\nE♭ clarinet (Sopranino or piccolo clarinet in E♭) | E♭ | The E-flat (E♭) clarinet is smaller than the more common B♭ clarinet. It has a characteristic \"hard and biting\" tone and is used in the orchestra when a brighter, or sometimes more comical, sound is called for. It is used in orchestras, concert bands, and marching bands, and plays a central role in clarinet choirs, carrying melodies that would be uncomfortably high for the B♭ clarinet.^[citation needed] Solo repertoire is limited, but composers from Berlioz to Mahler have used it extensively as a solo instrument in orchestral contexts. | E3 – A6 Musical scores are temporarily disabled. | G3 – C7 Musical scores are temporarily disabled. |",
+        "E-flat clarinet (also: Eb clarinet)\nThe E♭ clarinet is used in orchestras, concert bands, and marching bands, and plays a central role in clarinet choirs, carrying melodies that would be uncomfortably high for the B♭ clarinet. Solo repertoire is limited, but composers from Berlioz to Mahler have used it extensively as a solo instrument in orchestral contexts.",
+        "Clarinet (also: Soprano clarinet, B-flat clarinet, Bb clarinet, A clarinet)\nAlto clarinet | E♭ (or F) | Sometimes referred to as the tenor clarinet in Europe, mainly used in military and concert bands and rarely in orchestras. The alto in F was used in early 19th-century military bands and was a favorite instrument of Iwan Müller before falling out of use. If called for, it is commonly substituted with the basset horn. The range is usually to the standard low E, but sometimes has keys to low E♭ or D. | E3 – C7 Musical scores are temporarily disabled. | G2 – E♭6 (in E♭) Musical scores are temporarily disabled. |"
+      ],
+      "tool_results": [],
+      "reference": "The E-flat clarinet is used in orchestras, concert bands and marching bands, and plays a central role in clarinet choirs, carrying melodies that would be uncomfortably high for the B-flat clarinet. Solo repertoire is limited, but composers from Berlioz to Mahler have used it extensively as a solo instrument in orchestral contexts.",
+      "queries": [
+        "Eb clarinet",
+        "E flat clarinet",
+        "clarinets in E flat"
+      ],
+      "cost": 0.00065801,
+      "error": null
+    }
+  ]
+}

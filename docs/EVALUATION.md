@@ -196,6 +196,19 @@ Nothing in the bot yet. The evaluation was the story, and its findings are candi
 3. A stronger or second judge, or the same judge at several repeats, so that one question's score can be trusted. Costs about 0.05 credits a scoring now.
 4. A golden question that makes the agent say sources differ, for the open Convention-conflict check.
 
+### Experiment: 3 chunks per search (2026-10-29)
+
+`SEARCH_K=3` instead of 5 (a new setting, default 5), same 22 questions, same judge. Files: export `data/runs/2026-10-29T09-47-45.json`, scores `eval/results/2026-10-29-ragas-k3.json`. Answering cost 0.017 credits and scoring 0.036.
+
+| Metric | `ragas-final` (k=5) | k=3 | Target |
+|---|---|---|---|
+| Faithfulness | 0.84 | 0.79 | 0.8 |
+| Answer relevancy | 0.88 | 0.89 | none |
+| Context precision | 0.47 | 0.51 | 0.7 |
+| Context recall | 0.75 | 0.72 | 0.7 |
+
+Precision rose by 0.04 and still misses by a wide margin, recall fell by 0.03 and sits 0.02 over its target, and faithfulness fell under its target. The judge moves single questions by more than these differences (see above), so this is no clear gain and a visible cost. The default stays 5 (decision 76).
+
 ### Spend
 
 All spend is in `usage_log`. The evaluation cost about **0.23 credits**, against the 1 credit target: the 22 answers (export, 0.020), and the judge (purpose `eval`, 0.206: two 2-question trials, four full scorings of the 22 answers, one of them with 5 scores lost to rate limits and run again, and the 5-question second judge). One full scoring with `gemini-2.5-flash-lite` costs about 0.045 credits and takes about 10 minutes, because the metrics run one after another. The embedding calls report no cost on OpenRouter.
