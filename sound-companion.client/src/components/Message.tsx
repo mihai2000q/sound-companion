@@ -26,7 +26,7 @@ export function Message({ role, children, label }: Props) {
           className={cn(
             'break-words whitespace-pre-wrap',
             user
-              ? 'rounded-2xl rounded-br-sm bg-primary px-4 py-2 text-primary-foreground'
+              ? 'rounded-2xl rounded-br-sm bg-primary px-4 py-2 font-medium text-primary-foreground'
               : 'border-l-2 border-brass pl-4 font-serif text-[1.0625rem] leading-relaxed text-foreground',
           )}
         >
