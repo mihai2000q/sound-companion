@@ -1,6 +1,7 @@
 from typing import Literal, get_args
 from urllib.parse import quote
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 RetrieverMode = Literal["vector", "hybrid"]
@@ -21,6 +22,15 @@ class Settings(BaseSettings):
 
     # Which Retriever the chat route and the retrieval metrics use (decision log, Story 15).
     retriever_mode: RetrieverMode = "vector"
+
+    # Chunks one `search_knowledge_base` call returns (merged over the rewrites). Fewer chunks lift context precision.
+    search_k: int = Field(default=5, ge=1, le=10)
+    # Candidates fetched per query before the cut and the rerank trim them to `search_k` (used only when one is on).
+    search_pool: int = Field(default=10, ge=1, le=30)
+    # Drop candidates scoring under this share of the best score (0 = off).
+    search_score_ratio: float = Field(default=0.85, ge=0, le=1)
+    # A cheap model (the rewrite model) keeps only the chunks that help answer the question.
+    search_rerank: bool = True
 
     # Budget caps in OpenRouter credits, treated as USD (decision 37). Soft warns, hard refuses.
     budget_soft_credits: float = 1.0

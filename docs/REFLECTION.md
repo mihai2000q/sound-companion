@@ -1,17 +1,17 @@
 # Reflection
 
-What works, what does not, and what to do next, based on the saved runs in `sound-companion.server/eval/results/` and `data/runs/`. Numbers are from the 22 retrieval questions of `data/golden-set.json` and the 20 cases of `data/golden-tools.json` unless said otherwise. Decision numbers refer to [DECISIONS.md](DECISIONS.md), the full tables to [EVALUATION.md](EVALUATION.md).
+What works, what does not, and what to do next, based on the saved runs in `sound-companion.server/eval/results/` and `data/runs/`. Numbers are from the 22 retrieval questions of `data/golden-set.json` and the 22 cases of `data/golden-tools.json` unless said otherwise. Decision numbers refer to [DECISIONS.md](DECISIONS.md), the full tables to [EVALUATION.md](EVALUATION.md).
 
 ## What the evaluation shows
 
 | Layer | Result | Target |
 |---|---|---|
 | Retrieval, page level (vector, k=5) | precision@5 0.873, recall@5 0.886 (`vector-baseline-25q`) | none set |
-| Tool calling (`gpt-4o-mini`, 20 cases) | selection 1.00, parameters 1.00 | none set |
+| Tool calling (`gpt-4o-mini`, 22 cases) | selection 0.91, parameters 1.00 (the 20 original cases 1.00; the two clarification cases t21 and t22 fail) | none set |
 | Injection (agent cases, 3 runs each) | all pass | all pass |
-| RAGAs faithfulness | 0.84 | 0.8, met |
-| RAGAs context recall | 0.75 | 0.7, met |
-| RAGAs context precision | 0.47 | 0.7, **missed** |
+| RAGAs faithfulness | 0.83 with the rerank (0.84 before) | 0.8, met |
+| RAGAs context recall | 0.78 with the rerank (0.75 before) | 0.7, met |
+| RAGAs context precision | 0.58 with the rerank and score cut (0.47 before, `ragas-final`) | 0.7, **missed** |
 
 The evaluation as a whole cost about 0.23 credits against the 1 credit target, and one demo run costs about 0.006.
 
@@ -34,28 +34,25 @@ The evaluation as a whole cost about 0.23 credits against the 1 credit target, a
 
 **5. Underspecified questions are answered, not clarified.**
 - Evidence: on 2026-10-28 "Tell me about the guitar." and "What is the range of a saxophone?" both got full answers after several searches, although the golden set expects a clarifying question (q15, q16, decision 54). Decision 56 fixed exactly these two questions with worked examples in the prompt, and named its own revisit condition ("the clarify cases fail again"). Only the no-context case ("Transpose it up a fifth.", also t20 in the tool set) still asks.
-- Why it went unnoticed: the retrieval eval skips q15 to q17, the RAGAs export leaves them out, and the tool eval has no guitar or saxophone case. No automated check runs them end to end.
+- Why it went unnoticed: the retrieval eval skips q15 to q17 and the RAGAs export leaves them out. Since 2026-10-29 the tool eval has both questions as t21 and t22 and fails them (the agent calls `search_knowledge_base`), so the regression is now measured. The revisit condition of decision 56 is met, the fix is still open.
 
 **6. The judge is noisy.**
 - Evidence: `gemini-2.5-flash-lite` and `gpt-4o-mini` differ by up to 1.0 on one question's precision or recall (q03: 0.00 against 1.00 for the same six chunks from the right page). Means over 21 questions are usable, one question's score is not. A full scoring costs about 0.045 credits and takes about 10 minutes.
 
-**7. The `ragas` dependency group lowers `openai` in the shared lock.**
-- Cause: `ragas` 0.4.3 depends on `instructor`, which caps `jiter`. In `uv.lock` this moved `jiter` from 0.17.0 to 0.14.0 and `openai` from 3.36.1 to 3.3.0 (commit `c41bf7a`, #93). Because it is one lock file, the app image gets the older `openai` too, although the app never imports `ragas`.
-- Also: `ragas` fails to import against `langchain-community` 0.4 (`chat_models.vertexai` is gone), so `eval/judge.py` registers an empty stand-in module before importing it. A plain `uv sync` skips the group (checked on the clean clone, `ragas` is not installed), but the lock does not.
+**7. (Fixed 2026-10-29, decision 78) The `ragas` dependency group lowered `openai` in the shared lock.**
+- Cause: `ragas` 0.4.3 depends on `instructor`, which caps `jiter`, so the one lock file had `openai` 3.3.0 and `jiter` 0.14.0, and the app image got them too although it never imports `ragas`.
+- Fix: the group is gone and `ragas` runs with `uv run --with ragas==0.4.3`, so the lock has `openai` 3.41.0 and `jiter` 0.18.0 and the evaluation gets its own older copies for that one run. `ragas` still fails to import against `langchain-community` 0.4 (`chat_models.vertexai` is gone), so `eval/judge.py` registers an empty stand-in module first.
 
 **Smaller limits**
 - The tool answers carry their source as text, not as citation chips, because chips come only from retrieved chunks.
-- The `progress` event is in the contract and the client type, but the server never sends it.
-- CORS allows only `GET` and `POST`, so `DELETE` and `PATCH /api/threads/{id}` work only through the Vite proxy.
 - Not done, by design (SECURITY.md): no classifier-based injection detection, no authentication, no audit of the Corpus beyond samples and the instruction-string scan (0 hits in 7,329 chunks), no analysis of share-alike questions for generated answers.
 - Retrieval choice: hybrid search alone equals vector on exact-term and alias questions, and hybrid with rewrite has the best recall (0.932) but the worst precision (0.773). Vector with rewrite stayed the default (decision 71).
 
 ## Improvement ideas, ranked
 
 1. **Let the rewrite step see the whole question (decision 73).** Cheapest change with the widest reach: it can add a "middle C naming systems" query, which would restore the c′ check for q06 and probably help every question where the agent's single tool query drops half of the user's wording. Measure with `check_conventions` and `eval_retrieval --rewrite`.
-2. **Test the clarify cases end to end, then fix them.** A requirement (decision 54) that has regressed with no test behind it. Add q15 and q16 to the tool-calling set (expected: no search, a question with options) before changing the prompt, so the fix is measured. Then try more worked examples, as in decision 56, or a stronger model.
-3. **Fewer or better-ordered chunks per search.** The only missed target. A lower `k` per search, or a rerank, or dropping table rows. Measure with the RAGAs runner against `ragas-final`, and keep an eye on recall, which already sits just above its target (0.75 against 0.7).
+2. **Fix the clarify cases, now that they are tested.** A requirement (decision 54) that has regressed. t21 and t22 in the tool-calling set (expected: no search) fail, so a prompt change is measured. Try more worked examples, as in decision 56, or a stronger model.
+3. **Better-ordered chunks per search (done in part: a lower `k` alone did not work, the rerank and score cut lifted precision to 0.58, decision 77).** The only missed target. Tried `k=3` on 2026-10-29: precision 0.51, recall 0.72, faithfulness 0.79, so no clear gain and faithfulness fell under its target (decision 76). What is left is a rerank, or dropping table rows, since the problem is the wrong section of the right page. Measure with the RAGAs runner against `ragas-final`, and keep an eye on recall, which already sits just above its target (0.75 against 0.7).
 4. **A "sources differ" golden case.** Closes the open judge check, and it needs idea 1 first, because today no answer states a conflict.
 5. **A stricter "stay inside the chunks" rule**, or a cheap check of the answer. Ranked below precision because faithfulness already meets its target and the misses are a tail of single questions.
 6. **A steadier judge.** A second judge, or the same one at several repeats, so one question's score can be trusted. It changes how well we measure, not what the bot does, and costs about 0.05 credits per scoring.
-7. **Keep `ragas` out of the app's lock.** A separate project or environment for the evaluation, so the app image gets the `openai` it was developed against. Low urgency while the tests pass on 3.3.0, but it is a trap for the next dependency bump.

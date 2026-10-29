@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { chipsFor, labelOf } from '../lib/citations'
+import { stageOf } from '../lib/stage'
 import type { ChatMessage, ToolCall } from '../types/chat'
 import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -55,7 +56,7 @@ function EmptyState({ onSuggest }: { onSuggest: Props['onSuggest'] }) {
 export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSuggest }: Props) {
   const end = useRef<HTMLDivElement>(null)
   const last = messages.at(-1)
-  const typing = streaming && last?.role === 'bot' && last.text === '' && !last.error && !last.toolCalls
+  const stage = streaming && last?.role === 'bot' && !last.error ? stageOf(last) : null
 
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'end' })
@@ -89,9 +90,12 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
         </div>
         )
       })}
-      {typing && (
-        <Message role="bot" label="The bot is typing">
-          <Spinner />
+      {stage && (
+        <Message role="bot" label="The bot is working">
+          <span className="flex items-center gap-2 font-sans text-sm text-muted-foreground" role="status">
+            <Spinner />
+            <span className="break-words">{stage}</span>
+          </span>
         </Message>
       )}
       <div ref={end} />

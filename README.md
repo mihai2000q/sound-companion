@@ -46,7 +46,7 @@ Ports come from `.env`. To run the migrations by hand, see [Migrations](docs/DAT
 
 ### Building the Corpus
 
-With the stack up, from `sound-companion.server` (needs [uv](https://docs.astral.sh/uv/) and Python 3.12; `uv run` installs the dependencies, the `ragas` group is not needed). The host reaches Postgres on `POSTGRES_PORT` from `.env`. Checked on a fresh clone: the whole path takes about 3 minutes for ingest and 3.5 minutes for indexing, and indexing costs about 0.02 credits.
+With the stack up, from `sound-companion.server` (needs [uv](https://docs.astral.sh/uv/) and Python 3.12; `uv run` installs the dependencies, `ragas` is only added for evaluation runs with `uv run --with ragas==0.4.3`). The host reaches Postgres on `POSTGRES_PORT` from `.env`. Checked on a fresh clone: the whole path takes about 3 minutes for ingest and 3.5 minutes for indexing, and indexing costs about 0.02 credits.
 
 ```
 uv run python -m scripts.ingest              # fetch, clean, report and store

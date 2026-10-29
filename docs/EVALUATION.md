@@ -87,11 +87,11 @@ Run the agent and compare, per question:
 
 Report accuracy overall and per difficulty. Failures usually mean the tool description is vague, so fix the description first. Deterministic checks are fast and free, so run them on every prompt change. Optionally add a judge on ambiguous cases, as in the course.
 
-Run it with `uv run python -m scripts.eval_tools [--label L] [--model ID] [--real-retriever]` on `data/golden-tools.json` (20 cases: tool-rule, tool-instrument, Candidates, comparison, search and no-tool). Details of the numbers:
+Run it with `uv run python -m scripts.eval_tools [--label L] [--model ID] [--real-retriever]` on `data/golden-tools.json` (22 cases: tool-rule, tool-instrument, Candidates, comparison, search, no-tool and clarification). Details of the numbers:
 
-- Tool selection compares tool names as a multiset, so the comparison cases expect two `search_knowledge_base` calls, and a no-tool case fails on any call.
+- Tool selection compares tool names as a multiset, so the comparison cases expect two `search_knowledge_base` calls, and a no-tool case fails on any call. The clarification cases (t21 guitar, t22 saxophone range, the same questions as q15 and q16 of the golden set) expect no call at all, because a clarifying question comes before any search. They fail today (`2026-10-29-tools-clarify-cases`: selection 0.91 over 22 cases, the agent searches), see REFLECTION.md problem 5.
 - Parameter accuracy is the share of cases with arguments to check where every listed argument matches. Only the listed arguments are checked, free-text ones like `query` are left out. Names (`instrument`, `scale`, `direction`, `source_type`) ignore case, notes and numbers are exact, and `{"any_of": [...]}` lists accepted spellings.
-- Searches are answered by a stub by default (no database, see decision 59). A run costs about 72k tokens on `gpt-4o-mini`.
+- Searches are answered by a stub by default (no database, see decision 59). A run costs about 100k tokens (about $0.016) on `gpt-4o-mini`.
 - With `--label` the run is saved as `eval/results/<date>-tools-<label>.json`, with hashes of the system prompt and of every tool description, so `scripts.compare_runs A B` shows which one changed next to the cases that flipped.
 
 Also unit-test the tools directly with pytest (no LLM): the expected outputs from the research, for example `find_chords_from_notes(["D","F","A","C"])` in `pychord` gives `Dm7` and `F6/D`, written C4 on a B-flat clarinet sounds `Bb3`, and 450 Hz is A4 plus about 39 cents.
@@ -128,7 +128,7 @@ Export format (`data/runs/<timestamp>.json`): the settings the run used (models,
 
 `contexts` are the chunks the searches returned (from the `citations` events), each once. `tool_results` are the music tool calls (not searches), kept apart so the runner can pass them to RAGAs as contexts or leave them out (the decision of story 16). A run that failed keeps its entry with `error` set.
 
-Runner: `cd sound-companion.server && uv sync --group ragas && uv run --group ragas python -m eval.run_ragas data/runs/<timestamp>.json [--only q01,q02] [--tool-contexts] [--label L]` reads an export and prints faithfulness, answer relevancy, context precision (with reference) and context recall per question and overall (the mean of the questions that have a score, with how many that is). It uses the RAGAs 0.4 `metrics.collections` API with an OpenAI client pointed at OpenRouter. The judge is `OPENROUTER_JUDGE_MODEL` (default `google/gemini-2.5-flash-lite`, a different model family from the chat model so it does not grade its own answers, and cheap; a stronger judge is one setting away) and answer relevancy embeds with `OPENROUTER_EMBEDDING_MODEL`. RAGAs is in the optional dependency group `ragas`, so the app image (`uv sync --no-dev`) does not install it. Run it on demand, never in the request path. The scores are saved to `eval/results/<date>-ragas-<label>.json`.
+Runner: `cd sound-companion.server && uv run --with ragas==0.4.3 python -m eval.run_ragas data/runs/<timestamp>.json [--only q01,q02] [--tool-contexts] [--label L]` reads an export and prints faithfulness, answer relevancy, context precision (with reference) and context recall per question and overall (the mean of the questions that have a score, with how many that is). It uses the RAGAs 0.4 `metrics.collections` API with an OpenAI client pointed at OpenRouter. The judge is `OPENROUTER_JUDGE_MODEL` (default `google/gemini-2.5-flash-lite`, a different model family from the chat model so it does not grade its own answers, and cheap; a stronger judge is one setting away) and answer relevancy embeds with `OPENROUTER_EMBEDDING_MODEL`. RAGAs is in the optional dependency group `ragas`, so the app image (`uv sync --no-dev`) does not install it. Run it on demand, never in the request path. The scores are saved to `eval/results/<date>-ragas-<label>.json`.
 
 - A question whose answer used no retrieved chunk (no `contexts`) gets answer relevancy only, and its faithfulness and context scores are `-` with the reason printed. Clarify questions never reach the runner, because the export leaves them out.
 - A failed judge call loses that one score, not the run, and a failed agent run is not scored.
@@ -195,6 +195,32 @@ Nothing in the bot yet. The evaluation was the story, and its findings are candi
 2. Make the answer stay inside the chunks (a stricter prompt line, or a cheap check of the answer), against faithfulness misses like q03 and q10.
 3. A stronger or second judge, or the same judge at several repeats, so that one question's score can be trusted. Costs about 0.05 credits a scoring now.
 4. A golden question that makes the agent say sources differ, for the open Convention-conflict check.
+
+### Experiment: 3 chunks per search (2026-10-29)
+
+`SEARCH_K=3` instead of 5 (a new setting, default 5), same 22 questions, same judge. Files: export `data/runs/2026-10-29T09-47-45.json`, scores `eval/results/2026-10-29-ragas-k3.json`. Answering cost 0.017 credits and scoring 0.036.
+
+| Metric | `ragas-final` (k=5) | k=3 | Target |
+|---|---|---|---|
+| Faithfulness | 0.84 | 0.79 | 0.8 |
+| Answer relevancy | 0.88 | 0.89 | none |
+| Context precision | 0.47 | 0.51 | 0.7 |
+| Context recall | 0.75 | 0.72 | 0.7 |
+
+Precision rose by 0.04 and still misses by a wide margin, recall fell by 0.03 and sits 0.02 over its target, and faithfulness fell under its target. The judge moves single questions by more than these differences (see above), so this is no clear gain and a visible cost. The default stays 5 (decision 76).
+
+### Experiment: score cut and rerank (2026-10-29)
+
+`SEARCH_RERANK=true` and `SEARCH_SCORE_RATIO=0.85`, `SEARCH_K=5`, `SEARCH_POOL=10`: each query fetches 10 candidates, chunks scoring under 85% of the best are dropped, and the rewrite model picks the chunks that help answer the question (`app/rag/rerank.py`), at most 5. Same 22 questions and judge. Files: export `data/runs/2026-10-29T10-13-30.json`, scores `eval/results/2026-10-29-ragas-rerank-cut.json`. Answering cost 0.022 credits (the rerank call is under 0.001 per question) and scoring 0.037.
+
+| Metric | `ragas-final` | k=3 | rerank + cut | Target |
+|---|---|---|---|---|
+| Faithfulness | 0.84 | 0.79 | 0.83 | 0.8 |
+| Answer relevancy | 0.88 | 0.89 | 0.89 | none |
+| Context precision | 0.47 | 0.51 | **0.58** | 0.7 |
+| Context recall | 0.75 | 0.72 | **0.78** | 0.7 |
+
+Precision rose by 0.11 and recall by 0.03, with faithfulness still above its target. The rise is larger than the judge's noise on a mean of 21 questions, and it is the only one of the two trials that did not cost recall or faithfulness, so it is the default now (decision 77). Precision still misses 0.7. Questions still near zero: q07, q09 and q19 (mbira, recall 0.00 as well).
 
 ### Spend
 

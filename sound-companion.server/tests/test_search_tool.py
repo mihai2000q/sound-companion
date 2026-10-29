@@ -69,13 +69,14 @@ def test_tool_is_named_and_described_for_the_agent():
 
 
 def stream_events(chunks, replies=None):
+    import asyncio
+
     from langchain_core.messages import AIMessage
     from langgraph.checkpoint.memory import InMemorySaver
 
     from app.agent.agent import build_agent
     from app.agent.streaming import agent_events
     from tests.test_chat_api import StreamingToolModel
-    import asyncio
 
     call = AIMessage("", tool_calls=[{"name": "search_knowledge_base", "args": {"query": "clarinet"}, "id": "1"}])
     model = StreamingToolModel(messages=iter([call, AIMessage("A reed vibrates.")]), seen=[], bound=[])

@@ -1,6 +1,5 @@
-from datetime import datetime
-
 import uuid
+from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import BigInteger, CheckConstraint, DateTime, Index, Integer, Numeric, Text, func
@@ -38,7 +37,7 @@ class UsageLog(Base):
 
     __tablename__ = "usage_log"
     __table_args__ = (
-        CheckConstraint("purpose IN ('answer','rewrite','embed','eval')", name="usage_log_purpose_check"),
+        CheckConstraint("purpose IN ('answer','rewrite','rerank','embed','eval')", name="usage_log_purpose_check"),
         Index("usage_log_thread_idx", "thread_id"),
         Index("usage_log_request_idx", "request_id"),
     )

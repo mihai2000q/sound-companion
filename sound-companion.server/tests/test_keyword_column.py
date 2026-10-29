@@ -6,7 +6,6 @@ from sqlalchemy import create_engine, text
 
 from app.config import settings
 from app.rag.vector_store import ensure_keyword_index
-
 from tests.conftest import TABLE
 
 

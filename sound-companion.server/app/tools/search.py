@@ -5,9 +5,10 @@ from langchain_core.tools import StructuredTool
 from langgraph.config import get_stream_writer
 from pydantic import BaseModel, Field, ValidationError
 
-from app.tools.delimit import wrap_document
+from app.rag.rerank import Reranker
 from app.rag.retriever import Filters, RetrievedChunk, Retriever
 from app.rag.rewrite import Rewriter, retrieve_with_rewrites
+from app.tools.delimit import wrap_document
 
 NOT_FOUND = (
     "Nothing relevant found in the knowledge base for this query. "
@@ -74,6 +75,9 @@ def search_knowledge_base(
     k: int = 5,
     emit: Callable[[dict], None] = lambda event: None,
     rewriter: Rewriter | None = None,
+    reranker: Reranker | None = None,
+    pool: int | None = None,
+    score_ratio: float = 0.0,
 ) -> str:
     """Run the search and return text for the model. Never raises on bad arguments or empty results.
     `emit` receives the `citations` and `queries` events, and nothing when the search finds nothing.
@@ -84,7 +88,7 @@ def search_knowledge_base(
     topic = (topic or "").strip().lower() or None
     title = (title or "").strip() or None
     filters = Filters(source_type=source_type, topics=(topic,) if topic else (), title=title)
-    queries, chunks = retrieve_with_rewrites(retriever, rewriter, query, k, filters)
+    queries, chunks = retrieve_with_rewrites(retriever, rewriter, query, k, filters, reranker, pool, score_ratio)
     if not chunks:
         return NOT_FOUND
     emit({"type": "citations", "items": [citation_item(chunk) for chunk in chunks]})
@@ -97,9 +101,18 @@ def short_validation_error(error: ValidationError) -> str:
     return f"Error: invalid arguments ({problems}). Fix them or leave the filter out and retry."
 
 
-def make_search_tool(retriever: Retriever, k: int = 5, rewriter: Rewriter | None = None) -> StructuredTool:
+def make_search_tool(
+    retriever: Retriever,
+    k: int = 5,
+    rewriter: Rewriter | None = None,
+    reranker: Reranker | None = None,
+    pool: int | None = None,
+    score_ratio: float = 0.0,
+) -> StructuredTool:
     def run(query: str, source_type: str | None = None, topic: str | None = None, title: str | None = None) -> str:
-        return search_knowledge_base(retriever, query, source_type, topic, title, k, stream_writer(), rewriter)
+        return search_knowledge_base(
+            retriever, query, source_type, topic, title, k, stream_writer(), rewriter, reranker, pool, score_ratio
+        )
 
     return StructuredTool.from_function(
         func=run,

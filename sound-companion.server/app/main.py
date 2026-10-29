@@ -8,13 +8,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.agent.agent import build_agent, make_chat_model
 from app.agent.memory import open_checkpointer
-from app.limits import RateLimiter
 from app.api import chat, health, monitoring, threads
 from app.config import settings
 from app.db.logs import SqlLogWriter
 from app.db.migrate import run_migrations
 from app.db.threads import SqlThreadStore
 from app.db.usage import Ledger
+from app.limits import RateLimiter
 from app.rag.factory import make_retriever
 from app.rag.vector_store import create_chunk_table, ensure_keyword_index
 
@@ -44,7 +44,7 @@ app.add_exception_handler(RequestValidationError, chat.invalid_request)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.client_origins,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["Content-Type"],
 )
 app.include_router(health.router)

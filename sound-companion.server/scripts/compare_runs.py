@@ -9,10 +9,11 @@ import argparse
 from pathlib import Path
 
 from app.agent import injection_eval
-from eval import run_ragas
-from app.agent.tool_eval import KIND, compare as compare_tools
+from app.agent.tool_eval import KIND
+from app.agent.tool_eval import compare as compare_tools
 from app.rag.eval_results import compare, differing_settings, group_means, load_run
 from app.rag.evaluation import load_golden_set
+from eval import run_ragas
 
 GOLDEN_SET = Path(__file__).resolve().parents[2] / "data" / "golden-set.json"
 EXACT_CATEGORIES = ("exact-term", "alias")

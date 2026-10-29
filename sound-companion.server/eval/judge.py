@@ -1,6 +1,6 @@
 """The judge of the RAGAs evaluation: RAGAs metrics pointed at OpenRouter, and a meter of what the judge spends.
 
-RAGAs is in the optional `ragas` dependency group (`uv sync --group ragas`), so it is imported only here, inside
+RAGAs is not in the project's lock (`uv run --with ragas==0.4.3`, decision 78), so it is imported only here, inside
 functions, and the app and its tests never need it."""
 
 import sys
@@ -69,8 +69,8 @@ def import_ragas():
             module = types.ModuleType(name)
             module.ChatVertexAI = type("ChatVertexAI", (), {})
             sys.modules[name] = module
-    from ragas.llms.base import llm_factory
     from ragas.embeddings.base import embedding_factory
+    from ragas.llms.base import llm_factory
     from ragas.metrics import collections
 
     return llm_factory, embedding_factory, collections

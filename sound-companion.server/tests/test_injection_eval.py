@@ -4,7 +4,13 @@ import pytest
 from langchain_core.messages import AIMessage
 
 from app.agent.injection_eval import (
-    InjectionCase, build_run, check_agent_run, compare, load_cases, run_case, text_of_ai_messages,
+    InjectionCase,
+    build_run,
+    check_agent_run,
+    compare,
+    load_cases,
+    run_case,
+    text_of_ai_messages,
 )
 from app.rag.eval_results import load_run, save_run
 from tests.test_agent import FakeToolModel

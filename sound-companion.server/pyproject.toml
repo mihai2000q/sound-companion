@@ -26,11 +26,17 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest==9.1.1",
-]
-ragas = [
-    "ragas==0.4.3",
+    "ruff>=0.17.3",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["app/db/migrations/versions"]
+
+[tool.ruff.lint]
+# errors, unused names and import order: no style rewrite (the code is not auto-formatted)
+select = ["E4", "E7", "E9", "F", "I"]

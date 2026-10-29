@@ -60,7 +60,7 @@ The app is local-only with one user, so authentication and network exposure are 
 
 - `.env` is git-ignored, `.env.example` documents the keys.
 - The API key is only read server-side.
-- CORS allows only the client origin (`http://localhost:$CLIENT_PORT`, `http://127.0.0.1:$CLIENT_PORT`) and the methods `GET` and `POST`. In development the Vite proxy avoids CORS entirely.
+- CORS allows only the client origin (`http://localhost:$CLIENT_PORT`, `http://127.0.0.1:$CLIENT_PORT`) and the methods `GET`, `POST`, `PATCH` and `DELETE` (the thread routes need the last two). In development the Vite proxy avoids CORS entirely.
 - Errors shown in the UI are generic. Details go to `app_logs`, with secrets and full prompts excluded.
 
 ### 8. Output

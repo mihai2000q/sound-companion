@@ -1,7 +1,6 @@
 """Score an exported run with RAGAs (docs/EVALUATION.md, layer 3). Run from the server folder:
 
-    uv sync --group ragas
-    uv run python -m eval.run_ragas data/runs/<timestamp>.json [--only q01,q02] [--tool-contexts none|faithfulness|all] [--label L]
+    uv run --with ragas==0.4.3 python -m eval.run_ragas data/runs/<timestamp>.json [--only q01,q02] [--tool-contexts none|faithfulness|all] [--label L]
 
 Prints faithfulness, answer relevancy, context precision and context recall per question and overall (the mean
 of the questions that have a score), then the judge's spend. `OPENROUTER_JUDGE_MODEL` is the judge and

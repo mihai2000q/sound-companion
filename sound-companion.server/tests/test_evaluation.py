@@ -3,8 +3,15 @@ from pathlib import Path
 import pytest
 
 from app.rag.evaluation import (
-    GoldenQuestion, UnknownSourceError, check_sources, corpus_names, evaluate, is_relevant,
-    load_golden_set, score, summarize,
+    GoldenQuestion,
+    UnknownSourceError,
+    check_sources,
+    corpus_names,
+    evaluate,
+    is_relevant,
+    load_golden_set,
+    score,
+    summarize,
 )
 from app.rag.retriever import Filters, RetrievedChunk
 

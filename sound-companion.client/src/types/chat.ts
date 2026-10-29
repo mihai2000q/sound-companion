@@ -8,7 +8,6 @@ export type StreamEvent =
   | { type: 'tool_call'; id: string; name: string; args: Record<string, unknown> }
   | { type: 'tool_result'; id: string; name: string; content: string; durationMs: number }
   | { type: 'usage'; promptTokens: number; completionTokens: number; cost: number; totalSpend: number; warning: boolean }
-  | { type: 'progress' }
 
 /** A retrieved chunk, from stored metadata. `id` is the chunk id, `content` the chunk text. */
 export interface Citation {

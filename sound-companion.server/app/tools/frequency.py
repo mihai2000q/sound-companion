@@ -6,8 +6,8 @@ from typing import Annotated
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 
-from app.tools.errors import tool_error
 from app.tools.delimit import delimited
+from app.tools.errors import tool_error
 from app.tools.notes import CONVENTION, check_pitch_name
 
 A4_HZ = 440.0

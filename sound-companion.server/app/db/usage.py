@@ -17,7 +17,7 @@ from app.db.models import UsageLog
 
 log = logging.getLogger(__name__)
 
-Purpose = Literal["answer", "rewrite", "embed", "eval"]
+Purpose = Literal["answer", "rewrite", "rerank", "embed", "eval"]
 
 
 @dataclass(frozen=True)
