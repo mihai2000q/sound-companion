@@ -21,7 +21,8 @@ function storedWidth(): number {
 /** The frame of every page: the shadcn sidebar (pages and Conversations, resizable) beside the page. */
 export function AppShell() {
   const [streaming, setStreaming] = useState(false)
-  const activity = useMemo(() => ({ streaming, setStreaming }), [streaming])
+  const [inspectorOpen, setInspectorOpen] = useState(false)
+  const activity = useMemo(() => ({ streaming, setStreaming, inspectorOpen, setInspectorOpen }), [streaming, inspectorOpen])
   const [width, setWidth] = useState(storedWidth)
   const [dragging, setDragging] = useState(false)
 

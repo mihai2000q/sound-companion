@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useChatStream } from '../hooks/useChatStream'
 import { threadKeys } from '../queries/threads'
 import type { ChatMessage, Usage } from '../types/chat'
+import { useChatActivity } from '../state/chatActivity'
 import { AppBar } from './AppBar'
 import { Composer } from './Composer'
 import { Inspector, type ChunkFocus } from './Inspector'
@@ -23,7 +24,7 @@ interface Props {
 export function Conversation({ threadId, initialMessages, usage, setUsage, onStreamingChange }: Props) {
   const { messages, streaming, fieldError, clearFieldError, send, retry, stop } = useChatStream(threadId, initialMessages, setUsage)
   const queryClient = useQueryClient()
-  const [inspectorOpen, setInspectorOpen] = useState(false)
+  const { inspectorOpen, setInspectorOpen } = useChatActivity()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [focus, setFocus] = useState<ChunkFocus | null>(null)
 
@@ -54,7 +55,7 @@ export function Conversation({ threadId, initialMessages, usage, setUsage, onStr
     <div className="flex-1 min-w-0 flex flex-col">
       <AppBar>
         {usage && <UsageBadge usage={usage} />}
-        <Button type="button" variant="outline" size="sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
+        <Button type="button" variant="outline" size="sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen(!inspectorOpen)}>
           Inspector
         </Button>
       </AppBar>
