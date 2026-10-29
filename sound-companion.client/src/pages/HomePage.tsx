@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router'
 import { AppBar } from '../components/AppBar'
 import { Conversation } from '../components/Conversation'
-import { Sidebar } from '../components/Sidebar'
+import { useChatActivity } from '../state/chatActivity'
 import { toChatMessages } from '../lib/conversation'
 import { threadQueries } from '../queries/threads'
 import type { Usage } from '../types/chat'
@@ -21,9 +21,7 @@ export function HomePage() {
   const param = params.get('c')
   const threadId = param && UUID.test(param) ? param : null
   const [usage, setUsage] = useState<Usage | null>(null)
-  const [streaming, setStreaming] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const onStreamingChange = useCallback((value: boolean) => setStreaming(value), [])
+  const { setStreaming } = useChatActivity()
 
   useEffect(() => {
     if (!threadId) setParams({ c: crypto.randomUUID() }, { replace: true })
@@ -31,31 +29,10 @@ export function HomePage() {
 
   if (!threadId) return null
 
-  function select(id: string) {
-    setParams({ c: id })
-    setSidebarOpen(false)
-  }
-
   return (
-    <main className="h-screen flex bg-muted/40">
-      <Sidebar
-        activeId={threadId}
-        open={sidebarOpen}
-        busy={streaming}
-        onSelect={select}
-        onNew={() => select(crypto.randomUUID())}
-        onClose={() => setSidebarOpen(false)}
-      />
-      <Chat
-        key={threadId}
-        threadId={threadId}
-        usage={usage}
-        setUsage={setUsage}
-        onStreamingChange={onStreamingChange}
-        onNew={() => select(crypto.randomUUID())}
-        onOpenSidebar={() => setSidebarOpen(true)}
-      />
-    </main>
+    <div className="flex h-full min-h-0">
+      <Chat key={threadId} threadId={threadId} usage={usage} setUsage={setUsage} onStreamingChange={setStreaming} />
+    </div>
   )
 }
 
@@ -67,14 +44,14 @@ function Chat(props: ChatProps) {
   if (isPending)
     return (
       <div className="flex-1 min-w-0 flex flex-col">
-        <AppBar onOpenSidebar={props.onOpenSidebar} />
+        <AppBar />
         <div className="flex-1 grid place-items-center bg-background"><Spinner className="size-6" /></div>
       </div>
     )
   if (error)
     return (
       <div className="flex-1 min-w-0 flex flex-col">
-        <AppBar onOpenSidebar={props.onOpenSidebar} />
+        <AppBar />
         <div className="flex-1 grid place-items-center bg-background">
           <Alert variant="destructive" className="flex w-auto flex-col items-start gap-2">
             <span>This Conversation could not be loaded.</span>

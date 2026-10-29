@@ -14,7 +14,7 @@ export function MonitoringPage() {
   const { data, error, isFetching, refetch } = useQuery(monitoringQueries.summary())
 
   return (
-    <main className="min-h-screen bg-muted/40">
+    <div className="min-h-full bg-muted/40">
       <AppBar>
         <Button type="button" variant="outline" size="sm" disabled={isFetching} onClick={() => refetch()}>
           Refresh
@@ -95,6 +95,6 @@ export function MonitoringPage() {
           </>
         )}
       </div>
-    </main>
+    </div>
   )
 }

@@ -16,13 +16,11 @@ interface Props {
   usage: Usage | null
   setUsage: Dispatch<SetStateAction<Usage | null>>
   onStreamingChange: (streaming: boolean) => void
-  onNew: () => void
-  onOpenSidebar: () => void
 }
 
 /** One Conversation: app bar, messages, composer and inspector. The page gives it a `key` of its `threadId`, so a
  *  switch starts a fresh instance (messages, selection and inspector are reset). */
-export function Conversation({ threadId, initialMessages, usage, setUsage, onStreamingChange, onNew, onOpenSidebar }: Props) {
+export function Conversation({ threadId, initialMessages, usage, setUsage, onStreamingChange }: Props) {
   const { messages, streaming, fieldError, clearFieldError, send, retry, stop } = useChatStream(threadId, initialMessages, setUsage)
   const queryClient = useQueryClient()
   const [inspectorOpen, setInspectorOpen] = useState(false)
@@ -54,13 +52,10 @@ export function Conversation({ threadId, initialMessages, usage, setUsage, onStr
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      <AppBar onOpenSidebar={onOpenSidebar}>
+      <AppBar>
         {usage && <UsageBadge usage={usage} />}
         <Button type="button" variant="outline" size="sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
           Inspector
-        </Button>
-        <Button type="button" variant="outline" size="sm" className="lg:hidden" disabled={streaming} onClick={onNew}>
-          New Conversation
         </Button>
       </AppBar>
       <div className="flex-1 min-h-0 flex">
