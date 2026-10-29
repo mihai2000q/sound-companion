@@ -54,12 +54,12 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
           onKeyDown={onKeyDown}
         />
         {disabled ? (
-          <Button type="button" variant="secondary" size="lg" className="self-end" onClick={onStop}>
+          <Button type="button" variant="secondary" size="lg" className="h-auto" onClick={onStop}>
             <Square className="fill-current" />
             Stop
           </Button>
         ) : (
-          <Button type="submit" size="lg" className="self-end" disabled={!text.trim()}>
+          <Button type="submit" size="lg" className="h-auto" disabled={!text.trim()}>
             Send
             <Send />
           </Button>
