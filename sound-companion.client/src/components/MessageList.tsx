@@ -27,9 +27,9 @@ const SUGGESTIONS = [
 
 function RoleAvatar({ role }: { role: ChatMessage['role'] }) {
   return (
-    <Avatar className={cn('size-8 border-2', role === 'user' ? 'border-primary' : 'border-brass')} aria-hidden="true">
+    <Avatar className={cn('size-8 border', role === 'user' ? 'border-primary' : 'border-brass')} aria-hidden="true">
       <AvatarFallback className={cn('text-xs font-medium text-foreground', role === 'user' ? 'bg-primary/20' : 'bg-brass/20')}>
-        {role === 'user' ? 'You' : 'SC'}
+        {role === 'user' ? 'Me' : 'SC'}
       </AvatarFallback>
     </Avatar>
   )
@@ -78,7 +78,7 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
             <div className={cn('flex items-end gap-2', message.role === 'user' && 'flex-row-reverse')}>
               <RoleAvatar role={message.role} />
               <div className={cn('flex min-w-0 max-w-[85%] flex-col gap-1', message.role === 'user' && 'items-end')}>
-                <div className="text-xs text-muted-foreground">{message.role === 'user' ? 'You' : 'Sound Companion'}</div>
+                <div className="text-xs text-muted-foreground">{message.role === 'user' ? 'Me' : 'Sound Companion'}</div>
                 <div
                   className={cn(
                     'whitespace-pre-wrap break-words',
