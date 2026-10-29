@@ -16,7 +16,7 @@ export function Message({ role, children, label }: Props) {
   return (
     <div className={cn('flex items-end gap-2', user && 'flex-row-reverse')} aria-label={label}>
       <Avatar className="size-8" aria-hidden="true">
-        <AvatarFallback className={cn('text-xs font-medium', user ? 'bg-primary text-primary-foreground' : 'bg-brass text-brass-foreground')}>
+        <AvatarFallback className={cn('text-xs font-medium', !user && 'bg-brass text-brass-foreground')}>
           {user ? 'Me' : <Music2 className="size-4" />}
         </AvatarFallback>
       </Avatar>
