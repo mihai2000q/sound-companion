@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Music2 } from 'lucide-react'
 import { chipsFor, labelOf } from '../lib/citations'
 import type { ChatMessage, ToolCall } from '../types/chat'
 import { Alert } from '@/components/ui/alert'
@@ -29,7 +29,7 @@ function RoleAvatar({ role }: { role: ChatMessage['role'] }) {
   return (
     <Avatar className={cn('size-8 border', role === 'user' ? 'border-primary' : 'border-brass')} aria-hidden="true">
       <AvatarFallback className={cn('text-xs font-medium text-foreground', role === 'user' ? 'bg-primary/20' : 'bg-brass/20')}>
-        {role === 'user' ? 'Me' : 'SC'}
+        {role === 'user' ? 'Me' : <Music2 className="size-4" />}
       </AvatarFallback>
     </Avatar>
   )
