@@ -40,7 +40,7 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
         submit()
       }}
     >
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2">
         <Textarea
           className="flex-1 resize-none"
           rows={2}
@@ -54,12 +54,12 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
           onKeyDown={onKeyDown}
         />
         {disabled ? (
-          <Button type="button" variant="secondary" size="lg" className="h-auto" onClick={onStop}>
+          <Button type="button" variant="secondary" size="lg" className="self-center" onClick={onStop}>
             <Square className="fill-current" />
             Stop
           </Button>
         ) : (
-          <Button type="submit" size="lg" className="h-auto" disabled={!text.trim()}>
+          <Button type="submit" size="lg" className="self-center" disabled={!text.trim()}>
             Send
             <Send />
           </Button>
