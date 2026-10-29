@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Activity, Ellipsis, MessageSquare, Music2, SquarePen, type LucideIcon } from 'lucide-react'
+import { Activity, Ellipsis, MessageSquare, Music2, Search, SquarePen, type LucideIcon } from 'lucide-react'
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Alert } from '@/components/ui/alert'
@@ -140,14 +140,17 @@ export function AppSidebar() {
             </SidebarMenu>
           </nav>
           {data && data.length > 0 && (
-            <Input
-              type="search"
-              className="h-8"
-              placeholder="Search Conversations"
-              aria-label="Search Conversations"
-              value={filter}
-              onChange={(event) => setFilter(event.target.value)}
-            />
+            <div className="relative">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Input
+                type="search"
+                className="h-8 pl-8"
+                placeholder="Search Conversations"
+                aria-label="Search Conversations"
+                value={filter}
+                onChange={(event) => setFilter(event.target.value)}
+              />
+            </div>
           )}
         </SidebarHeader>
         <SidebarContent className="gap-2 px-3 pb-4">
