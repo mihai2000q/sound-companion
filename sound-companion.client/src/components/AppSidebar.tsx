@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Activity, Download, MessageSquare, Music2, Pencil, Search, SquarePen, Trash2, type LucideIcon } from 'lucide-react'
+import { Activity, Download, Music2, Pencil, Search, SquarePen, Trash2, type LucideIcon } from 'lucide-react'
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Alert } from '@/components/ui/alert'
@@ -31,7 +31,6 @@ import { Spinner } from './Spinner'
 const MAX_TITLE_LENGTH = 100 // the server refuses a longer one
 
 const PAGES: { to: string; label: string; icon: LucideIcon }[] = [
-  { to: '/', label: 'Chat', icon: MessageSquare },
   { to: '/monitoring', label: 'Monitoring', icon: Activity },
 ]
 
