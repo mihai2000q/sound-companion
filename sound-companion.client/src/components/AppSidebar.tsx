@@ -116,7 +116,7 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
     <>
       <Sidebar aria-label="Conversations">
         <SidebarHeader className="gap-3 px-3 pt-4 pb-3">
-          <Link to="/" className="flex items-center gap-2 px-3 py-1 font-serif text-xl font-medium tracking-tight">
+          <Link to="/" className="flex items-center gap-2 px-3 py-1 font-serif text-xl font-semibold tracking-tight">
             <span className="grid size-7 place-items-center rounded-full bg-brass text-brass-foreground" aria-hidden="true">
               <Music2 className="size-4" />
             </span>
