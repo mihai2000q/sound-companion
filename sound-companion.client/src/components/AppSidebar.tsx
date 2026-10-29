@@ -1,13 +1,12 @@
 import { Fragment, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Activity, Ellipsis, MessageSquare, Music2, Search, SquarePen, type LucideIcon } from 'lucide-react'
+import { Activity, MessageSquare, Music2, Search, SquarePen, type LucideIcon } from 'lucide-react'
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Alert } from '@/components/ui/alert'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import {
   Sidebar,
@@ -17,7 +16,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
@@ -82,8 +80,9 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
   const needle = filter.trim().toLowerCase()
   const shown = data?.filter((thread) => (thread.title || 'Untitled Conversation').toLowerCase().includes(needle))
 
-  /** The same three actions in the right-click menu and in the "⋯" menu. */
-  function actions(thread: ThreadSummary, Item: typeof ContextMenuItem | typeof DropdownMenuItem) {
+  /** The actions of the right-click menu. */
+  function actions(thread: ThreadSummary) {
+    const Item = ContextMenuItem
     return (
       <>
         <Item disabled={download.isPending} onSelect={() => download.mutate(thread)}>
@@ -214,20 +213,10 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
                                   >
                                     <span className="truncate">{title}</span>
                                   </SidebarMenuButton>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <SidebarMenuAction showOnHover aria-label={`Actions for ${title}`}>
-                                        <Ellipsis />
-                                      </SidebarMenuAction>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start" className="w-44" onCloseAutoFocus={onCloseAutoFocus}>
-                                      {actions(thread, DropdownMenuItem)}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
                                 </SidebarMenuItem>
                               </ContextMenuTrigger>
                               <ContextMenuContent className="w-44" onCloseAutoFocus={onCloseAutoFocus}>
-                                {actions(thread, ContextMenuItem)}
+                                {actions(thread)}
                               </ContextMenuContent>
                             </ContextMenu>
                           )}
