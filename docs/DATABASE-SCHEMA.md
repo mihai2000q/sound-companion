@@ -112,7 +112,7 @@ CREATE TABLE usage_log (
   id                 BIGSERIAL PRIMARY KEY,
   thread_id          TEXT NOT NULL,
   request_id         UUID NOT NULL,
-  purpose            TEXT NOT NULL CHECK (purpose IN ('answer','rewrite','embed','eval')),
+  purpose            TEXT NOT NULL CHECK (purpose IN ('answer','rewrite','rerank','embed','eval')),
   model              TEXT NOT NULL,
   prompt_tokens      INTEGER NOT NULL DEFAULT 0,
   completion_tokens  INTEGER NOT NULL DEFAULT 0,
@@ -121,6 +121,7 @@ CREATE TABLE usage_log (
 );
 CREATE INDEX usage_log_thread_idx ON usage_log (thread_id);
 CREATE INDEX usage_log_request_idx ON usage_log (request_id);
+-- purpose 'rerank' (the cheap model that picks the chunks of a search) came with migration 0009
 
 CREATE TABLE app_logs (
   id          BIGSERIAL PRIMARY KEY,
@@ -141,7 +142,7 @@ CREATE TABLE threads (
 
 `threads` has one row per Conversation, inserted by the chat route on the first request of a `thread_id` (`ON CONFLICT DO NOTHING`, migration 0007) listed newest first by `GET /api/threads`, and its `title` changed by `PATCH /api/threads/{id}`. A delete removes the row and the checkpoint state, and keeps `usage_log` and `app_logs` rows (budget guard and monitoring). The export reads `usage_log` by `thread_id`.
 
-Two views over `app_logs` (migration `0006`) feed `GET /api/monitoring` and the `/monitoring` page: `monitoring_daily` (requests, errors, error rate, average and p95 duration per day, from `request_end` rows) and `monitoring_tools` (calls, errors and average duration per tool, from `tool_result` rows).
+Two views over `app_logs` (migration `0006`) feed `GET /api/monitoring` and the `/monitoring` page: `monitoring_daily` (requests, errors, error rate, average and p95 duration per day, from `request_end` rows) and `monitoring_tools` (calls, errors and average duration per tool, from `tool_result` rows). The tokens and credits on the page do not come from a view: `GET /api/monitoring` also sums `usage_log` per day and per model (and purpose) with two plain queries in `app/api/monitoring.py`.
 
 Total spend for the budget guard: `SELECT COALESCE(SUM(cost_credits),0) FROM usage_log;`
 

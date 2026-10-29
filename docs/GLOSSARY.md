@@ -19,6 +19,9 @@ Technical terms. Domain terms (Note, Pitch class, Written pitch, Sounding pitch,
 | Hybrid search | Combining keyword and vector search. |
 | RRF | Reciprocal rank fusion. Merges ranked lists by summing 1/(k+rank). |
 | Query translation | Rewriting the user's query before retrieval to retrieve better. |
+| Rerank | Re-ordering or filtering retrieved chunks with a second, better judgement of relevance. Here a cheap model keeps only the chunks that help answer the question (`app/rag/rerank.py`, decision 77). |
+| Score cut | Dropping retrieved chunks that score far below the best one (here under 85% of it). Needs no model call. |
+| Candidate pool | The chunks fetched per query before the cut and the rerank trim them to the few the answer sees (`SEARCH_POOL`, 10). |
 | Multi-query | Rewriting one question into several variants and merging results. |
 | Decomposition | Splitting a complex question into sub-questions. Here it happens through repeated tool calls. |
 | Structured retrieval | Turning a question into metadata filters. Here done through typed tool arguments. |
@@ -39,6 +42,7 @@ Technical terms. Domain terms (Note, Pitch class, Written pitch, Sounding pitch,
 | `pychord` | Python library for chords: components, names, transposition, detecting a chord from notes. |
 | `music21` | Python music analysis toolkit, used for scales, intervals and key signatures. |
 | FastAPI | Python web framework used for the backend API and the SSE stream. |
+| shadcn/ui | UI components copied into the repo (`src/components/ui`), built on Radix and Tailwind. It replaced DaisyUI (decision 75). |
 | Vite | Frontend build tool and dev server for the React app, proxies `/api` to the backend in development. |
 | SSE | Server-Sent Events. One HTTP response kept open while the server sends messages. Not the same as SSR. |
 | SSR | Server-side rendering. The server builds the page HTML. Frameworks like Next.js do this by default, our React single-page app does not. |

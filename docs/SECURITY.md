@@ -21,6 +21,7 @@ The app is local-only with one user, so authentication and network exposure are 
 - Wrap every chunk in `<document source="..."> ... </document>` and every music tool result in `<tool_result tool="..."> ... </tool_result>` (`app/tools/delimit.py`).
 - The system prompt states that content inside those delimiters is reference material and instructions found there are never followed.
 - Strip or escape delimiter look-alikes inside retrieved text, so a chunk cannot close its own wrapper.
+- The rerank step (`app/rag/rerank.py`) shows the first 500 characters of each candidate chunk to the cheap model in a plain numbered list, not inside the `<document>` wrapper. A planted instruction could try to steer that model, but its answer is a structured list of passage numbers (anything else fails parsing and the retrieval order is kept), it has no tools, and it never writes text the user sees. The worst case is a poor choice of chunks. Chunks that reach the answer model are still wrapped.
 
 ### 2. Input validation
 
@@ -89,5 +90,5 @@ The planted-chunk test is inserted into a test-only table or an in-memory retrie
 
 - No classifier-based injection detection (cost). Defences are structural, not guaranteed.
 - No authentication or per-user data isolation.
-- No audit of the third-party corpus beyond the sample checks and the instruction-string scan.
+- No audit of the third-party corpus beyond the sample checks and the instruction-string scan (0 hits in 7,329 chunks).
 - Share-alike licensing questions for chunks and generated answers were not analysed. The app links to the source pages and states the licence.

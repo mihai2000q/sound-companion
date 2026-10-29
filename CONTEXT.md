@@ -67,7 +67,7 @@ One line of the Seed list: a title, its Source type, its topic tags, and its Ali
 _Avoid_: Record
 
 **Corpus**:
-The indexed text produced by ingesting the Seed list. It is what the bot retrieves from.
+The indexed text produced by ingesting the Seed list and Open Music Theory v1: 276 documents, 7,329 chunks (docs/DOMAIN.md, "Corpus facts"). It is what the bot retrieves from.
 _Avoid_: Database, data, documents
 
 **Provenance**:
