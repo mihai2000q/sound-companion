@@ -32,7 +32,7 @@ Stack: React + Vite + TypeScript + Tailwind/shadcn/ui (`sound-companion.client/`
 
 ## Architecture (big picture)
 
-One streaming endpoint, `POST /api/chat` (body: `thread_id` + `message`), returns an SSE stream of typed events (`token`, `tool_call`, `tool_result`, `citations`, `queries`, `progress`, `usage`, `error`, `done`). The browser reads it with `fetch` plus a stream reader, not `EventSource`. The same events feed logging, so UI and monitoring cannot disagree.
+One streaming endpoint, `POST /api/chat` (body: `thread_id` + `message`), returns an SSE stream of typed events (`token`, `tool_call`, `tool_result`, `citations`, `queries`, `usage`, `error`, `done`). The browser reads it with `fetch` plus a stream reader, not `EventSource`. The same events feed logging, so UI and monitoring cannot disagree.
 
 The backend runs a LangChain `create_agent` with no router. Retrieval is a tool (`search_knowledge_base`) that does multi-query rewrite with a cheap model, then retrieves, merges and wraps chunks as data (prompt-injection defence). Decomposition happens through the agent's tool loop. Music tools: `chord_info` (pychord), `scale_info` and `interval_between` (music21), `transpose_for_instrument` (hand-written offset table + music21 spelling), `note_frequency` (hand-written). Memory is per `thread_id` via `AsyncPostgresSaver`.
 

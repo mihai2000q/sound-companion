@@ -65,7 +65,6 @@ The backend returns `text/event-stream` from a FastAPI `StreamingResponse`. The 
 | `tool_result` | `{ id, name, content, durationMs }` | Fill the tool card | `updates` mode (tools node) |
 | `citations` | `{ items: [{ id, title, section, url, score, license, content }] }` (one per retrieved chunk, from stored metadata; `id` is the chunk id, `content` the chunk text) | Citation chips and the inspector panel | `custom` mode, written by the retrieval tool with `get_stream_writer()`. Not sent when the search finds nothing |
 | `queries` | `{ items: [original, rewritten...] }` (the original query first, then the rewritten variants) | Inspector panel (RAG-process view) | `custom` mode, same writer. Not sent when the search finds nothing |
-| `progress` | `{ message }` | Reserved: the client type exists, but the server sends no `progress` events today (the UI shows a skeleton and spinners from `tool_call` and `tool_result`) | `custom` mode, not emitted |
 | `usage` | `{ promptTokens, completionTokens, cost, totalSpend, warning }` (`cost` and tokens are this request's so far, `totalSpend` is the `usage_log` sum, `warning` is set at the soft cap) | Usage badge, soft-cap warning | After each answer model call and each tool result, read from `usage_log` (also before an `error`, so a failed turn shows its spend) |
 | `error` | `{ code, message }` (`agent_error`, `tool_limit` after 8 tool calls in one request, or `budget_exceeded` at the hard cap, sent without any model call) | Inline error with retry (no retry for `budget_exceeded`) | Backend |
 | `done` | `{}` | End of stream | Backend |
@@ -87,7 +86,7 @@ Chat on the left, collapsible inspector panel on the right.
 - Message list with hand-written Tailwind chat bubbles (shadcn has no chat component), Citation chips under each answer, and attribution links (Wikipedia and OMT are CC BY-SA).
 - Inline tool-call cards (name, arguments, result, duration, status).
 - Inspector: rewritten queries, retrieved chunks with scores, tokens and cost, running spend against the caps.
-- Progress indicators: a skeleton while retrieving, a spinner on running tool cards, a typing indicator while tokens stream.
+- Progress indicators: a stage label with a spinner while the answer is not flowing ("Thinking", "Searching: <queries>", "Calling <tool>", "Writing the answer"), worked out in the client from `queries`, `tool_call` and `tool_result` (`src/lib/stage.ts`), and a spinner on running tool cards. There is no `progress` event.
 - History sidebar with JSON export, and a `/monitoring` page.
 
 ## Cost guard
