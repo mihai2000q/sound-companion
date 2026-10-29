@@ -44,6 +44,8 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
   const { streaming: busy } = useChatActivity()
   const { isMobile, setOpenMobile } = useSidebar()
   const activeId = pathname === '/' ? params.get('c') : null
+  // the open chat is a new Conversation until the server has written it (on its first message)
+  const onNewConversation = pathname === '/' && !!activeId && !!data && !data.some((thread) => thread.thread_id === activeId)
   const [asking, setAsking] = useState<ThreadSummary | null>(null)
   const [filter, setFilter] = useState('')
   const [renaming, setRenaming] = useState<string | null>(null)
@@ -126,7 +128,7 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
           <nav aria-label="Pages">
             <SidebarMenu className="gap-1">
               <SidebarMenuItem>
-                <SidebarMenuButton className="h-9 px-3 font-medium" disabled={busy} onClick={startNew}>
+                <SidebarMenuButton className="h-9 px-3 font-medium" isActive={onNewConversation} disabled={busy} onClick={startNew}>
                   <SquarePen />
                   New Conversation
                 </SidebarMenuButton>
