@@ -1,6 +1,6 @@
 """The judge of the RAGAs evaluation: RAGAs metrics pointed at OpenRouter, and a meter of what the judge spends.
 
-RAGAs is in the optional `ragas` dependency group (`uv sync --group ragas`), so it is imported only here, inside
+RAGAs is not in the project's lock (`uv run --with ragas==0.4.3`, decision 78), so it is imported only here, inside
 functions, and the app and its tests never need it."""
 
 import sys

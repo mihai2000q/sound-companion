@@ -39,9 +39,9 @@ The evaluation as a whole cost about 0.23 credits against the 1 credit target, a
 **6. The judge is noisy.**
 - Evidence: `gemini-2.5-flash-lite` and `gpt-4o-mini` differ by up to 1.0 on one question's precision or recall (q03: 0.00 against 1.00 for the same six chunks from the right page). Means over 21 questions are usable, one question's score is not. A full scoring costs about 0.045 credits and takes about 10 minutes.
 
-**7. The `ragas` dependency group lowers `openai` in the shared lock.**
-- Cause: `ragas` 0.4.3 depends on `instructor`, which caps `jiter`. In `uv.lock` this moved `jiter` from 0.17.0 to 0.14.0 and `openai` from 3.36.1 to 3.3.0 (commit `c41bf7a`, #93). Because it is one lock file, the app image gets the older `openai` too, although the app never imports `ragas`.
-- Also: `ragas` fails to import against `langchain-community` 0.4 (`chat_models.vertexai` is gone), so `eval/judge.py` registers an empty stand-in module before importing it. A plain `uv sync` skips the group (checked on the clean clone, `ragas` is not installed), but the lock does not.
+**7. (Fixed 2026-10-29, decision 78) The `ragas` dependency group lowered `openai` in the shared lock.**
+- Cause: `ragas` 0.4.3 depends on `instructor`, which caps `jiter`, so the one lock file had `openai` 3.3.0 and `jiter` 0.14.0, and the app image got them too although it never imports `ragas`.
+- Fix: the group is gone and `ragas` runs with `uv run --with ragas==0.4.3`, so the lock has `openai` 3.41.0 and `jiter` 0.18.0 and the evaluation gets its own older copies for that one run. `ragas` still fails to import against `langchain-community` 0.4 (`chat_models.vertexai` is gone), so `eval/judge.py` registers an empty stand-in module first.
 
 **Smaller limits**
 - The tool answers carry their source as text, not as citation chips, because chips come only from retrieved chunks.
@@ -56,4 +56,3 @@ The evaluation as a whole cost about 0.23 credits against the 1 credit target, a
 4. **A "sources differ" golden case.** Closes the open judge check, and it needs idea 1 first, because today no answer states a conflict.
 5. **A stricter "stay inside the chunks" rule**, or a cheap check of the answer. Ranked below precision because faithfulness already meets its target and the misses are a tail of single questions.
 6. **A steadier judge.** A second judge, or the same one at several repeats, so one question's score can be trusted. It changes how well we measure, not what the bot does, and costs about 0.05 credits per scoring.
-7. **Keep `ragas` out of the app's lock.** A separate project or environment for the evaluation, so the app image gets the `openai` it was developed against. Low urgency while the tests pass on 3.3.0, but it is a trap for the next dependency bump.

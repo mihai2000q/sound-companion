@@ -137,7 +137,7 @@ sound-companion/
   data/                      seed-list.json, golden-set.json, golden-tools.json, injection-tests.json,
                              runs/ (RAGAs exports); cache/ (gitignored): fetched pages, OMT clone
   sound-companion.server/
-    pyproject.toml           pinned versions (langchain-postgres exact), `ragas` dependency group
+    pyproject.toml           pinned versions (langchain-postgres exact), `ruff` in the dev group
     app/
       main.py                FastAPI app, lifespan (migrations, agent, checkpointer), CORS
       config.py              settings from env
