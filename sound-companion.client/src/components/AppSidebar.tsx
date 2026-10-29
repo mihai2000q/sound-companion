@@ -1,4 +1,4 @@
-import { Fragment, useRef, useState } from 'react'
+import { Fragment, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Activity, Ellipsis, MessageSquare, Music2, Search, SquarePen, type LucideIcon } from 'lucide-react'
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router'
@@ -37,7 +37,7 @@ const PAGES: { to: string; label: string; icon: LucideIcon }[] = [
 ]
 
 /** Pages and Conversations, newest first, in the shadcn sidebar of every page. */
-export function AppSidebar() {
+export function AppSidebar({ handle }: { handle?: ReactNode }) {
   const { data, error, isPending, refetch } = useQuery(threadQueries.list())
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -239,6 +239,7 @@ export function AppSidebar() {
               </SidebarGroup>
             ))}
         </SidebarContent>
+        {handle}
       </Sidebar>
       <DeleteDialog
         thread={asking}
