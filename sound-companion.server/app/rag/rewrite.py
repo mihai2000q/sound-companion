@@ -7,6 +7,7 @@ from langchain_core.language_models import BaseChatModel
 from pydantic import BaseModel, Field
 
 from app.db.usage import UsageCallback
+from app.rag.rerank import Reranker, cut_by_score
 from app.rag.retriever import Filters, RetrievedChunk, Retriever
 
 log = logging.getLogger(__name__)
@@ -69,11 +70,25 @@ def merge_results(results: list[list[RetrievedChunk]], k: int) -> list[Retrieved
 
 
 def retrieve_with_rewrites(
-    retriever: Retriever, rewriter: Rewriter | None, query: str, k: int, filters: Filters | None
+    retriever: Retriever,
+    rewriter: Rewriter | None,
+    query: str,
+    k: int,
+    filters: Filters | None,
+    reranker: Reranker | None = None,
+    pool: int | None = None,
+    score_ratio: float = 0.0,
 ) -> tuple[list[str], list[RetrievedChunk]]:
-    """The queries searched (the original first) and the merged chunks, k overall."""
+    """The queries searched (the original first) and the merged chunks, k overall. With a `reranker` or a
+    `score_ratio` a larger `pool` of candidates is fetched first (decision 76), cut by score, ranked by the
+    reranker and trimmed to k."""
     queries = [query, *(rewriter(query) if rewriter else [])]
-    return queries, merge_results([retriever.retrieve(q, k, filters) for q in queries], k)
+    fetch = max(pool or k, k) if (reranker or score_ratio > 0) else k
+    merged = merge_results([retriever.retrieve(q, fetch, filters) for q in queries], fetch)
+    merged = cut_by_score(merged, score_ratio)
+    if reranker:
+        merged = reranker(query, merged)
+    return queries, merged[:k]
 
 
 class RewritingRetriever:
