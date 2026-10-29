@@ -11,7 +11,7 @@ What works, what does not, and what to do next, based on the saved runs in `soun
 | Injection (agent cases, 3 runs each) | all pass | all pass |
 | RAGAs faithfulness | 0.84 | 0.8, met |
 | RAGAs context recall | 0.75 | 0.7, met |
-| RAGAs context precision | 0.47 | 0.7, **missed** |
+| RAGAs context precision | 0.47 (k=3 trial: 0.51) | 0.7, **missed** |
 
 The evaluation as a whole cost about 0.23 credits against the 1 credit target, and one demo run costs about 0.006.
 
