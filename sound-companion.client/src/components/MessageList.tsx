@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
-import { Spinner } from './Spinner'
+import { Spinner } from '@/components/ui/spinner'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 interface Props {

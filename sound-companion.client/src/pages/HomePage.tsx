@@ -7,7 +7,7 @@ import { useChatActivity } from '../state/chatActivity'
 import { toChatMessages } from '../lib/conversation'
 import { threadQueries } from '../queries/threads'
 import type { Usage } from '../types/chat'
-import { Spinner } from '../components/Spinner'
+import { Spinner } from '@/components/ui/spinner'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 

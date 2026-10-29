@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { AppBar } from '../components/AppBar'
 import { monitoringQueries } from '../queries/monitoring'
-import { Spinner } from '../components/Spinner'
+import { Spinner } from '@/components/ui/spinner'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

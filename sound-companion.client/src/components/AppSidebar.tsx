@@ -26,7 +26,7 @@ import { groupThreads } from '../lib/threadGroups'
 import { deleteThread, exportThread, renameThread, threadKeys, threadQueries } from '../queries/threads'
 import { useChatActivity } from '../state/chatActivity'
 import type { ThreadSummary } from '../types/threads'
-import { Spinner } from './Spinner'
+import { Spinner } from '@/components/ui/spinner'
 
 const MAX_TITLE_LENGTH = 100 // the server refuses a longer one
 
