@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { AppBar } from '../components/AppBar'
 import { credits } from '../lib/credits'
+import { totalsPerModel } from '../lib/usageTotals'
 import { monitoringQueries } from '../queries/monitoring'
 import { Spinner } from '@/components/ui/spinner'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const ms = (value: number) => `${Math.round(value).toLocaleString()} ms`
 const count = (value: number) => value.toLocaleString()
@@ -14,6 +15,7 @@ const percent = (rate: number) => `${(rate * 100).toFixed(1)}%`
 
 export function MonitoringPage() {
   const { data, error, isFetching, refetch } = useQuery(monitoringQueries.summary())
+  const totals = totalsPerModel(data?.models ?? [])
 
   return (
     <div className="flex h-full flex-col bg-muted/40">
@@ -91,6 +93,25 @@ export function MonitoringPage() {
                           </TableRow>
                         ))}
                       </TableBody>
+                    <TableFooter>
+                      {totals.models.map((row) => (
+                        <TableRow key={row.model}>
+                          <TableCell className="font-medium">Total</TableCell>
+                          <TableCell>{row.model}</TableCell>
+                          <TableCell className="text-right">{count(row.calls)}</TableCell>
+                          <TableCell className="text-right">{count(row.prompt_tokens)}</TableCell>
+                          <TableCell className="text-right">{count(row.completion_tokens)}</TableCell>
+                          <TableCell className="text-right">{credits(row.cost_credits)}</TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow className="font-semibold">
+                        <TableCell colSpan={2}>Total of all models</TableCell>
+                        <TableCell className="text-right">{count(totals.all.calls)}</TableCell>
+                        <TableCell className="text-right">{count(totals.all.prompt_tokens)}</TableCell>
+                        <TableCell className="text-right">{count(totals.all.completion_tokens)}</TableCell>
+                        <TableCell className="text-right">{credits(totals.all.cost_credits)}</TableCell>
+                      </TableRow>
+                    </TableFooter>
                     </Table>
                   )}
                 </CardContent>
