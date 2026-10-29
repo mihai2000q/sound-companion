@@ -1,6 +1,7 @@
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'node:path'
 import { defineConfig, loadEnv } from 'vite'
 
 // https://vite.dev/config/
@@ -15,6 +16,7 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       proxy: { '/api': `http://${env.BACKEND_HOST}:${env.BACKEND_PORT}` },
     },
+    resolve: { alias: { '@': path.resolve(import.meta.dirname, 'src') } },
     plugins: [
       react(),
       tailwindcss(),

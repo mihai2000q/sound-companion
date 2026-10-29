@@ -8,7 +8,7 @@ Each entry: decision, reason, and what would change it. Entries 1 to 4 are about
 | 2 | Data was verified before design this time | The metal subject failed on data. Two research agents checked licences, fetchability and tools first. | Never. |
 | 3 | Audio input (recording, analysis, YouTube links) is out of scope | Audio analysis is a separate signal-processing problem, accuracy on real songs is weak, and YouTube downloads breach its terms. | A later project. |
 | 4 | Scope: music theory and instruments together | A question like "what does a B-flat clarinet sound when it reads a written C" needs both the corpus and a tool. | Never. |
-| 5 | Stack: SvelteKit (Svelte 5), TypeScript, LangChain.js, DaisyUI | Author's preference, reviewer approved, one language. Course supports a JS track. | LangChain.js gaps cost too much time. Then Next.js (same server code). |
+| 5 | Stack: SvelteKit (Svelte 5), TypeScript, LangChain.js, shadcn/ui | Author's preference, reviewer approved, one language. Course supports a JS track. | LangChain.js gaps cost too much time. Then Next.js (same server code). |
 | 6 | RAG and tool logic isolated in `src/lib/server` | Keeps the UI shell swappable and the code testable from scripts. | Never. |
 | 7 | Audience: a learner, beginner to intermediate | Tightens the system prompt and the golden set. | Never. |
 | 8 | Corpus: about 150 Wikipedia articles plus Open Music Theory v1 | Both CC BY-SA 4.0, structured headings, enough size (about 2,000 to 5,000 chunks), and the two sources use different Conventions. | OMT 2e becomes fetchable, or a text gap appears. |
@@ -55,4 +55,4 @@ Each entry: decision, reason, and what would change it. Entries 1 to 4 are about
 - `PostgresSaver` against a real database, and `getState` for export (stories 5 and 14).
 - Exact stream-mode mapping for `citations` and `queries` events (story 6).
 - Credits equal USD on this OpenRouter account, and workspace guardrails for the chosen models (stories 1 and 11).
-- A Tailwind 4, DaisyUI 5 and SvelteKit 3 build (story 1, the research did not run one).
+- A Tailwind 4, shadcn/ui and SvelteKit 3 build (story 1, the research did not run one).

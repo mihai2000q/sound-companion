@@ -1,6 +1,16 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { chipsFor, labelOf } from '../lib/citations'
 import type { ChatMessage, ToolCall } from '../types/chat'
+import { Alert } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { cn } from '@/lib/utils'
+import { Spinner } from '@/components/ui/spinner'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Message } from './Message'
 
 interface Props {
   messages: ChatMessage[]
@@ -17,32 +27,28 @@ const SUGGESTIONS = [
   'What does a B-flat clarinet sound like when it plays a written C?',
 ]
 
-function Avatar({ role }: { role: ChatMessage['role'] }) {
-  return (
-    <div className="chat-image avatar avatar-placeholder" aria-hidden="true">
-      <div className={`w-8 rounded-full ${role === 'user' ? 'bg-primary text-primary-content' : 'bg-neutral text-neutral-content'}`}>
-        <span className="text-xs">{role === 'user' ? 'You' : 'SC'}</span>
-      </div>
-    </div>
-  )
-}
-
 /** Shown for a Conversation with no messages: a few questions that start it. */
 function EmptyState({ onSuggest }: { onSuggest: Props['onSuggest'] }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center p-4">
-      <h2 className="text-2xl font-bold">What would you like to learn?</h2>
-      <p className="opacity-70 max-w-md">Ask about music theory or an instrument. Answers cite Wikipedia and Open Music Theory.</p>
-      <ul className="flex flex-wrap justify-center gap-2 max-w-xl">
-        {SUGGESTIONS.map((question) => (
-          <li key={question}>
-            <button type="button" className="btn btn-sm btn-outline font-normal h-auto py-2 text-left" onClick={() => onSuggest(question)}>
-              {question}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Empty className="flex-1">
+      <EmptyHeader>
+        <div className="staff w-full max-w-lg py-3">
+          <EmptyTitle className="mx-auto w-fit bg-background px-4 font-serif text-3xl font-medium tracking-tight">What would you like to learn?</EmptyTitle>
+        </div>
+        <EmptyDescription>Ask about music theory or an instrument. Answers cite Wikipedia and Open Music Theory.</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent className="max-w-xl">
+        <ul className="flex flex-wrap justify-center gap-2">
+          {SUGGESTIONS.map((question) => (
+            <li key={question}>
+              <Button type="button" variant="outline" size="sm" className="h-auto py-2 text-left font-normal whitespace-normal" onClick={() => onSuggest(question)}>
+                {question}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </EmptyContent>
+    </Empty>
   )
 }
 
@@ -58,46 +64,39 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
   if (messages.length === 0) return <EmptyState onSuggest={onSuggest} />
 
   return (
-    <div className="flex-1 overflow-y-auto flex flex-col gap-3 p-4">
+    <ScrollArea className="min-h-0 flex-1">
+      <div className="flex flex-col gap-3 p-4">
       {messages.map((message) => {
         if (message.text === '' && !message.error && !message.stopped && !message.toolCalls) return null
         return (
         <div key={message.id} className="flex flex-col gap-1">
           <ToolCards calls={message.toolCalls} />
           {message.text !== '' && (
-            <div className={`chat ${message.role === 'user' ? 'chat-end' : 'chat-start'}`}>
-              <Avatar role={message.role} />
-              <div className="chat-header text-xs opacity-60 mb-1">{message.role === 'user' ? 'You' : 'Sound Companion'}</div>
-              <div className={`chat-bubble whitespace-pre-wrap ${message.role === 'user' ? 'chat-bubble-primary' : ''}`}>
-                {message.text}
-              </div>
-            </div>
+            <Message role={message.role}>{message.text}</Message>
           )}
           <SourceChips message={message} onOpenChunk={onOpenChunk} />
-          {message.stopped && <p className="text-sm opacity-60 px-2">Stopped</p>}
+          {message.stopped && <p className="text-sm text-muted-foreground px-2">Stopped</p>}
           {message.error && (
-            <div role="alert" className="alert alert-error alert-soft">
+            <Alert variant="destructive" className="flex items-center justify-between gap-2">
               <span>{message.error}</span>
               {message === last && !streaming && message.errorCode !== 'budget_exceeded' && (
-                <button type="button" className="btn btn-sm" onClick={() => onRetry(message.id)}>
+                <Button type="button" variant="outline" size="sm" onClick={() => onRetry(message.id)}>
                   Retry
-                </button>
+                </Button>
               )}
-            </div>
+            </Alert>
           )}
         </div>
         )
       })}
       {typing && (
-        <div className="chat chat-start" aria-label="The bot is typing">
-          <Avatar role="bot" />
-          <div className="chat-bubble">
-            <span className="loading loading-dots loading-sm" />
-          </div>
-        </div>
+        <Message role="bot" label="The bot is typing">
+          <Spinner />
+        </Message>
       )}
       <div ref={end} />
-    </div>
+      </div>
+    </ScrollArea>
   )
 }
 
@@ -114,18 +113,20 @@ function SourceChips({ message, onOpenChunk }: { message: ChatMessage; onOpenChu
       <ul className="flex flex-wrap gap-1">
         {chips.map((chip) => (
           <li key={labelOf(chip)}>
-            <button type="button" className="badge badge-outline badge-sm" onClick={() => onOpenChunk(message.id, chip.id)}>
-              {labelOf(chip)}
-            </button>
+            <Badge asChild variant="outline" className="cursor-pointer border-brass/60 bg-accent text-accent-foreground hover:bg-brass/30">
+              <button type="button" onClick={() => onOpenChunk(message.id, chip.id)}>
+                {labelOf(chip)}
+              </button>
+            </Badge>
           </li>
         ))}
       </ul>
-      <p className="text-xs opacity-60">
+      <p className="text-xs text-muted-foreground">
         Sources:{' '}
         {SOURCES.map((source, i) => (
           <span key={source.name}>
             {i > 0 && ' and '}
-            <a className="link" href={source.url} target="_blank" rel="noreferrer">
+            <a className="underline underline-offset-2 hover:text-foreground" href={source.url} target="_blank" rel="noreferrer">
               {source.name}
             </a>
           </span>
@@ -137,10 +138,10 @@ function SourceChips({ message, onOpenChunk }: { message: ChatMessage; onOpenChu
 }
 
 const STATUS = {
-  running: { label: 'Running', badge: 'badge-info' },
-  done: { label: 'Done', badge: 'badge-success' },
-  error: { label: 'Error', badge: 'badge-error' },
-  stopped: { label: 'Stopped', badge: 'badge-warning' },
+  running: { label: 'Running', badge: 'text-sky-700 dark:text-sky-300' },
+  done: { label: 'Done', badge: 'text-green-700 dark:text-green-300' },
+  error: { label: 'Error', badge: 'text-destructive' },
+  stopped: { label: 'Stopped', badge: 'text-amber-700 dark:text-amber-300' },
 }
 
 function ToolCards({ calls }: { calls: ToolCall[] | undefined }) {
@@ -154,32 +155,40 @@ function ToolCards({ calls }: { calls: ToolCall[] | undefined }) {
   )
 }
 
-/** A DaisyUI `collapse` on a native `<details>`: open while the call runs or failed, closed once it is done. */
+/** A `collapsible`: open while the call runs or failed, closed once it is done (a click still toggles it). */
 function ToolCard({ call }: { call: ToolCall }) {
   const status = STATUS[call.status]
+  const auto = call.status === 'running' || call.status === 'error'
+  const [open, setOpen] = useState(auto)
+  const [seen, setSeen] = useState(call.status)
+  if (seen !== call.status) {
+    // the status moved on: follow it again, whatever was clicked before
+    setSeen(call.status)
+    setOpen(auto)
+  }
   return (
     <li>
-      <details
-        className={`collapse collapse-arrow card-border bg-base-100 ${call.status === 'error' ? 'border-error' : 'border-base-300'}`}
-        open={call.status === 'running' || call.status === 'error'}
-      >
-        <summary className="collapse-title min-h-0 py-2 pr-10">
+      <Collapsible open={open} onOpenChange={setOpen} className={cn('rounded-lg border bg-card', call.status === 'error' && 'border-destructive')}>
+        <CollapsibleTrigger className="group flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-2 text-left">
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-mono text-sm font-medium break-all">{call.name}</span>
-            <span className={`badge badge-sm badge-soft ${status.badge}`}>
-              {call.status === 'running' && <span className="loading loading-spinner loading-xs" />}
+            <Badge variant="secondary" className={status.badge}>
+              {call.status === 'running' && <Spinner className="size-3" />}
               {status.label}
-            </span>
-            {call.durationMs !== undefined && <span className="text-xs opacity-60">{call.durationMs} ms</span>}
+            </Badge>
+            {call.durationMs !== undefined && <span className="text-xs text-muted-foreground">{call.durationMs} ms</span>}
           </span>
-        </summary>
-        <div className="collapse-content flex flex-col gap-1 min-w-0">
-          <pre className="text-xs whitespace-pre-wrap break-all">{JSON.stringify(call.args)}</pre>
-          {call.content !== undefined && (
-            <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-y-auto">{call.content}</pre>
-          )}
-        </div>
-      </details>
+          <ChevronDown className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" aria-hidden="true" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down motion-reduce:animate-none">
+          <div className="flex min-w-0 flex-col gap-1 px-4 pb-3">
+            <pre className="text-xs whitespace-pre-wrap break-all">{JSON.stringify(call.args)}</pre>
+            {call.content !== undefined && (
+              <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-y-auto">{call.content}</pre>
+            )}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </li>
   )
 }

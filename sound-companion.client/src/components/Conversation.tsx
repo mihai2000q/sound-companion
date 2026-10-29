@@ -3,11 +3,13 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useChatStream } from '../hooks/useChatStream'
 import { threadKeys } from '../queries/threads'
 import type { ChatMessage, Usage } from '../types/chat'
+import { useChatActivity } from '../state/chatActivity'
 import { AppBar } from './AppBar'
 import { Composer } from './Composer'
 import { Inspector, type ChunkFocus } from './Inspector'
 import { MessageList } from './MessageList'
 import { UsageBadge } from './UsageBadge'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   threadId: string
@@ -15,16 +17,14 @@ interface Props {
   usage: Usage | null
   setUsage: Dispatch<SetStateAction<Usage | null>>
   onStreamingChange: (streaming: boolean) => void
-  onNew: () => void
-  onOpenSidebar: () => void
 }
 
 /** One Conversation: app bar, messages, composer and inspector. The page gives it a `key` of its `threadId`, so a
  *  switch starts a fresh instance (messages, selection and inspector are reset). */
-export function Conversation({ threadId, initialMessages, usage, setUsage, onStreamingChange, onNew, onOpenSidebar }: Props) {
+export function Conversation({ threadId, initialMessages, usage, setUsage, onStreamingChange }: Props) {
   const { messages, streaming, fieldError, clearFieldError, send, retry, stop } = useChatStream(threadId, initialMessages, setUsage)
   const queryClient = useQueryClient()
-  const [inspectorOpen, setInspectorOpen] = useState(false)
+  const { inspectorOpen, setInspectorOpen } = useChatActivity()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [focus, setFocus] = useState<ChunkFocus | null>(null)
 
@@ -53,17 +53,14 @@ export function Conversation({ threadId, initialMessages, usage, setUsage, onStr
 
   return (
     <div className="flex-1 min-w-0 flex flex-col">
-      <AppBar onOpenSidebar={onOpenSidebar}>
+      <AppBar>
         {usage && <UsageBadge usage={usage} />}
-        <button type="button" className="btn btn-sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen((open) => !open)}>
+        <Button type="button" variant="outline" size="sm" aria-expanded={inspectorOpen} onClick={() => setInspectorOpen(!inspectorOpen)}>
           Inspector
-        </button>
-        <button type="button" className="btn btn-sm lg:hidden" disabled={streaming} onClick={onNew}>
-          New Conversation
-        </button>
+        </Button>
       </AppBar>
       <div className="flex-1 min-h-0 flex">
-        <div className="flex-1 min-w-0 max-w-3xl mx-auto flex flex-col bg-base-100">
+        <div className="flex-1 min-w-0 max-w-3xl mx-auto flex flex-col bg-background">
           <MessageList messages={messages} streaming={streaming} onRetry={retry} onOpenChunk={openChunk} onSuggest={(text) => void sendAndRefresh(text)} />
           <Composer disabled={streaming} error={fieldError} onSend={sendAndRefresh} onEdit={clearFieldError} onStop={stop} />
         </div>

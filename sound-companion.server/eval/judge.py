@@ -24,7 +24,9 @@ class Spend:
 
     def add(self, body: dict) -> None:
         usage = body.get("usage") or {}
-        row = self.models.setdefault(str(body.get("model", "unknown")), [0, 0, 0, 0.0])
+        if not usage or "model" not in body:  # a 200 that is no completion (an error body): it spent nothing
+            return
+        row = self.models.setdefault(str(body["model"]), [0, 0, 0, 0.0])
         row[0] += 1
         row[1] += int(usage.get("prompt_tokens") or 0)
         row[2] += int(usage.get("completion_tokens") or 0)

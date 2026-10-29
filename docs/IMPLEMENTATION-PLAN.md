@@ -37,14 +37,14 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 **Build:**
 - `docker-compose.yml` with Postgres (`pgvector` image) and a volume, plus the backend and the client dev server services.
 - `sound-companion.server/`: `pyproject.toml` with pinned versions (`langchain-postgres` exact), FastAPI app with a health endpoint, settings from env (pydantic settings or similar) that fail fast, a migration runner.
-- `sound-companion.client/`: Vite + React + TypeScript, Tailwind 4 with DaisyUI 5 (`@plugin "daisyui"`), a Vite proxy for `/api`.
+- `sound-companion.client/`: Vite + React + TypeScript, Tailwind 4 with shadcn/ui (Radix components in `src/components/ui`), a Vite proxy for `/api`.
 - `.env.example`.
 
 **Verify first (needs your OpenRouter key, kept in `.env`, never committed):**
 - A real call through `langchain-openai` (`ChatOpenAI` and `OpenAIEmbeddings`, `base_url` set to OpenRouter) with `openai/gpt-4o-mini` and `openai/text-embedding-3-small`.
 - The six checks in [research/python-stack-spike.md](research/python-stack-spike.md) section C4, above all whether `usage.cost` survives `langchain-openai` on streamed responses. If it is dropped, decide between a `ChatOpenAI` subclass, the raw response, or `GET /api/v1/generation?id=<id>`.
 - Credits equal USD on the account page, and workspace guardrails allow the chosen models.
-- A React, Vite, Tailwind 4 and DaisyUI 5 build works on Node 24.
+- A React, Vite, Tailwind 4 and shadcn/ui build works on Node 24.
 
 **Done when:**
 - `docker compose up` starts Postgres and the backend, and `/health` answers.

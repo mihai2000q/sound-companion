@@ -32,13 +32,13 @@ Each story states: goal, what to build, acceptance criteria, and facts to verify
 
 ## Story 1: Infrastructure and scaffold
 
-**Build:** `docker-compose.yml` with Postgres (`pgvector` image) and a volume. SvelteKit + TypeScript scaffold, Tailwind + DaisyUI, `.env.example`, `src/lib/server/config.ts` parsing env with validation, migration runner with the first migration (`CREATE EXTENSION vector`).
+**Build:** `docker-compose.yml` with Postgres (`pgvector` image) and a volume. SvelteKit + TypeScript scaffold, Tailwind + shadcn/ui, `.env.example`, `src/lib/server/config.ts` parsing env with validation, migration runner with the first migration (`CREATE EXTENSION vector`).
 
-**Verify first:** Tailwind and DaisyUI versions work together. Pick chat model, rewrite model and embedding model on OpenRouter (tool-calling support, prices, embedding dimension).
+**Verify first:** Tailwind and shadcn/ui versions work together. Pick chat model, rewrite model and embedding model on OpenRouter (tool-calling support, prices, embedding dimension).
 
 **Done when:**
 - `docker compose up` starts Postgres, migrations apply, `\dx` shows `vector`.
-- `npm run dev` serves a page styled with DaisyUI.
+- `npm run dev` serves a page styled with shadcn/ui.
 - App fails fast with a clear message when a required env var is missing.
 - A one-off script calls OpenRouter chat and embeddings successfully and logs usage.
 

@@ -1,24 +1,21 @@
+import { credits } from '../lib/credits'
 import type { Usage } from '../types/chat'
-
-/** Credits are tiny per call, so show enough digits for a turn to be visible. */
-function credits(value: number): string {
-  return value === 0 ? '0' : value < 0.0001 ? value.toExponential(1) : value.toFixed(4)
-}
+import { Badge } from '@/components/ui/badge'
 
 export function UsageBadge({ usage }: { usage: Usage }) {
   return (
     <div className="flex items-center gap-2 text-xs" aria-label="Usage">
       {usage.warning && (
-        <span role="status" className="badge badge-warning badge-sm">
+        <Badge role="status" className="bg-amber-500 text-black">
           Spending limit is close
-        </span>
+        </Badge>
       )}
-      <span className="opacity-70" title="Credits spent by this answer">
+      <span className="text-muted-foreground" title="Spent by this answer, in USD">
         This turn: {credits(usage.cost)}
       </span>
-      <span className="badge badge-outline badge-sm" title="Credits spent in total (database sum)">
+      <Badge variant="outline" title="Spent in total, in USD (database sum)">
         Total: {credits(usage.totalSpend)}
-      </span>
+      </Badge>
     </div>
   )
 }

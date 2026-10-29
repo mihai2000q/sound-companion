@@ -19,7 +19,7 @@ Documentation phase complete. Implementation proceeds story by story, see [docs/
 
 | Layer | Choice |
 |---|---|
-| Frontend and server | SvelteKit (Svelte 5), TypeScript, Tailwind + DaisyUI |
+| Frontend and server | SvelteKit (Svelte 5), TypeScript, Tailwind + shadcn/ui |
 | Orchestration | LangChain.js (`createAgent`, retrievers, tools), PostgresSaver for memory |
 | LLM and embeddings | OpenRouter (OpenAI-compatible) |
 | Database | PostgreSQL with pgvector, in Docker |

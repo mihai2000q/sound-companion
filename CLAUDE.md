@@ -18,7 +18,7 @@ Run from the repo root unless noted. Settings come from the root `.env` (copy `.
 
 `RETRIEVER_MODE=vector|hybrid` (default `vector`, an unknown value stops startup) picks the retriever for `POST /api/chat` and the default of `eval_retrieval --mode`. The golden set has 22 retrieval questions since issue #88 (q18 to q25 are exact-term and Alias queries), so compare against `vector-baseline-25q`, not `vector-baseline`.
 
-Stack: React + Vite + TypeScript + Tailwind/DaisyUI (`sound-companion.client/`), Python 3.12 + FastAPI + LangChain `create_agent` (`sound-companion.server/`), PostgreSQL + pgvector in Docker, OpenRouter for the LLM and embeddings. Secrets (OpenRouter key) live in `.env`, never committed.
+Stack: React + Vite + TypeScript + Tailwind/shadcn/ui (`sound-companion.client/`), Python 3.12 + FastAPI + LangChain `create_agent` (`sound-companion.server/`), PostgreSQL + pgvector in Docker, OpenRouter for the LLM and embeddings. Secrets (OpenRouter key) live in `.env`, never committed.
 
 ## Where to look
 

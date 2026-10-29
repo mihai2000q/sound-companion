@@ -20,7 +20,7 @@ Documentation phase. Implementation proceeds story by story, see [docs/IMPLEMENT
 
 | Layer | Choice |
 |---|---|
-| Frontend and server | SvelteKit (Svelte 5), TypeScript, Tailwind + DaisyUI |
+| Frontend and server | SvelteKit (Svelte 5), TypeScript, Tailwind + shadcn/ui |
 | Orchestration | LangChain.js (`createAgent`, `PGVectorStore`, tools), PostgresSaver for memory |
 | Music computation | `tonal` (local, MIT) plus small hand-written functions |
 | LLM and embeddings | OpenRouter (OpenAI-compatible) |
