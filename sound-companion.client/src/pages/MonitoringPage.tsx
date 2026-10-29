@@ -76,7 +76,7 @@ export function MonitoringPage() {
                           <TableHead className="text-right">Calls</TableHead>
                           <TableHead className="text-right">Tokens in</TableHead>
                           <TableHead className="text-right">Tokens out</TableHead>
-                          <TableHead className="text-right">Credits</TableHead>
+                          <TableHead className="text-right">Cost (USD)</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -114,7 +114,7 @@ export function MonitoringPage() {
                           <TableHead className="text-right">p95</TableHead>
                           <TableHead className="text-right">Tokens in</TableHead>
                           <TableHead className="text-right">Tokens out</TableHead>
-                          <TableHead className="text-right">Credits</TableHead>
+                          <TableHead className="text-right">Cost (USD)</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

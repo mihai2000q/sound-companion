@@ -10,10 +10,10 @@ export function UsageBadge({ usage }: { usage: Usage }) {
           Spending limit is close
         </Badge>
       )}
-      <span className="text-muted-foreground" title="Credits spent by this answer">
+      <span className="text-muted-foreground" title="Spent by this answer, in USD">
         This turn: {credits(usage.cost)}
       </span>
-      <Badge variant="outline" title="Credits spent in total (database sum)">
+      <Badge variant="outline" title="Spent in total, in USD (database sum)">
         Total: {credits(usage.totalSpend)}
       </Badge>
     </div>
