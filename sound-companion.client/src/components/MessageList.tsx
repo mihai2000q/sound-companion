@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, Music2 } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { chipsFor, labelOf } from '../lib/citations'
 import type { ChatMessage, ToolCall } from '../types/chat'
 import { Alert } from '@/components/ui/alert'
@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Message } from './Message'
 
 interface Props {
   messages: ChatMessage[]
@@ -25,34 +27,28 @@ const SUGGESTIONS = [
   'What does a B-flat clarinet sound like when it plays a written C?',
 ]
 
-function RoleAvatar({ role }: { role: ChatMessage['role'] }) {
-  return (
-    <Avatar className="size-8" aria-hidden="true">
-      <AvatarFallback className={cn('text-xs font-medium', role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-brass text-brass-foreground')}>
-        {role === 'user' ? 'Me' : <Music2 className="size-4" />}
-      </AvatarFallback>
-    </Avatar>
-  )
-}
-
 /** Shown for a Conversation with no messages: a few questions that start it. */
 function EmptyState({ onSuggest }: { onSuggest: Props['onSuggest'] }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-5 p-4 text-center">
-      <div className="staff w-full max-w-lg py-3">
-        <h2 className="mx-auto w-fit bg-background px-4 font-serif text-3xl font-medium tracking-tight">What would you like to learn?</h2>
-      </div>
-      <p className="max-w-md text-muted-foreground">Ask about music theory or an instrument. Answers cite Wikipedia and Open Music Theory.</p>
-      <ul className="flex flex-wrap justify-center gap-2 max-w-xl">
-        {SUGGESTIONS.map((question) => (
-          <li key={question}>
-            <Button type="button" variant="outline" size="sm" className="h-auto py-2 text-left font-normal whitespace-normal" onClick={() => onSuggest(question)}>
-              {question}
-            </Button>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Empty className="flex-1">
+      <EmptyHeader>
+        <div className="staff w-full max-w-lg py-3">
+          <EmptyTitle className="mx-auto w-fit bg-background px-4 font-serif text-3xl font-medium tracking-tight">What would you like to learn?</EmptyTitle>
+        </div>
+        <EmptyDescription>Ask about music theory or an instrument. Answers cite Wikipedia and Open Music Theory.</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent className="max-w-xl">
+        <ul className="flex flex-wrap justify-center gap-2">
+          {SUGGESTIONS.map((question) => (
+            <li key={question}>
+              <Button type="button" variant="outline" size="sm" className="h-auto py-2 text-left font-normal whitespace-normal" onClick={() => onSuggest(question)}>
+                {question}
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </EmptyContent>
+    </Empty>
   )
 }
 
@@ -68,29 +64,15 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
   if (messages.length === 0) return <EmptyState onSuggest={onSuggest} />
 
   return (
-    <div className="flex-1 overflow-y-auto flex flex-col gap-3 p-4">
+    <ScrollArea className="min-h-0 flex-1">
+      <div className="flex flex-col gap-3 p-4">
       {messages.map((message) => {
         if (message.text === '' && !message.error && !message.stopped && !message.toolCalls) return null
         return (
         <div key={message.id} className="flex flex-col gap-1">
           <ToolCards calls={message.toolCalls} />
           {message.text !== '' && (
-            <div className={cn('flex items-end gap-2', message.role === 'user' && 'flex-row-reverse')}>
-              <RoleAvatar role={message.role} />
-              <div className={cn('flex min-w-0 max-w-[85%] flex-col gap-1', message.role === 'user' && 'items-end')}>
-                <div className="text-xs text-muted-foreground">{message.role === 'user' ? 'Me' : 'Sound Companion'}</div>
-                <div
-                  className={cn(
-                    'whitespace-pre-wrap break-words',
-                    message.role === 'user'
-                      ? 'rounded-2xl rounded-br-sm bg-primary px-4 py-2 text-primary-foreground'
-                      : 'border-l-2 border-brass pl-4 font-serif text-[1.0625rem] leading-relaxed text-foreground',
-                  )}
-                >
-                  {message.text}
-                </div>
-              </div>
-            </div>
+            <Message role={message.role}>{message.text}</Message>
           )}
           <SourceChips message={message} onOpenChunk={onOpenChunk} />
           {message.stopped && <p className="text-sm text-muted-foreground px-2">Stopped</p>}
@@ -108,15 +90,13 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
         )
       })}
       {typing && (
-        <div className="flex items-end gap-2" aria-label="The bot is typing">
-          <RoleAvatar role="bot" />
-          <div className="rounded-2xl rounded-bl-sm bg-muted px-4 py-3">
-            <Spinner />
-          </div>
-        </div>
+        <Message role="bot" label="The bot is typing">
+          <Spinner />
+        </Message>
       )}
       <div ref={end} />
-    </div>
+      </div>
+    </ScrollArea>
   )
 }
 

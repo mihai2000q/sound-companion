@@ -2,6 +2,7 @@ import { useState, type KeyboardEvent, type SubmitEvent } from 'react'
 import type { FieldError } from '../hooks/useChatStream'
 import { Send, Square } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Kbd } from '@/components/ui/kbd'
 import { Textarea } from '@/components/ui/textarea'
 
 interface Props {
@@ -65,7 +66,9 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
           </Button>
         )}
       </div>
-      <p className="text-xs text-muted-foreground">Enter sends, Shift+Enter starts a new line.</p>
+      <p className="text-xs text-muted-foreground">
+        <Kbd>Enter</Kbd> sends, <Kbd>Shift</Kbd> + <Kbd>Enter</Kbd> starts a new line.
+      </p>
       {error && (
         <p role="alert" className="text-destructive text-sm">
           {error.field.charAt(0).toUpperCase() + error.field.slice(1)}: {error.message}
