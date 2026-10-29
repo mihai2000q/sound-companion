@@ -1,12 +1,12 @@
 import { Fragment, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Activity, MessageSquare, Music2, Search, SquarePen, type LucideIcon } from 'lucide-react'
+import { Activity, Download, MessageSquare, Music2, Pencil, Search, SquarePen, Trash2, type LucideIcon } from 'lucide-react'
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Alert } from '@/components/ui/alert'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu'
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@/components/ui/context-menu'
 import { Input } from '@/components/ui/input'
 import {
   Sidebar,
@@ -86,6 +86,7 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
     return (
       <>
         <Item disabled={download.isPending} onSelect={() => download.mutate(thread)}>
+          <Download />
           Export
         </Item>
         <Item
@@ -94,9 +95,12 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
             setRenaming(thread.thread_id)
           }}
         >
+          <Pencil />
           Rename
         </Item>
+        <ContextMenuSeparator />
         <Item variant="destructive" disabled={busy && thread.thread_id === activeId} onSelect={() => setAsking(thread)}>
+          <Trash2 />
           Delete
         </Item>
       </>
