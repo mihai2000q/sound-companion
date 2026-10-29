@@ -180,11 +180,13 @@ function ToolCard({ call }: { call: ToolCall }) {
           </span>
           <ChevronDown className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" aria-hidden="true" />
         </CollapsibleTrigger>
-        <CollapsibleContent className="flex min-w-0 flex-col gap-1 px-4 pb-3">
-          <pre className="text-xs whitespace-pre-wrap break-all">{JSON.stringify(call.args)}</pre>
-          {call.content !== undefined && (
-            <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-y-auto">{call.content}</pre>
-          )}
+        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down motion-reduce:animate-none">
+          <div className="flex min-w-0 flex-col gap-1 px-4 pb-3">
+            <pre className="text-xs whitespace-pre-wrap break-all">{JSON.stringify(call.args)}</pre>
+            {call.content !== undefined && (
+              <pre className="text-xs whitespace-pre-wrap break-all max-h-40 overflow-y-auto">{call.content}</pre>
+            )}
+          </div>
         </CollapsibleContent>
       </Collapsible>
     </li>
