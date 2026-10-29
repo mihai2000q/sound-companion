@@ -4,6 +4,7 @@ import type { ChatMessage } from '../types/chat'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { cn } from '@/lib/utils'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -80,14 +81,24 @@ export function Inspector({ message, open, focus, onClose }: Props) {
   // docked beside the chat on wide screens, a sheet over it on narrow ones
   if (desktop)
     return (
-      <aside aria-label="Inspector" className={`${open ? 'flex' : 'hidden'} w-96 flex-col border-l bg-background`}>
-        <div className="flex items-center justify-between border-b p-4">
-          <h2 className="font-bold">Inspector</h2>
-          <Button type="button" variant="outline" size="sm" onClick={onClose}>
-            Close
-          </Button>
+      <aside
+        aria-label="Inspector"
+        inert={!open}
+        className={cn(
+          'shrink-0 overflow-hidden bg-background transition-[width] duration-300 ease-in-out motion-reduce:transition-none',
+          open ? 'w-96 border-l' : 'w-0',
+        )}
+      >
+        {/* fixed width, so the content slides in with the edge instead of reflowing */}
+        <div className="flex h-full w-96 flex-col">
+          <div className="flex items-center justify-between border-b p-4">
+            <h2 className="font-bold">Inspector</h2>
+            <Button type="button" variant="outline" size="sm" onClick={onClose}>
+              Close
+            </Button>
+          </div>
+          {body}
         </div>
-        {body}
       </aside>
     )
   return (
