@@ -1,13 +1,13 @@
 # Reflection
 
-What works, what does not, and what to do next, based on the saved runs in `sound-companion.server/eval/results/` and `data/runs/`. Numbers are from the 22 retrieval questions of `data/golden-set.json` and the 20 cases of `data/golden-tools.json` unless said otherwise. Decision numbers refer to [DECISIONS.md](DECISIONS.md), the full tables to [EVALUATION.md](EVALUATION.md).
+What works, what does not, and what to do next, based on the saved runs in `sound-companion.server/eval/results/` and `data/runs/`. Numbers are from the 22 retrieval questions of `data/golden-set.json` and the 22 cases of `data/golden-tools.json` unless said otherwise. Decision numbers refer to [DECISIONS.md](DECISIONS.md), the full tables to [EVALUATION.md](EVALUATION.md).
 
 ## What the evaluation shows
 
 | Layer | Result | Target |
 |---|---|---|
 | Retrieval, page level (vector, k=5) | precision@5 0.873, recall@5 0.886 (`vector-baseline-25q`) | none set |
-| Tool calling (`gpt-4o-mini`, 20 cases) | selection 1.00, parameters 1.00 | none set |
+| Tool calling (`gpt-4o-mini`, 22 cases) | selection 0.91, parameters 1.00 (the 20 original cases 1.00; the two clarification cases t21 and t22 fail) | none set |
 | Injection (agent cases, 3 runs each) | all pass | all pass |
 | RAGAs faithfulness | 0.84 | 0.8, met |
 | RAGAs context recall | 0.75 | 0.7, met |
@@ -34,7 +34,7 @@ The evaluation as a whole cost about 0.23 credits against the 1 credit target, a
 
 **5. Underspecified questions are answered, not clarified.**
 - Evidence: on 2026-10-28 "Tell me about the guitar." and "What is the range of a saxophone?" both got full answers after several searches, although the golden set expects a clarifying question (q15, q16, decision 54). Decision 56 fixed exactly these two questions with worked examples in the prompt, and named its own revisit condition ("the clarify cases fail again"). Only the no-context case ("Transpose it up a fifth.", also t20 in the tool set) still asks.
-- Why it went unnoticed: the retrieval eval skips q15 to q17, the RAGAs export leaves them out, and the tool eval has no guitar or saxophone case. No automated check runs them end to end.
+- Why it went unnoticed: the retrieval eval skips q15 to q17 and the RAGAs export leaves them out. Since 2026-10-29 the tool eval has both questions as t21 and t22 and fails them (the agent calls `search_knowledge_base`), so the regression is now measured. The revisit condition of decision 56 is met, the fix is still open.
 
 **6. The judge is noisy.**
 - Evidence: `gemini-2.5-flash-lite` and `gpt-4o-mini` differ by up to 1.0 on one question's precision or recall (q03: 0.00 against 1.00 for the same six chunks from the right page). Means over 21 questions are usable, one question's score is not. A full scoring costs about 0.045 credits and takes about 10 minutes.
@@ -51,7 +51,7 @@ The evaluation as a whole cost about 0.23 credits against the 1 credit target, a
 ## Improvement ideas, ranked
 
 1. **Let the rewrite step see the whole question (decision 73).** Cheapest change with the widest reach: it can add a "middle C naming systems" query, which would restore the c′ check for q06 and probably help every question where the agent's single tool query drops half of the user's wording. Measure with `check_conventions` and `eval_retrieval --rewrite`.
-2. **Test the clarify cases end to end, then fix them.** A requirement (decision 54) that has regressed with no test behind it. Add q15 and q16 to the tool-calling set (expected: no search, a question with options) before changing the prompt, so the fix is measured. Then try more worked examples, as in decision 56, or a stronger model.
+2. **Fix the clarify cases, now that they are tested.** A requirement (decision 54) that has regressed. t21 and t22 in the tool-calling set (expected: no search) fail, so a prompt change is measured. Try more worked examples, as in decision 56, or a stronger model.
 3. **Fewer or better-ordered chunks per search.** The only missed target. A lower `k` per search, or a rerank, or dropping table rows. Measure with the RAGAs runner against `ragas-final`, and keep an eye on recall, which already sits just above its target (0.75 against 0.7).
 4. **A "sources differ" golden case.** Closes the open judge check, and it needs idea 1 first, because today no answer states a conflict.
 5. **A stricter "stay inside the chunks" rule**, or a cheap check of the answer. Ranked below precision because faithfulness already meets its target and the misses are a tail of single questions.

@@ -34,5 +34,7 @@
   {"id": "t17", "question": "Tell me a joke.", "category": "no-tool", "difficulty": "easy", "expected_tools": []},
   {"id": "t18", "question": "What is a good recipe for pancakes?", "category": "no-tool", "difficulty": "easy", "expected_tools": []},
   {"id": "t19", "question": "Thanks, that was really helpful!", "category": "no-tool", "difficulty": "easy", "expected_tools": []},
-  {"id": "t20", "question": "Transpose it up a fifth.", "category": "no-tool", "difficulty": "hard", "expected_tools": []}
+  {"id": "t20", "question": "Transpose it up a fifth.", "category": "no-tool", "difficulty": "hard", "expected_tools": []},
+  {"id": "t21", "question": "Tell me about the guitar.", "category": "clarification", "difficulty": "easy", "expected_tools": []},
+  {"id": "t22", "question": "What is the range of a saxophone?", "category": "clarification", "difficulty": "medium", "expected_tools": []}
 ]

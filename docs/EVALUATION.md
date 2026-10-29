@@ -87,11 +87,11 @@ Run the agent and compare, per question:
 
 Report accuracy overall and per difficulty. Failures usually mean the tool description is vague, so fix the description first. Deterministic checks are fast and free, so run them on every prompt change. Optionally add a judge on ambiguous cases, as in the course.
 
-Run it with `uv run python -m scripts.eval_tools [--label L] [--model ID] [--real-retriever]` on `data/golden-tools.json` (20 cases: tool-rule, tool-instrument, Candidates, comparison, search and no-tool). Details of the numbers:
+Run it with `uv run python -m scripts.eval_tools [--label L] [--model ID] [--real-retriever]` on `data/golden-tools.json` (22 cases: tool-rule, tool-instrument, Candidates, comparison, search, no-tool and clarification). Details of the numbers:
 
-- Tool selection compares tool names as a multiset, so the comparison cases expect two `search_knowledge_base` calls, and a no-tool case fails on any call.
+- Tool selection compares tool names as a multiset, so the comparison cases expect two `search_knowledge_base` calls, and a no-tool case fails on any call. The clarification cases (t21 guitar, t22 saxophone range, the same questions as q15 and q16 of the golden set) expect no call at all, because a clarifying question comes before any search. They fail today (`2026-10-29-tools-clarify-cases`: selection 0.91 over 22 cases, the agent searches), see REFLECTION.md problem 5.
 - Parameter accuracy is the share of cases with arguments to check where every listed argument matches. Only the listed arguments are checked, free-text ones like `query` are left out. Names (`instrument`, `scale`, `direction`, `source_type`) ignore case, notes and numbers are exact, and `{"any_of": [...]}` lists accepted spellings.
-- Searches are answered by a stub by default (no database, see decision 59). A run costs about 72k tokens on `gpt-4o-mini`.
+- Searches are answered by a stub by default (no database, see decision 59). A run costs about 100k tokens (about $0.016) on `gpt-4o-mini`.
 - With `--label` the run is saved as `eval/results/<date>-tools-<label>.json`, with hashes of the system prompt and of every tool description, so `scripts.compare_runs A B` shows which one changed next to the cases that flipped.
 
 Also unit-test the tools directly with pytest (no LLM): the expected outputs from the research, for example `find_chords_from_notes(["D","F","A","C"])` in `pychord` gives `Dm7` and `F6/D`, written C4 on a B-flat clarinet sounds `Bb3`, and 450 Hz is A4 plus about 39 cents.
