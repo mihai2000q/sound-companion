@@ -29,7 +29,14 @@ from app.config import RETRIEVER_MODES, settings
 from app.rag.chunking import CHUNK_CHARS, OVERLAP_CHARS
 from app.rag.eval_results import build_run, git_state, save_run
 from app.rag.evaluation import (
-    K, UnknownSourceError, check_sources, corpus_names, derive_filters, evaluate, load_golden_set, summarize,
+    K,
+    UnknownSourceError,
+    check_sources,
+    corpus_names,
+    derive_filters,
+    evaluate,
+    load_golden_set,
+    summarize,
 )
 from app.rag.factory import make_retriever
 from app.rag.rewrite import RewritingRetriever, make_rewriter

@@ -1,6 +1,5 @@
-from datetime import datetime
-
 import uuid
+from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import BigInteger, CheckConstraint, DateTime, Index, Integer, Numeric, Text, func

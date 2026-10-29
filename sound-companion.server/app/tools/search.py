@@ -5,10 +5,10 @@ from langchain_core.tools import StructuredTool
 from langgraph.config import get_stream_writer
 from pydantic import BaseModel, Field, ValidationError
 
-from app.tools.delimit import wrap_document
 from app.rag.rerank import Reranker
 from app.rag.retriever import Filters, RetrievedChunk, Retriever
 from app.rag.rewrite import Rewriter, retrieve_with_rewrites
+from app.tools.delimit import wrap_document
 
 NOT_FOUND = (
     "Nothing relevant found in the knowledge base for this query. "

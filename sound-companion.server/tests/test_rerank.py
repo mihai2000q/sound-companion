@@ -1,7 +1,7 @@
 from app.rag.rerank import Ranking, cut_by_score, make_reranker, pick
 from app.rag.rewrite import retrieve_with_rewrites
-from tests.test_search_tool import chunk
 from tests.test_rewrite import FakeModel, StubRetriever
+from tests.test_search_tool import chunk
 
 
 def scored(id, score, section="Design"):
@@ -63,6 +63,8 @@ def test_retrieval_fetches_a_pool_then_trims_to_k():
     _, cut = retrieve_with_rewrites(inner, None, "q", 5, None, pool=10, score_ratio=0.85)
     assert inner.k == 10 and ids(cut) == ["a", "b"]
 
-    keep_last = lambda query, chunks: chunks[::-1]
+    def keep_last(query, chunks):
+        return chunks[::-1]
+
     _, reranked = retrieve_with_rewrites(inner, None, "q", 2, None, reranker=keep_last, pool=10)
     assert inner.k == 10 and ids(reranked) == ["c", "b"]

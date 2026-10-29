@@ -69,8 +69,8 @@ def import_ragas():
             module = types.ModuleType(name)
             module.ChatVertexAI = type("ChatVertexAI", (), {})
             sys.modules[name] = module
-    from ragas.llms.base import llm_factory
     from ragas.embeddings.base import embedding_factory
+    from ragas.llms.base import llm_factory
     from ragas.metrics import collections
 
     return llm_factory, embedding_factory, collections

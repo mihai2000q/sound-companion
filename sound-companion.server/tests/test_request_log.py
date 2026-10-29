@@ -12,7 +12,7 @@ from app.api import chat
 from app.db.usage import Budget, Ledger, Usage
 from tests.test_chat_api import StreamingToolModel, events
 from tests.test_search_tool import FakeRetriever, chunk
-from tests.test_usage import SEARCH, Boom, FakeStore, priced
+from tests.test_usage import SEARCH, Boom, FakeStore
 
 
 class FakeWriter:

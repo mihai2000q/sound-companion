@@ -4,8 +4,8 @@ from typing import Annotated
 from langchain_core.tools import StructuredTool
 from pydantic import BaseModel, Field
 
-from app.tools.errors import tool_error
 from app.tools.delimit import delimited
+from app.tools.errors import tool_error
 from app.tools.notes import CONVENTION, check_note_names, check_pitch_name, normalise_flats
 
 # Seven-note scales only: name -> (music21 class name, accepted aliases)

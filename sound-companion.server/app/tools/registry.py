@@ -2,8 +2,8 @@
 from langchain_core.tools import BaseTool
 
 from app.config import settings
-from app.rag.retriever import Retriever
 from app.rag.rerank import Reranker
+from app.rag.retriever import Retriever
 from app.rag.rewrite import Rewriter
 from app.tools.chords import make_chord_info_tool
 from app.tools.frequency import make_note_frequency_tool

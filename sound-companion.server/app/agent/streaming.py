@@ -8,8 +8,8 @@ from collections.abc import AsyncIterator, Callable
 
 from langchain_core.messages import AIMessage, AIMessageChunk, ToolMessage
 
-from app.limits import MAX_TOOL_CALLS
 from app.db.usage import Ledger, open_scope, record_usage, usage_of_message
+from app.limits import MAX_TOOL_CALLS
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,8 @@ from langchain_core.tools import StructuredTool
 from pychord import find_chords_from_notes
 from pydantic import BaseModel, Field
 
-from app.tools.errors import tool_error
 from app.tools.delimit import delimited
+from app.tools.errors import tool_error
 from app.tools.notes import CONVENTION, check_note_names
 
 DESCRIPTION = """Name the chord formed by some notes. Returns every Candidate (an ambiguous set of notes has \

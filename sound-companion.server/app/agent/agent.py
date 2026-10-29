@@ -4,8 +4,8 @@ from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.base import BaseCheckpointSaver
 
 from app.agent.prompt import SYSTEM_PROMPT
-from app.rag.retriever import Retriever
 from app.rag.rerank import make_reranker
+from app.rag.retriever import Retriever
 from app.rag.rewrite import make_rewriter
 from app.tools.registry import build_tools
 
