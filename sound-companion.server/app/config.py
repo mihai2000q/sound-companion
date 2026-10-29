@@ -28,9 +28,9 @@ class Settings(BaseSettings):
     # Candidates fetched per query before the cut and the rerank trim them to `search_k` (used only when one is on).
     search_pool: int = Field(default=10, ge=1, le=30)
     # Drop candidates scoring under this share of the best score (0 = off).
-    search_score_ratio: float = Field(default=0.0, ge=0, le=1)
+    search_score_ratio: float = Field(default=0.85, ge=0, le=1)
     # A cheap model (the rewrite model) keeps only the chunks that help answer the question.
-    search_rerank: bool = False
+    search_rerank: bool = True
 
     # Budget caps in OpenRouter credits, treated as USD (decision 37). Soft warns, hard refuses.
     budget_soft_credits: float = 1.0

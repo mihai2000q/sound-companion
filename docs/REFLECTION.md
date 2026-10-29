@@ -9,9 +9,9 @@ What works, what does not, and what to do next, based on the saved runs in `soun
 | Retrieval, page level (vector, k=5) | precision@5 0.873, recall@5 0.886 (`vector-baseline-25q`) | none set |
 | Tool calling (`gpt-4o-mini`, 22 cases) | selection 0.91, parameters 1.00 (the 20 original cases 1.00; the two clarification cases t21 and t22 fail) | none set |
 | Injection (agent cases, 3 runs each) | all pass | all pass |
-| RAGAs faithfulness | 0.84 | 0.8, met |
-| RAGAs context recall | 0.75 | 0.7, met |
-| RAGAs context precision | 0.47 (k=3 trial: 0.51) | 0.7, **missed** |
+| RAGAs faithfulness | 0.83 with the rerank (0.84 before) | 0.8, met |
+| RAGAs context recall | 0.78 with the rerank (0.75 before) | 0.7, met |
+| RAGAs context precision | 0.58 with the rerank and score cut (0.47 before, `ragas-final`) | 0.7, **missed** |
 
 The evaluation as a whole cost about 0.23 credits against the 1 credit target, and one demo run costs about 0.006.
 
@@ -52,7 +52,7 @@ The evaluation as a whole cost about 0.23 credits against the 1 credit target, a
 
 1. **Let the rewrite step see the whole question (decision 73).** Cheapest change with the widest reach: it can add a "middle C naming systems" query, which would restore the c′ check for q06 and probably help every question where the agent's single tool query drops half of the user's wording. Measure with `check_conventions` and `eval_retrieval --rewrite`.
 2. **Fix the clarify cases, now that they are tested.** A requirement (decision 54) that has regressed. t21 and t22 in the tool-calling set (expected: no search) fail, so a prompt change is measured. Try more worked examples, as in decision 56, or a stronger model.
-3. **Better-ordered chunks per search (a lower `k` alone did not work).** The only missed target. Tried `k=3` on 2026-10-29: precision 0.51, recall 0.72, faithfulness 0.79, so no clear gain and faithfulness fell under its target (decision 76). What is left is a rerank, or dropping table rows, since the problem is the wrong section of the right page. Measure with the RAGAs runner against `ragas-final`, and keep an eye on recall, which already sits just above its target (0.75 against 0.7).
+3. **Better-ordered chunks per search (done in part: a lower `k` alone did not work, the rerank and score cut lifted precision to 0.58, decision 77).** The only missed target. Tried `k=3` on 2026-10-29: precision 0.51, recall 0.72, faithfulness 0.79, so no clear gain and faithfulness fell under its target (decision 76). What is left is a rerank, or dropping table rows, since the problem is the wrong section of the right page. Measure with the RAGAs runner against `ragas-final`, and keep an eye on recall, which already sits just above its target (0.75 against 0.7).
 4. **A "sources differ" golden case.** Closes the open judge check, and it needs idea 1 first, because today no answer states a conflict.
 5. **A stricter "stay inside the chunks" rule**, or a cheap check of the answer. Ranked below precision because faithfulness already meets its target and the misses are a tail of single questions.
 6. **A steadier judge.** A second judge, or the same one at several repeats, so one question's score can be trusted. It changes how well we measure, not what the bot does, and costs about 0.05 credits per scoring.

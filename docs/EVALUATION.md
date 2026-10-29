@@ -209,6 +209,19 @@ Nothing in the bot yet. The evaluation was the story, and its findings are candi
 
 Precision rose by 0.04 and still misses by a wide margin, recall fell by 0.03 and sits 0.02 over its target, and faithfulness fell under its target. The judge moves single questions by more than these differences (see above), so this is no clear gain and a visible cost. The default stays 5 (decision 76).
 
+### Experiment: score cut and rerank (2026-10-29)
+
+`SEARCH_RERANK=true` and `SEARCH_SCORE_RATIO=0.85`, `SEARCH_K=5`, `SEARCH_POOL=10`: each query fetches 10 candidates, chunks scoring under 85% of the best are dropped, and the rewrite model picks the chunks that help answer the question (`app/rag/rerank.py`), at most 5. Same 22 questions and judge. Files: export `data/runs/2026-10-29T10-13-30.json`, scores `eval/results/2026-10-29-ragas-rerank-cut.json`. Answering cost 0.022 credits (the rerank call is under 0.001 per question) and scoring 0.037.
+
+| Metric | `ragas-final` | k=3 | rerank + cut | Target |
+|---|---|---|---|---|
+| Faithfulness | 0.84 | 0.79 | 0.83 | 0.8 |
+| Answer relevancy | 0.88 | 0.89 | 0.89 | none |
+| Context precision | 0.47 | 0.51 | **0.58** | 0.7 |
+| Context recall | 0.75 | 0.72 | **0.78** | 0.7 |
+
+Precision rose by 0.11 and recall by 0.03, with faithfulness still above its target. The rise is larger than the judge's noise on a mean of 21 questions, and it is the only one of the two trials that did not cost recall or faithfulness, so it is the default now (decision 77). Precision still misses 0.7. Questions still near zero: q07, q09 and q19 (mbira, recall 0.00 as well).
+
 ### Spend
 
 All spend is in `usage_log`. The evaluation cost about **0.23 credits**, against the 1 credit target: the 22 answers (export, 0.020), and the judge (purpose `eval`, 0.206: two 2-question trials, four full scorings of the 22 answers, one of them with 5 scores lost to rate limits and run again, and the 5-question second judge). One full scoring with `gemini-2.5-flash-lite` costs about 0.045 credits and takes about 10 minutes, because the metrics run one after another. The embedding calls report no cost on OpenRouter.
