@@ -155,7 +155,7 @@ export function Sidebar({ activeId, open, busy, onSelect, onNew, onClose }: Prop
                       <li key={thread.thread_id}>
                         <ContextMenu>
                           <ContextMenuTrigger asChild>
-                            <div className={cn('group flex items-center rounded-md hover:bg-accent', active && 'bg-accent font-medium')}>
+                            <div className={cn('group flex items-center rounded-md select-none hover:bg-accent', active && 'bg-accent font-medium')}>
                               <button
                                 type="button"
                                 className="min-w-0 flex-1 rounded-md px-3 py-1.5 text-left text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
