@@ -1,6 +1,6 @@
 import { Fragment, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Ellipsis, Music2, Plus } from 'lucide-react'
+import { Activity, Ellipsis, MessageSquare, Music2, SquarePen, type LucideIcon } from 'lucide-react'
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Alert } from '@/components/ui/alert'
@@ -31,9 +31,9 @@ import { Spinner } from './Spinner'
 
 const MAX_TITLE_LENGTH = 100 // the server refuses a longer one
 
-const PAGES = [
-  { to: '/', label: 'Chat' },
-  { to: '/monitoring', label: 'Monitoring' },
+const PAGES: { to: string; label: string; icon: LucideIcon }[] = [
+  { to: '/', label: 'Chat', icon: MessageSquare },
+  { to: '/monitoring', label: 'Monitoring', icon: Activity },
 ]
 
 /** Pages and Conversations, newest first, in the shadcn sidebar of every page. */
@@ -119,16 +119,19 @@ export function AppSidebar() {
             </span>
             Sound Companion
           </Link>
-          <Button type="button" size="sm" disabled={busy} onClick={startNew}>
-            <Plus />
-            New Conversation
-          </Button>
           <nav aria-label="Pages">
             <SidebarMenu className="gap-2">
+              <SidebarMenuItem>
+                <SidebarMenuButton className="h-9 px-3" disabled={busy} onClick={startNew}>
+                  <SquarePen />
+                  New Conversation
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               {PAGES.map((page) => (
                 <SidebarMenuItem key={page.to}>
                   <SidebarMenuButton asChild isActive={pathname === page.to} className="h-9 px-3">
                     <NavLink to={page.to} end onClick={() => isMobile && setOpenMobile(false)}>
+                      <page.icon />
                       {page.label}
                     </NavLink>
                   </SidebarMenuButton>
