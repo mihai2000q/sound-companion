@@ -40,7 +40,7 @@ export function Composer({ disabled, error, onSend, onEdit, onStop }: Props) {
         submit()
       }}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <Textarea
           className="flex-1 resize-none"
           rows={2}
