@@ -104,7 +104,7 @@ export function MonitoringPage() {
                           <TableCell className="text-right">{credits(row.cost_credits)}</TableCell>
                         </TableRow>
                       ))}
-                      <TableRow className="font-semibold">
+                      <TableRow className="border-t-2 border-border font-semibold">
                         <TableCell colSpan={2}>Total of all models</TableCell>
                         <TableCell className="text-right">{count(totals.all.calls)}</TableCell>
                         <TableCell className="text-right">{count(totals.all.prompt_tokens)}</TableCell>
