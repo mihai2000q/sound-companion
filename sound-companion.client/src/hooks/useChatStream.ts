@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { EventSourceParserStream } from 'eventsource-parser/stream'
+import { markStarted } from '../lib/newConversations'
 import { isToolError } from '../lib/toolResult'
 import type { ChatMessage, StreamEvent, ToolCall, Usage } from '../types/chat'
 
@@ -27,8 +28,16 @@ async function* readEvents(response: Response, onChunk: () => void): AsyncGenera
     .pipeThrough(new TextDecoderStream())
     .pipeThrough(activity)
     .pipeThrough(new EventSourceParserStream())
-  for await (const message of stream) {
-    yield JSON.parse(message.data) as StreamEvent
+  // a reader loop, because Safari has no async iterator on ReadableStream
+  const reader = stream.getReader()
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      yield JSON.parse(value.data) as StreamEvent
+    }
+  } finally {
+    reader.releaseLock()
   }
 }
 
@@ -157,6 +166,7 @@ export function useChatStream(
     const userId = crypto.randomUUID()
     const botId = crypto.randomUUID()
     setFieldError(null)
+    markStarted(threadId)
     setMessages((all) => [
       ...all,
       { id: userId, role: 'user', text },

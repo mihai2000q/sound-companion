@@ -23,6 +23,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { groupThreads } from '../lib/threadGroups'
+import { newConversationId } from '../lib/newConversations'
 import { deleteThread, exportThread, renameThread, threadKeys, threadQueries } from '../queries/threads'
 import { useChatActivity } from '../state/chatActivity'
 import type { ThreadSummary } from '../types/threads'
@@ -56,7 +57,7 @@ export function AppSidebar({ handle }: { handle?: ReactNode }) {
     navigate({ pathname: '/', search: `?c=${threadId}` })
     if (isMobile) setOpenMobile(false)
   }
-  const startNew = () => select(crypto.randomUUID())
+  const startNew = () => select(newConversationId())
 
   const remove = useMutation({
     mutationFn: (thread: ThreadSummary) => deleteThread(thread.thread_id),

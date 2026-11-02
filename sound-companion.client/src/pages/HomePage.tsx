@@ -5,6 +5,7 @@ import { AppBar } from '../components/AppBar'
 import { Conversation } from '../components/Conversation'
 import { useChatActivity } from '../state/chatActivity'
 import { toChatMessages } from '../lib/conversation'
+import { isNewConversation, newConversationId } from '../lib/newConversations'
 import { threadQueries } from '../queries/threads'
 import type { Usage } from '../types/chat'
 import { Spinner } from '@/components/ui/spinner'
@@ -24,7 +25,7 @@ export function HomePage() {
   const { setStreaming } = useChatActivity()
 
   useEffect(() => {
-    if (!threadId) setParams({ c: crypto.randomUUID() }, { replace: true })
+    if (!threadId) setParams({ c: newConversationId() }, { replace: true })
   }, [threadId, setParams])
 
   if (!threadId) return null
@@ -40,7 +41,9 @@ type ChatProps = Omit<React.ComponentProps<typeof Conversation>, 'initialMessage
 
 /** Reads the stored messages once, then hands them to the Conversation (which keeps its own state from there on). */
 function Chat(props: ChatProps) {
-  const { data, error, isPending, refetch } = useQuery(threadQueries.detail(props.threadId))
+  const [isNew] = useState(() => isNewConversation(props.threadId))
+  const { data, error, isPending, refetch } = useQuery({ ...threadQueries.detail(props.threadId), enabled: !isNew })
+  if (isNew) return <Conversation {...props} initialMessages={[]} />
   if (isPending)
     return (
       <div className="flex-1 min-w-0 flex flex-col">
