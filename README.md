@@ -2,8 +2,6 @@
 
 A study companion for music theory and musical instruments. Ask what a chord is, how a clarinet transposes, why the 7th harmonic sounds flat, or how two textbooks name the same note differently. The bot answers from a curated, cited corpus and calls local tools for the calculations.
 
-Sprint 2 project: advanced RAG (query translation, structured retrieval, hybrid search), tool calling, a streaming React UI, and an evaluation harness.
-
 Example questions:
 
 - "What is the circle of fifths and how does it relate to key signatures?" (retrieval)
