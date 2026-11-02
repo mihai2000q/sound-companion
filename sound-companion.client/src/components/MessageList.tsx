@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
+import { Markdown } from './Markdown'
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Message } from './Message'
@@ -73,7 +74,7 @@ export function MessageList({ messages, streaming, onRetry, onOpenChunk, onSugge
         <div key={message.id} className="flex flex-col gap-1">
           <ToolCards calls={message.toolCalls} />
           {message.text !== '' && (
-            <Message role={message.role}>{message.text}</Message>
+            <Message role={message.role}>{message.role === 'bot' ? <Markdown>{message.text}</Markdown> : message.text}</Message>
           )}
           <SourceChips message={message} onOpenChunk={onOpenChunk} />
           {message.stopped && <p className="text-sm text-muted-foreground px-2">Stopped</p>}

@@ -24,9 +24,9 @@ export function Message({ role, children, label }: Props) {
         <div className="text-xs text-muted-foreground">{user ? 'Me' : 'Sound Companion'}</div>
         <div
           className={cn(
-            'break-words whitespace-pre-wrap',
+            'break-words',
             user
-              ? 'rounded-2xl rounded-br-sm bg-primary px-4 py-2 font-medium text-primary-foreground'
+              ? 'whitespace-pre-wrap rounded-2xl rounded-br-sm bg-primary px-4 py-2 font-medium text-primary-foreground'
               : 'border-l-2 border-brass pl-4 font-serif text-[1.0625rem] leading-relaxed text-foreground',
           )}
         >
